@@ -12,8 +12,9 @@ def beamer_push_image(self, img):
     # build the url to post the image to
     beamer = self.getModuleConfig("beamer")
     print(beamer)
-    #url = f"http://{beamer['ip']}:{beamer['port']}" + "/v1/receiveimage"
-    url = "http://127.0.0.1:5000/v1/receiveimage"
+    url = f"http://{beamer['ip']}:{beamer['port']}" + "/v1/receiveimage"
+    url = "http://134.28.20.50:5000/v1/receiveimage"
+    #url = "http://127.0.0.1:5000/v1/receiveimage"
 
     _, buffer = cv2.imencode(".jpg", img)
     requests.post(url, data=buffer.tobytes(), headers={"content-type": "image/jpeg"})
