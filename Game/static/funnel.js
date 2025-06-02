@@ -6,8 +6,8 @@ const funnelQuestions = [
       type: "radio",
       options: [
         { icon: "fa-globe", text: "Billard standortverteilt spielen", follows: "single-player-selection"}, // eventually follows: "location", when we have more than one other location
-        { icon: "fa-location-dot", text: "Billard lokal spielen", follows: "player-selection"},
-        { icon: "fa-wand-magic-sparkles", text: "Trickshots üben", follows: "launch"},
+        { icon: "fa-location-dot", text: "Billard lokal spielen", follows: "two-player-selection"},
+        { icon: "fa-wand-magic-sparkles", text: "Trickshots üben", submitTo: "./sites/trickshots"},
         { icon: "fa-clipboard", text: "Prüfungsmodus", follows: "exam-selection"}
       ]
     },
@@ -23,7 +23,7 @@ const funnelQuestions = [
       ]
     },*/
     {
-      question: "2. Wähle deinen Spielernamen aus.",
+      question: "2. Wähle deinen Spielernamen aus.", // Selector for online play
       name: "single-player-selection",
       isAfter: "mode", // zu faul für Rückwärtssuche
       type: "selection-dynamic",
@@ -35,11 +35,13 @@ const funnelQuestions = [
     {
       question: "2. Wählt die Spieler aus",
       name: "two-player-selection",
-      type: "radio",
-      options: [
-        { icon: "fa-seedling", text: "Ich nutze meine Studienzeit hauptsÃ¤chlich fÃ¼r meine persÃ¶nliche Entwicklung" },
-        { icon: "fa-balance-scale", text: "Studium und Freizeit stehen bei mir stets im Gleichgewicht" },
-        { icon: "fa-graduation-cap", text: "Das Studium hat fÃ¼r mich die hÃ¶chste PrioritÃ¤t" }
+      isAfter: "mode",
+      type: "inputs",
+      fields: [
+        { label: "1. Name ", type: "text", name: "name1", placeholder: ""},
+        { label: "1. Team ", type: "text", name: "team1", placeholder: ""},
+        { label: "2. Name ", type: "text", name: "name2", placeholder: ""},
+        { label: "2. Team ", type: "text", name: "team2", placeholder: ""},
       ]
     },
     {

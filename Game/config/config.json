@@ -1,10 +1,11 @@
 {
-    "__doc__": "Configuration file for a module. Define its name and the other available modules.",
+    "__doc__": "Configuration file for a module. Define its name and the other available modules. Also defines the size of the pool table used in feet.",
 
     "id": "game",
     "ip": "134.28.20.52",
     "port": "5000",
 
+    "size": 8,
     "apriltag-id-beamer": ["4", "5", "6", "7"],
     
     "modules": [
@@ -15,7 +16,7 @@
         },
         {
             "name": "camera",
-            "ip": "134.28.20.53",
+            "ip": "134.28.20.52",
             "port": "5000"
         }
     ]

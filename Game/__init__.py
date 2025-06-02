@@ -37,7 +37,8 @@ class Game(Module):
 			},
 			"sites": {
 				"kp2": self.get_site_kp2,
-				"lat": self.get_site_lat
+				"lat": self.get_site_lat,
+				"trickshots": self.get_site_trickshots
 			},
 			"general": {
 				"ballimagenumber": self.get_ball_image
@@ -50,6 +51,10 @@ class Game(Module):
 			},
 			"game": {
 				"updateelo": self.do_update_elo
+			},
+			"trickshots": {
+				"list": self.list_trickshots,
+				"load": self.load_trickshot 
 			}
 		}
 
@@ -109,12 +114,18 @@ class Game(Module):
 	# INTERACTIONS WITH CAMERA MODULE ###############################################
 	from ._camera_interface import forward_coords
 
+	# INTERACTIONS WITH BEAMER MODULE ###############################################
+	from ._beamer_interface import beamer_push_image, beamer_off
+
 	# INTERACTIONS FOR NORMAL GAME ##################################################
 	#from ._game_local import *
 
 	# INTERACTIONS FOR EXAM MODE ####################################################
 	from ._kp2 import get_site_kp2 # import all methods from _kp2.py
 	from ._lat import get_site_lat, enter_round_lat # import all methods from _lat.py
+
+	# INTERACTION FOR TRICKSHOT MODE ################################################
+	from ._trickshots import load_trickshot, list_trickshots, get_site_trickshots
 
 	# INTERNAL FUNCTIONS ############################################################
 

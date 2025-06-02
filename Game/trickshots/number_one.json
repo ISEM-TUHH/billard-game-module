@@ -1,0 +1,76 @@
+{
+    "__doc__": "JSON describing an 8-ball pool trickshot. Size describes the type of table this should be played on. polygons describe the lines that should be drawn/projected on the table. balls: Each has its coordinates in x and y in mm, starting from the upper left of the table.",
+    "name": "Triple",
+    "difficulty": 1,
+    "description": "Sink three balls with one straight on hit.",
+    "size": 8,
+    "balls": {
+        "white": {
+            "x": 300,
+            "y": 400
+        },
+        "1": {
+            "x": 280,
+            "y": 700
+        },
+        "5": {
+            "x": 1050,
+            "y": 300
+        },
+        "6": {
+            "x": 2100,
+            "y": 40
+        }
+    },
+    "cue": {
+        "__doc__": "JSON describing the position of the cue and its power on a scale of 0 to 1 (quite the subjective measurement). start and end subject describe two points of the que",
+        "start": {
+            "x": 300,
+            "y": 350
+        },
+        "end": {
+            "x": 300,
+            "y": 100
+        },
+        "power": 0.7
+    },
+    "hit": {
+        "__doc__": "JSON describing the point where the cue should hit the ball on the back of the white ball. x and y coordinates from the top left of a square of the ball",
+        "x": 0.5,
+        "y": 0.5
+    },
+    "polygons": {
+        "white": [
+            {
+                "x": 300,
+                "y": 450
+            },
+            {
+                "x": 300,
+                "y": 670
+            },
+            {
+                "x": 600,
+                "y": 1150
+            },
+            {
+                "x": 1050,
+                "y": 350
+            },
+            {
+                "x": 2060,
+                "y": 70
+            }
+        ],
+        "red": [
+            {
+                "x": 260,
+                "y": 730
+            },
+            {
+                "x": 20,
+                "y": 1150
+            }
+        ]
+    }
+}

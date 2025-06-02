@@ -1,0 +1,22 @@
+#trickshot-lost table {
+    border-collapse: collapse;
+}
+
+.trickshot-table-row {
+    background: #f1f1f1;
+    padding: 1.5rem;
+    text-align: center;
+    border-radius: 8px;
+    cursor: pointer;
+    outline: 2px solid transparent;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+    overflow-wrap: break-word;
+    white-space: normal;
+}
+.trickshot-table-row:hover {
+    cursor: pointer;
+    background-color: #e0f7fa;
+    border-color: #00C1D4;
+    outline-color: #00C1D4;
+}

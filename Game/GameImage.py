@@ -1,5 +1,8 @@
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
+import json # for testing
+import os
+import cv2
 
 class GameImage:
 	"""Class to generate an image from different game modes and other information
@@ -17,6 +20,9 @@ class GameImage:
 		self.draw = ImageDraw.Draw(self.img)
 		self.phys = phys
 		self.w, self.h = size
+
+	def getImageCV2(self):
+		return np.array(self.img)[:,:,[2,1,0]] # shift from rgb to bgr
 
 	def placeBall(self, pos, n, d=None):
 		"""Place a ball on the canvas self.img based on its number
@@ -79,10 +85,19 @@ class BilliardBall:
 
 	Each ball is initiated with its number with number 16 being the white ball. Number 1-7 are full, 8 is black, 9-15 are half.
 	"""
-	colors = ["#f7d339","#1f419f","#e44c23","#5d1c8f","#f89348","#17953b","#c71517","#20201e","#f7d339","#1f419f","#e44c23","#5d1c8f","#f89348","#17953b","#c71517","#d5d1c5"]
+	colors = ["#f7d339","#1f419f","#e44c23","#5d1c8f","#f89348","#17953b","#c71517","#20201e","#f7d339","#1f419f","#e44c23","#5d1c8f","#f89348","#17953b","#c71517","#d5d1c5","#fb48c4"] # the last entry is a dummy ball color (neon pink)
 
 	def __init__(self, n):
-		self.n = n if n != 16 else "" # empty string for the white ball
+		current_dir = os.path.dirname(__file__) # finding the Roboto-Black.ttf/navigating the dirs
+		self.fontpath = current_dir + "/../Roboto-Black.ttf"
+
+		if n == "white":
+			n = 16
+		elif n == "eight":
+			n = 8
+		n = int(n)
+		self.indexNumber = n
+		self.n = n if n != 16 and n != 17 else "" # empty string for the white and dummy ball
 		self.type = "half" if (n>8 and n<16) else "full"
 		if n == 8:
 			self.type = "eight"
@@ -90,7 +105,7 @@ class BilliardBall:
 			self.type = "white"
 
 		self.color = self.colors[n-1]
-		self.white = self.colors[-1]
+		self.white = self.colors[-2]
 
 
 	def getImg(self, d):
@@ -100,7 +115,7 @@ class BilliardBall:
 		:type d: int
 		:return: PIL.Image object
 		"""
-		self.font = ImageFont.truetype("Roboto-Black.ttf", d//3)
+		self.font = ImageFont.truetype(self.fontpath, d//3)
 		
 		img = Image.new(mode="RGBA", size=(d, d))
 		draw = ImageDraw.Draw(img)
@@ -111,19 +126,135 @@ class BilliardBall:
 			draw.rectangle((0,4*d//5,d,d), fill=self.white, outline=self.white)
 			draw.ellipse((-d//2,-d//2,3*d//2,3*d//2), outline="#00000000", width=d//2)
 
-		draw.ellipse((d//4,d//4, 3*d//4, 3*d//4), fill=self.white, outline=self.white) # inner white circle
+		if self.indexNumber != 17: # do not draw a white inner circle for dummy balls
+			draw.ellipse((d//4,d//4, 3*d//4, 3*d//4), fill=self.white, outline=self.white) # inner white circle
 		_,_, w, h = draw.textbbox((0,d//20), str(self.n), font = self.font)
 		draw.text(((d-w)//2, (d-h)//2), str(self.n), font=self.font, fill="black")
 
 		return img
+
+class Trickshot: 
+	"""Class to draw a trickshot with all its belongings onto the gameimage based on the json/dict defining the trickshot (see subfolder trickshots)
+
+	:param definition: dict describing the trickshot, most likely loaded from a trickshots/*.json
+	:type definition: dict
+	:param size: the size of the image in mm = pixel. Sample down later.
+	:type size: optional tuple (width, height)
+	"""
+
+	def __init__(self, definition, size=(2150, 1171)):
+		self.d = definition
+		self.width = size[0]
+		self.height = size[1]
+		self.img = Image.new(mode="RGBA", size=size)
+		self.draw = ImageDraw.Draw(self.img)
+
+	def getTrickshotImage(self):
+		""" Draws everything from the definition and returns a cv2 image. 
+		
+		The background gets set to black, but this is not a problem as thisis "off" on a beamer.
+		"""
+		# actually draw everything
+		self.placeHitHints()
+		self.drawPolygons()
+		self.placeBalls()
+		self.drawCue()
+		return np.array(self.img)[:,:,[2,1,0]] # transform to cv2
+
+	def getHitHints(self, d=100):
+		height = int(1.05*d)
+
+		img = Image.new(mode="RGBA", size=(d,height))
+		draw = ImageDraw.Draw(img)
+
+		# basic form
+		draw.rectangle((0,d, d,height), fill="white")
+		draw.ellipse((0,0, d,d), fill="white")
+
+		# draw the actual hints (in the json: d.hit.x and .y)
+		pos_x = self.d["hit"]["x"]*d
+		pos_y = self.d["hit"]["y"]*d
+		offset = int(d/20) # 2*offset = diameter of the marker
+		draw.ellipse((pos_x-offset, pos_y-offset, pos_x+offset, pos_y+offset), fill="red")
+
+		return img
+
+	def placeHitHints(self):
+		""" Generate and place the cue hints on the main image
+		"""
+		imgbot = self.getHitHints()
+		w, h = imgbot.size
+		self.img.paste(imgbot, (self.width//2-w//2,self.height-h), imgbot)
+
+		imgtop = imgbot.transpose(Image.ROTATE_180)
+		imgleft = imgbot.transpose(Image.ROTATE_270)
+		imgright = imgbot.transpose(Image.ROTATE_90)
+		self.img.paste(imgtop, (self.width//2-w//2,0), imgtop)
+		self.img.paste(imgleft, (0,self.height//2-w//2), imgleft)
+		self.img.paste(imgright, (self.width-h,self.height//2-w//2), imgright)
+
+
+	def drawPolygons(self, linewidth=10):
+		""" Directy draws all polygons from definition on the objects image
+		"""
+		rawAllPoly = self.d["polygons"]
+		for color in rawAllPoly:
+			# iterate over every polygon
+			# key is the color
+			#print(color)
+			poly = rawAllPoly[color]
+			coords = []
+			for points in poly:
+				coords.append((points["x"], points["y"]))
+			#print(coords)
+			self.draw.line(coords, width=linewidth, fill=color, joint="curve")
+
+	def placeBalls(self, anonymize = False, diameter=52):
+		""" Place all the ball from the definition onto the canvas
+
+		:param anonymize: if true, every ball that is not white will be replaced by the same color, as their number is rarely important for trickshot
+		:type anonymize: optional bool
+		"""
+		allBalls = self.d["balls"]
+		for number in allBalls:
+			# key is the number
+			ball = allBalls[number]
+			if anonymize and not number == "white":
+				number = 17 # a dummy ball that does not really exist
+			b = BilliardBall(number)
+
+			offset = diameter // 2
+			bImg = b.getImg(diameter) # currently hardcoded ball diameter
+			
+			xCorner, yCorner = int(ball["x"])-offset, int(ball["y"])-offset
+			self.img.paste(bImg, (xCorner, yCorner), bImg)
+
+	def drawCue(self, linewidth = 20):
+		allCue = self.d["cue"]
+		start = tuple([allCue["start"]["x"], allCue["start"]["y"]])
+		end = tuple([allCue["end"]["x"], allCue["end"]["y"]])
+		self.draw.line([start, end], width=linewidth, fill="brown")
+
 		
 
 if __name__ == "__main__":
-	data = {"1": (400,300), "2": (654,76), "16": (1200,900), "14": (1800,400), "8": (700,300), "5": (588,833)}
-	g = GameImage(phys=0.5, size=(3840,2160))
-	g.instructionText("Platziere die Kugeln auf den Projektionen")
-	g.placeAllBalls(data)
+	#data = {"1": (400,300), "2": (654,76), "16": (1200,900), "14": (1800,400), "8": (700,300), "5": (588,833)}
+	#g = GameImage(phys=0.5, size=(3840,2160))
+	#g.instructionText("Platziere die Kugeln auf den Projektionen")
+	#g.placeAllBalls(data)
 	#g.drawArrow((100,100),(300,600))
 
-	g.img.show()
-	
+	#g.img.show()
+	trick = json.load(open("trickshots/number_one.json", "r"))
+
+	t = Trickshot(trick)
+	#t.getCueHints()
+	#t.drawPolygons()
+	#t.placeBalls(anonymize=False)
+	#t.placeHitHints()
+	#t.drawCue()
+	#t.img.show()
+	img = t.getTrickshotImage()
+	cv2.imshow("Trickshot", img)
+	cv2.waitKey(0)
+	#cv2.destroyAllWindows()

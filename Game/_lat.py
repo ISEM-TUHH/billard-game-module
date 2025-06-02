@@ -12,6 +12,8 @@ def get_site_lat(self):
     #if request.method == "POST":
     self.teamtableLAT = pd.read_csv(self.current_dir + "/storage/LAT-teamtable.csv", header=0, sep="\t")
     self.fulltableLAT = pd.read_csv(self.current_dir + "/storage/LAT-fulltable.csv", header=0, sep="\t")
+
+    self.list_trickshots() # cache all the trickshots
     return render_template("lat.html")
 
 def enter_round_lat(self):

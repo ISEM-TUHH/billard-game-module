@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    
+
+    <!-- Externe CSS-Datei einbinden -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles-trickshots.css') }}" />
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  </head>
+
+  <body>
+    <header>
+      <div class="logo">
+        <img src=" {{ url_for('static', filename='inst_logo.svg') }}" alt="ISEM Logo" />
+      </div>
+      &ensp; <!-- fixed empty space -->
+      <h1>Trickshots</h1>
+    </header>
+
+    
+    <section id="interface-camera" class="col">
+      <div class="image-container" id="livestream-container">
+        <!--colors = ["#f7d339","#1f419f","#e44c23","#5d1c8f","#f89348","#17953b","#c71517","#20201e","#f7d339","#1f419f","#e44c23","#5d1c8f","#f89348","#17953b","#c71517","#d5d1c5"]-->
+        <img src="http://134.28.20.53:5000/website/video_feed" id="livestream">
+      </div>
+    </section>
+
+    <section class="col">
+        <div id="trickshot-list">
+
+        </div>
+    </section>
+  
+    <section id="submit-round" class="col">
+        Submit your results: <input type="button" value="submit" id="submit-button"><br>
+        <div id="results"><!-- Your total score is: 1870 points, rank 3/10--></div> 
+    </section>
+
+    <section id="scoreboard" class="col">
+      Leaderboard
+    </section>
+
+    <!--<footer>
+      <div class="content-wrapper">
+        <p>
+          <a href="https://www.linkedin.com/company/tuhh-isem" target="_blank">ISEM auf LinkedIn</a> |
+          <a href="https://isem-karriere.de/datenschutz/" target="_blank">Datenschutz</a> |
+          <a href="https://www.tuhh.de/isem/impressum" target="_blank">Impressum</a>
+        </p>
+      </div>
+    </footer>-->
+
+    <!-- JavaScript einbinden -->
+    <script src="{{ url_for('static', filename='trickshots.js') }}"></script>
+  </body>
+</html>

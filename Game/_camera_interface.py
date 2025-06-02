@@ -7,6 +7,8 @@ import socket
 import requests
 import json
 
+from .GameImage import GameImage
+
 def forward_coords(self):
     """ Collect the coordinates from the camera module and forward it to the calling website
 
@@ -16,4 +18,11 @@ def forward_coords(self):
     api = f"http://{camera['ip']}:{camera['port']}/v1/coords"
     response = requests.get(api)
     #print(response.json())
+
+    # generate an image and place it on the beamer
+    gameimage = GameImage(size=(2150, 1171))
+    gameimage.placeAllBalls(response.json())
+    image = gameimage.getImageCV2()
+    self.beamer_push_image(image)
+
     return jsonify(response.json())
