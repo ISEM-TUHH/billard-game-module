@@ -57,3 +57,8 @@ def load_trickshot(self):
     # name, description and difficulty are already loaded and displayed inside the frontend
     
     return "Success i hope."
+
+
+# -------------- Functions to generate trickshots ------------------------
+def get_site_create_trickshots(self):
+    return render_template("create_trickshots.html")

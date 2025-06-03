@@ -54,7 +54,8 @@ class Game(Module):
 			},
 			"trickshots": {
 				"list": self.list_trickshots,
-				"load": self.load_trickshot 
+				"load": self.load_trickshot,
+				"sitecreate": self.get_site_create_trickshots
 			}
 		}
 
@@ -125,7 +126,7 @@ class Game(Module):
 	from ._lat import get_site_lat, enter_round_lat # import all methods from _lat.py
 
 	# INTERACTION FOR TRICKSHOT MODE ################################################
-	from ._trickshots import load_trickshot, list_trickshots, get_site_trickshots
+	from ._trickshots import load_trickshot, list_trickshots, get_site_trickshots, get_site_create_trickshots
 
 	# INTERNAL FUNCTIONS ############################################################
 

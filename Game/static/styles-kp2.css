@@ -1,0 +1,69 @@
+.option-boxes {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.ball {
+  position: absolute;
+  width: 15px; /* Width of the point */
+  height: 15px; /* Height of the point */
+  /*background-color: black; /* Color of the point */
+  border-radius: 50%; /* Make it circular */
+  transform: translate(-50%, -50%); /* Center the point */
+  /*visibility: hidden;*/
+  display: none;
+}
+
+.image-container {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+#livestream {
+  width: 100%;
+}
+
+#ball-selector {
+  display: grid;    
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1rem;
+}
+/*input[type="radio"]:checked + span { /* Da inputs im label liegen, ist Text nochmal in span gewrapped 
+  background-color: #e0f7fa;
+  border-color: #00C1D4;
+}*//*
+#ball-selector label input {
+  display: none;
+}*/
+#ball-selector label {
+  background: #f1f1f1;
+  padding: 0.5rem;
+  text-align: center;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+  overflow-wrap: break-word;
+  white-space: normal;
+  font-size: smaller;
+}
+
+input[type="radio"] {
+  display: none;
+}
+
+label.active,
+label:hover {
+  background-color: #e0f7fa;
+  /*border-color: #00C1D4;*/
+  border: 2px solid #00C1D4;
+}
+/*
+.active {
+  outline: none;
+}*/
+.mode {
+  display: none;
+}
