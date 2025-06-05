@@ -19,6 +19,17 @@ var currentRound = {};
 // select the mode -> make all other mode-sections invisible
 document.getElementById("mode-selector-radios").addEventListener("click", function(e) {
   var val = document.querySelector('input[name="mode"]:checked').value;
+
+  // update the backend -> beamer
+  fetch("/kp2/selectmode", {
+    method: "POST",
+    headers: {
+			"Accept": "application/json",
+			"Content-Type": "application/json"
+		},
+    body: JSON.stringify({"mode": val})
+  })
+
   for (let i of ["precision", "distance", "break","trickshot"]) {
     var vis = "none";
     if (i === val) {
@@ -220,6 +231,8 @@ for (let c of precCheckboxes) {
         var distance = Math.sqrt((xr - refPoint.x)**2 + (yr - refPoint.y)**2);
         label.innerText = Math.round(distance) + " mm";
 
+        soundJudge(distance, [15, 150, 450])
+
         currentRound[c.id] = distance;
       }
     })
@@ -339,6 +352,8 @@ document.getElementById("break-button").addEventListener("change", ()=>{
         currentRound["break"] = sunken;
       })
 })
+
+// ------------------------- Logic for Trickshots -----------------
 
 
 // ------------------------- Logic for submission and reset -------

@@ -194,8 +194,10 @@
 
       <section id="trickshot" class="col mode"><fieldset>
         <legend>Trickshot</legend>
-        Place the balls as projected and try to sink as many balls as possible in one hit.
+        Place the balls as projected and try to sink as many balls as possible in one hit by following the trickshot hints.
         <div class="button-list">
+          <input id="trickshot-load" value="Load trickshot">
+          <label for="trickshot-load" id="trickshot-load-label">Load Trickshot</label>
           <input type="checkbox" id="trickshot-button">
           <label for="trickshot-button" id="trickshot-button-label" data-og="Count sunk balls">Count sunk balls</label>
         </div>        
@@ -227,7 +229,7 @@
     </footer>-->
 
     <!-- Audio files -->
-    <div style="display: none;">
+    <div style="display: none;" id="sounds">
         <div id="">
 
         </div>
@@ -235,6 +237,7 @@
     </div>
 
     <!-- JavaScript einbinden -->
+    <script src="{{ url_for('static', filename='sound.js') }}"></script> 
     <script src="{{ url_for('static', filename='kp2.js') }}"></script>
   </body>
 </html>

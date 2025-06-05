@@ -12,17 +12,14 @@ from .GameImage import GameImage
 def forward_coords(self):
     """ Collect the coordinates from the camera module and forward it to the calling website
 
-    This prevents the user from having to directly connect to the camera module
+    This prevents the user from having to directly connect to the camera module. Also updates the beamer with a current game image and overlays depending on the current mode.
     """
     camera = self.getModuleConfig("camera")
     api = f"http://{camera['ip']}:{camera['port']}/v1/coords"
     response = requests.get(api)
-    #print(response.json())
+    res = response.json()
 
     # generate an image and place it on the beamer
-    gameimage = GameImage(size=(2150, 1171))
-    gameimage.placeAllBalls(response.json())
-    image = gameimage.getImageCV2()
-    self.beamer_push_image(image)
+    self.beamer_make_gameimage(coords = res)
 
-    return jsonify(response.json())
+    return jsonify(res)

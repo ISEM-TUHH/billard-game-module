@@ -2,7 +2,7 @@
     "__doc__": "Configuration file for a module. Define its name and the other available modules. Also defines the size of the pool table used in feet.",
 
     "id": "game",
-    "ip": "134.28.20.52",
+    "ip": "134.28.20.51",
     "port": "5000",
 
     "size": 8,
@@ -11,12 +11,12 @@
     "modules": [
         {
             "name": "beamer",
-            "ip": "134.28.20.51",
+            "ip": "134.28.20.52",
             "port": "5000"
         },
         {
             "name": "camera",
-            "ip": "134.28.20.52",
+            "ip": "134.28.20.53",
             "port": "5000"
         }
     ]

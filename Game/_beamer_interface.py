@@ -1,5 +1,6 @@
 import requests
 import cv2
+from .GameImage import GameImage
 
 # These methods mostly get called by internal functions to display the gameimage 
 
@@ -11,15 +12,15 @@ def beamer_push_image(self, img):
     """
     # build the url to post the image to
     beamer = self.getModuleConfig("beamer")
-    print(beamer)
+    #print(beamer)
     url = f"http://{beamer['ip']}:{beamer['port']}" + "/v1/receiveimage"
-    url = "http://134.28.20.50:5000/v1/receiveimage"
+    #url = "http://134.28.20.50:5000/v1/receiveimage"
     #url = "http://127.0.0.1:5000/v1/receiveimage"
 
     _, buffer = cv2.imencode(".jpg", img)
     requests.post(url, data=buffer.tobytes(), headers={"content-type": "image/jpeg"})
     
-    print(f"Posted image to {url}.")
+    print(f"Posted image to the beamer-module at {url}.")
     return "Game beamer push image"
 
 def beamer_off(self):
@@ -27,3 +28,17 @@ def beamer_off(self):
     """
     black_image = np.zeros((1080,1920,3))
     self.beamer_push_image(black_image)
+
+def beamer_make_gameimage(self, coords=None):
+    """ Build an image with GameImage and push it to the beamer
+
+    Handle situations like showing gameresults and instructions for modes.
+    """
+    gameimage = GameImage(size=(2150, 1171))
+    
+    gameimage.addGameMode(self.supermode, self)
+
+    if coords != None:
+        gameimage.placeAllBalls(coords)
+    image = gameimage.getImageCV2()
+    self.beamer_push_image(image)

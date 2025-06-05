@@ -16,7 +16,8 @@ class GameImage:
 	ballDiameter = 52.5 # diameter of a billiard ball (snooker) in mm
 
 	def __init__(self, size=(1920, 1080), phys=1):
-		self.img = Image.new(mode="RGB", size=size, color="#50b12c")
+		self.img = Image.new(mode="RGB", size=size, color="#000000")
+		#self.img = Image.new(mode="RGB", size=size, color="#50b12c")
 		self.draw = ImageDraw.Draw(self.img)
 		self.phys = phys
 		self.w, self.h = size
@@ -45,10 +46,16 @@ class GameImage:
 	def placeAllBalls(self, data):
 		"""Place all balls mentioned in the data dict on the canvas self.img
 
-		:param data: dictionary matching the number of a ball (key) to its position (tuple x,y) from the upper left in mm
-		:type data: dict<tuple<float>>
+		:param data: dictionary matching the number of a ball (key) to its position (tuple x,y) from the upper left in mm. Can also just be the output of Camera.get_coords (.../v1/getcoords)
+		:type data: dict<tuple<float>> or list<dict>
 		"""
-		for b in data:
+		for b in data:			
+			if type(data) == list:
+				rawN = b["name"]
+				number = 8 if rawN=="eight" else (16 if rawN=="white" else int(rawN))
+				x,y = b["x"],b["y"]
+				self.placeBall((x,y),number)
+				continue
 			self.placeBall(data[b], int(b))
 
 	def instructionText(self, text):
@@ -78,6 +85,53 @@ class GameImage:
 		startP = tuple([int(i/self.phys) for i in start])
 		endP = tuple([int(i/self.phys) for i in end])
 		self.draw.line([startP,endP], fill=color, width=0)
+
+	def addGameMode(self, supermode, game):
+		""" Add an overlay to the image depending on the current game supermode.
+
+		:param supermode: supermode of the game
+		:type supermode: str
+		:param game: Game Object calling this function
+		:type game: Game Object 
+		"""
+
+		match supermode:
+			case "kp2":
+				kp2mode = game.kp2mode
+				match kp2mode:
+					case "precision":
+						self.instructionText("Challenge: Precision")
+						# draw a bullseye
+						bullX, bullY = self.h//2, self.h//2
+						r = 30 # radius of each ring
+						print(bullX, bullY)
+						for i in [4,2,0]:
+							#topWhite = bullX - 2*(i+1)*r
+							#bottomWhite = bullX + 2*(i+1)*r
+							#topBlack = bullX - 2*i*r
+							#bottomBlack = bullX + 2*i*r
+							white = 2*(i+1)*r
+							black = 2*i*r
+							print(white, black)
+							self.draw.ellipse((bullX-white, bullY-white, bullX+white, bullY+white), fill="#FFFFFF")
+							self.draw.ellipse((bullX-black, bullY-black, bullX+black, bullY+black), fill="#000000")
+						return
+					case "results":
+						# show results screen -> podium
+						return
+					case "base":
+						self.instructionText("Select a challenge on the screen.")
+						return
+					case "trickshot":
+						# Loading a trickshot already creates an image
+						return
+					case "break":
+						self.instructionText("Challenge: Break")
+					case "distance":
+						self.instructionText("Challenge: Distance")
+
+
+				
 
 
 class BilliardBall:
@@ -233,7 +287,7 @@ class Trickshot:
 		allCue = self.d["cue"]
 		start = tuple([allCue["start"]["x"], allCue["start"]["y"]])
 		end = tuple([allCue["end"]["x"], allCue["end"]["y"]])
-		self.draw.line([start, end], width=linewidth, fill="brown")
+		self.draw.line([start, end], width=linewidth, fill="grey") # brown is literally invisible on the blue table cloth
 
 		
 

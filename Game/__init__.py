@@ -17,7 +17,7 @@ class Game(Module):
 	Bundles all modules APIs and provides the central website.
 	"""
 	
-	mode = "base" # current gamemode. base: on booting up, before selecting mode. play-local: normal game local. play-online: online game with another billiard robot somewhere else. kp2: mode of selecting kp2 testat, with kp2-t1...t3 being the different testate.
+	supermode = "base" # current gamemode. base: on booting up, before selecting mode. play-local: normal game local. play-online: online game with another billiard robot somewhere else. kp2: mode of selecting kp2 testat, with kp2-t1...t3 being the different testate.
 	current_players = [] # will store the player objects
 	winner = {} # player object that last won the game
 	
@@ -48,6 +48,10 @@ class Game(Module):
 			},
 			"lat": {
 				"enterround": self.enter_round_lat
+			},
+			"kp2": {
+				"enterround": self.enter_round_kp2,
+				"selectmode": self.select_mode_kp2
 			},
 			"game": {
 				"updateelo": self.do_update_elo
@@ -116,13 +120,13 @@ class Game(Module):
 	from ._camera_interface import forward_coords
 
 	# INTERACTIONS WITH BEAMER MODULE ###############################################
-	from ._beamer_interface import beamer_push_image, beamer_off
+	from ._beamer_interface import beamer_push_image, beamer_off, beamer_make_gameimage
 
 	# INTERACTIONS FOR NORMAL GAME ##################################################
 	#from ._game_local import *
 
 	# INTERACTIONS FOR EXAM MODE ####################################################
-	from ._kp2 import get_site_kp2 # import all methods from _kp2.py
+	from ._kp2 import get_site_kp2, enter_round_kp2, select_mode_kp2 # import all methods from _kp2.py
 	from ._lat import get_site_lat, enter_round_lat # import all methods from _lat.py
 
 	# INTERACTION FOR TRICKSHOT MODE ################################################
