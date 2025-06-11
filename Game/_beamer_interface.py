@@ -1,6 +1,7 @@
 import requests
 import cv2
 from .GameImage import GameImage
+import numpy as np
 
 # These methods mostly get called by internal functions to display the gameimage 
 
@@ -18,8 +19,11 @@ def beamer_push_image(self, img):
     #url = "http://127.0.0.1:5000/v1/receiveimage"
 
     _, buffer = cv2.imencode(".jpg", img)
-    requests.post(url, data=buffer.tobytes(), headers={"content-type": "image/jpeg"})
-    
+    try:
+        requests.post(url, data=buffer.tobytes(), headers={"content-type": "image/jpeg"})
+    except Exception as e:
+        print(e)
+
     print(f"Posted image to the beamer-module at {url}.")
     return "Game beamer push image"
 
@@ -34,7 +38,7 @@ def beamer_make_gameimage(self, coords=None):
 
     Handle situations like showing gameresults and instructions for modes.
     """
-    gameimage = GameImage(size=(2150, 1171))
+    gameimage = GameImage()
     
     gameimage.addGameMode(self.supermode, self)
 

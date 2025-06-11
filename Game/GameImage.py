@@ -13,14 +13,15 @@ class GameImage:
 	:param phys: how many meters are 1000 pixels? (equivalent to how many mm are 1 pixel)
 	:type phys: float
 	"""
-	ballDiameter = 52.5 # diameter of a billiard ball (snooker) in mm
+	ballDiameter = 57 # diameter of a billiard ball (snooker) in mm
 
-	def __init__(self, size=(1920, 1080), phys=1):
+	def __init__(self, size=(2230, 1115), phys=1):
 		self.img = Image.new(mode="RGB", size=size, color="#000000")
 		#self.img = Image.new(mode="RGB", size=size, color="#50b12c")
 		self.draw = ImageDraw.Draw(self.img)
 		self.phys = phys
 		self.w, self.h = size
+		self.current_dir = os.path.dirname(__file__)
 
 	def getImageCV2(self):
 		return np.array(self.img)[:,:,[2,1,0]] # shift from rgb to bgr
@@ -94,17 +95,30 @@ class GameImage:
 		:param game: Game Object calling this function
 		:type game: Game Object 
 		"""
+		logo1 = Image.open(self.current_dir + "/static/isem_logo.png")
+		logo = logo1.resize((700,350))
 
 		match supermode:
+			case "base":
+				self.instructionText("Select a Game Mode")
+				self.img.paste(logo, (self.w//2-350, self.h//2-350//2))
+			case "trickshots":
+				self.instructionText("Select a Trickshot")
 			case "kp2":
 				kp2mode = game.kp2mode
+				if kp2mode != "trickshot":
+					right, top = self.w, self.h//2
+					self.draw.rectangle([(right-250, top-280//2),(right, top+280//2)], outline="yellow", width=10)
+					self.draw.rectangle([(right-250-90, top-10),(right-250, top+10)], outline="yellow", width=10)
+					#print(f"Marking rectangle: {right}, {top}")
+
 				match kp2mode:
 					case "precision":
 						self.instructionText("Challenge: Precision")
 						# draw a bullseye
 						bullX, bullY = self.h//2, self.h//2
 						r = 30 # radius of each ring
-						print(bullX, bullY)
+						#print(bullX, bullY)
 						for i in [4,2,0]:
 							#topWhite = bullX - 2*(i+1)*r
 							#bottomWhite = bullX + 2*(i+1)*r
@@ -112,23 +126,38 @@ class GameImage:
 							#bottomBlack = bullX + 2*i*r
 							white = 2*(i+1)*r
 							black = 2*i*r
-							print(white, black)
+							#print(white, black)
 							self.draw.ellipse((bullX-white, bullY-white, bullX+white, bullY+white), fill="#FFFFFF")
 							self.draw.ellipse((bullX-black, bullY-black, bullX+black, bullY+black), fill="#000000")
+						self.draw.ellipse((bullX-r, bullY-r, bullX+r, bullY+r), fill="#000000")
+						self.draw.ellipse((bullX-r, bullY-r, bullX+r, bullY+r), fill="#000000")
 						return
 					case "results":
 						# show results screen -> podium
+						self.img.paste(logo, (self.w//2-350, self.h//2-350//2))
+						self.instructionText(f"Score: {str(game.kp2_last_score)}")
 						return
 					case "base":
-						self.instructionText("Select a challenge on the screen.")
+						self.img.paste(logo, (self.w//2-350, self.h//2-350//2))
+						self.instructionText("Select a challenge on the screen")
 						return
 					case "trickshot":
-						# Loading a trickshot already creates an image
+						trickshot = Trickshot(game.trickshots[str(game.trickshot_current_id)])
+						timg = trickshot.getTrickshotImage()
+						#timg = Image.fromarray(timgNP.astype("uint8"), "RGB")
+						self.img.paste(timg, (0,0))
+						#self.img = timg
+						#self.draw = ImageDraw.Draw(self.img)
 						return
 					case "break":
 						self.instructionText("Challenge: Break")
+						center = self.h//2
+						offTop = 160
+						offFront = 290
+						self.draw.polygon([(center, center-offTop),(center+offFront, center), (center, center+offTop)], fill=(255,255,0))
 					case "distance":
 						self.instructionText("Challenge: Distance")
+
 
 
 				
@@ -196,7 +225,7 @@ class Trickshot:
 	:type size: optional tuple (width, height)
 	"""
 
-	def __init__(self, definition, size=(2150, 1171)):
+	def __init__(self, definition, size=(2230, 1115)):
 		self.d = definition
 		self.width = size[0]
 		self.height = size[1]
@@ -211,9 +240,12 @@ class Trickshot:
 		# actually draw everything
 		self.placeHitHints()
 		self.drawPolygons()
-		self.placeBalls()
+		self.placeBalls(anonymize=False)
 		self.drawCue()
-		return np.array(self.img)[:,:,[2,1,0]] # transform to cv2
+		return self.img # transform to cv2
+
+	def getTrickshotImageCV2(self):
+		return np.array(self.getTrickshotImage(self))[:,:,[2,1,0]]
 
 	def getHitHints(self, d=100):
 		height = int(1.05*d)
@@ -263,7 +295,7 @@ class Trickshot:
 			#print(coords)
 			self.draw.line(coords, width=linewidth, fill=color, joint="curve")
 
-	def placeBalls(self, anonymize = False, diameter=52):
+	def placeBalls(self, anonymize = False, diameter=57):
 		""" Place all the ball from the definition onto the canvas
 
 		:param anonymize: if true, every ball that is not white will be replaced by the same color, as their number is rarely important for trickshot

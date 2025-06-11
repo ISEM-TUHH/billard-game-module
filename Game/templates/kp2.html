@@ -84,14 +84,18 @@
       <section id="user-info" class="col">
         <fieldset>
           <legend>Enter your details</legend>
-          <label for="team">Name of your team: </label>
-          <input type="text" list="teams" placeholder="Team name" id="team" name="team">
+          <label for="person-name">Your name: </label>
+          <input type="text" placeholder="Your name" id="person-name">
+          <br><br>
+          <label for="team-name">Name of your team: </label>
+          <input type="text" list="teams" placeholder="Team name" id="team-name" name="team-name">
           <datalist id="teams">
             <option value="Team 1"></option>
             <option value="Team 2"></option>
             <option value="Team 3"></option>
             <option value="Coaches"></option>
             <option value="ISEM"></option>
+            <option value="Professoren"></option>
           </datalist>
         </fieldset>
       </section>
@@ -196,8 +200,8 @@
         <legend>Trickshot</legend>
         Place the balls as projected and try to sink as many balls as possible in one hit by following the trickshot hints.
         <div class="button-list">
-          <input id="trickshot-load" value="Load trickshot">
-          <label for="trickshot-load" id="trickshot-load-label">Load Trickshot</label>
+          <!--<input id="trickshot-load" value="Load trickshot">
+          <label for="trickshot-load" id="trickshot-load-label">Load Trickshot</label>-->
           <input type="checkbox" id="trickshot-button">
           <label for="trickshot-button" id="trickshot-button-label" data-og="Count sunk balls">Count sunk balls</label>
         </div>        
@@ -215,7 +219,54 @@
     </section>
 
     <section id="scoreboard" class="col">
-      Leaderboard
+      <fieldset id="single">
+        <legend>Individual</legend>
+        <div id="podium-single", class="podium-container">
+					<div class="podium-item" id="single-2">
+						<p class="podium-name">Moritz</p>
+						<div class="podium-rank second">
+							ISEM<br/>7500
+						</div>
+					</div>
+					<div class="podium-item" id="single-1">
+						<p class="podium-name">Mathis</p>
+						<div class="podium-rank first">
+							ISEM<br/>9000
+						</div>
+					</div>
+					<div class="podium-item" id="single-3">
+						<p class="podium-name">Felix</p>
+						<div class="podium-rank third">
+							ISEM<br/>7200
+						</div>
+					</div>
+				</div>
+        <div id="table-single" class="table-div">Table gets put here...</div>
+      </fieldset>
+
+      <fieldset id="team">
+        <legend>Teams</legend>
+        <div id="podium-team", class="podium-container">
+					<div class="podium-item" id="team-2">
+						<p class="podium-name">AIW</p>
+						<div class="podium-rank second">
+							Average<br/>7500
+						</div>
+					</div>
+					<div class="podium-item" id="team-1">
+						<p class="podium-name">ISEM</p>
+						<div class="podium-rank first">
+							Average<br/>9000
+						</div>
+					</div>
+					<div class="podium-item" id="team-3">
+						<p class="podium-name">Professoren</p>
+						<div class="podium-rank third">
+							Average<br/>7200
+						</div>
+					</div>
+          <div id="table-team" class="table-div">Table gets put here...</div>
+      </fieldset>
     </section>
 
     <!--<footer>
@@ -230,7 +281,7 @@
 
     <!-- Audio files -->
     <div style="display: none;" id="sounds">
-        <div id="">
+        <div>
 
         </div>
 

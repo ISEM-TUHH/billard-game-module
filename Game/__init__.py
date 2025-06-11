@@ -71,6 +71,8 @@ class Game(Module):
 
 	def index(self):
 		print(f"Client connected.")
+		self.supermode = "base"
+		self.beamer_make_gameimage()
 		return render_template('index.html')
 
 

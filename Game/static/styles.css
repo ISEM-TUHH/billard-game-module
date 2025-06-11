@@ -205,6 +205,7 @@ input[type="radio"]:checked + .option-box {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   margin: 1rem;
   box-sizing: border-box;
+  vertical-align: top;
 }
 
 .button-list {
@@ -260,3 +261,50 @@ input[type="radio"]:checked + .option-box {
   cursor: not-allowed;
 }
 
+/* podium */
+
+.podium-container {
+    display: flex;
+    align-items: flex-end;
+}
+.podium-item {
+    width: 30%;
+}
+.podium-rank {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    /*font-size: 35px;*/
+    color: #fff;
+}
+.podium-name {
+    text-align: center;
+    padding: 0 .5rem;
+}
+.first {
+    min-height: 300px;
+    background: rgb(0,106,129);
+}
+.second {
+    min-height: 200px;
+    background: rgb(103, 142, 169);
+}
+.third {
+    min-height: 100px;
+    background: rgb(0, 193, 212);
+}
+
+.table-div {
+    overflow: auto;
+    height: 100px;
+}
+th{
+    text-align: left;
+}
+tr:nth-child(even) {
+    background-color: #557593;
+}
+tr:nth-child(odd) {
+    background-color: #f1f1ee;
+}

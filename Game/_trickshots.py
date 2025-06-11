@@ -8,7 +8,8 @@ import json
 from flask import jsonify, render_template, request
 
 def get_site_trickshots(self):
-
+    self.supermode = "trickshots"
+    self.beamer_make_gameimage()
     return render_template("trickshots.html")
 
 def list_trickshots(self):
@@ -44,14 +45,19 @@ def list_trickshots(self):
 def load_trickshot(self):
     """ Load a single trickshot into the beamer. Name, description and difficulty are already loaded and should be displayed by the frontend
     """
-    res = request.json
+    if "request" in locals():    
+        res = request.json
+    else:
+        res = {"id": "0"}
+        self.list_trickshots()
     #print(res)
-    trickshot_definition = self.trickshots[str(res["id"])] # retrieve the trickshot from all the loaded trickshots
-    #print(self.trickshots)
-    #trickshot_definition = self.trickshots["0"]
+    self.trickshot_current_id = res["id"]
+    # retrieve the trickshot from all the loaded trickshots
+    trickshot_definition = self.trickshots[str(res["id"])] 
+    print(trickshot_definition["id"], res)
 
     trickshot = Trickshot(trickshot_definition)
-    img = trickshot.getTrickshotImage()
+    img = trickshot.getTrickshotImageCV2()
 
     self.beamer_push_image(img)
     # name, description and difficulty are already loaded and displayed inside the frontend

@@ -6,6 +6,7 @@ import socket
 #import urllib.request
 import requests
 import json
+import time
 
 from .GameImage import GameImage
 
@@ -14,6 +15,9 @@ def forward_coords(self):
 
     This prevents the user from having to directly connect to the camera module. Also updates the beamer with a current game image and overlays depending on the current mode.
     """
+    self.beamer_off() # project a black screen before taking the image so that the proection cant influence the Camera AI.
+    time.sleep(1.5)
+    
     camera = self.getModuleConfig("camera")
     api = f"http://{camera['ip']}:{camera['port']}/v1/coords"
     response = requests.get(api)

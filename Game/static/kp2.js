@@ -1,6 +1,6 @@
 // CHANGE THE TABLE MEASUREMENTS HERE
-longsideTable = 2150; //mm
-shortsideTable = 1171; //mm 
+longsideTable = 2230; //mm
+shortsideTable = 1115; //mm 
 //1171, 2150
 
 
@@ -37,6 +37,14 @@ document.getElementById("mode-selector-radios").addEventListener("click", functi
     }
     document.getElementById(i).style.display = vis;
   }
+
+  if (val != "distance") {
+    // when leaving distance mode, deselect the flag icon
+    current_ball = "white"
+  } else {
+    current_ball = "marker-start"
+  }
+
 });
 
 
@@ -88,6 +96,7 @@ function placePoint(x, y, id, realBall = true) {
   } else {
     altCoordinates[id] = {name: id, x: x, y: y};
   }
+  console.log(x,y)
 }
 
 function placePointFromRealDim(xr, yr, id) {
@@ -188,7 +197,7 @@ function storeInput(storageID, fieldID, value) {
 
 // ----------------------------------- Precision logic -------------
 // -> Kalibrierung: einfach eine Kugel auf das (projizierte) Bild legen und messen.
-var refPoint = {x: 600, y: 600}; //reference point towards the distance is calculated
+var refPoint = {x: 565, y: 557}; //reference point towards the distance is calculated
 
 
 var debugObject = 0;
@@ -231,7 +240,7 @@ for (let c of precCheckboxes) {
         var distance = Math.sqrt((xr - refPoint.x)**2 + (yr - refPoint.y)**2);
         label.innerText = Math.round(distance) + " mm";
 
-        soundJudge(distance, [15, 150, 450])
+        //soundJudge(distance, [15, 150, 450])
 
         currentRound[c.id] = distance;
       }
@@ -354,23 +363,52 @@ document.getElementById("break-button").addEventListener("change", ()=>{
 })
 
 // ------------------------- Logic for Trickshots -----------------
+/*document.getElementById("trickshot-load").addEventListener("click", ()=> {
+  fetch("/trickshots/load", {
+          method: "post",
+          headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({"id": "0"})
+      }); // there is no answer to be processed :)
+})*/
 
+document.getElementById("trickshot-button").addEventListener("change", ()=>{
+  var self = document.getElementById("trickshot-button")
+  if (!self.checked) {
+      return; // if this is an uncheck event -> only measure data when checking the element
+    }
+    var label = document.querySelector("label[for=" + self.id + "]");
+    var oldText = label.innerText;
+    label.innerText = "Counting balls...";
+
+    getCameraCoordinates()
+      .then((r) => {
+        var nBalls = Object.keys(coordinates).length;
+        var sunken = 3 - nBalls;
+        label.innerText = sunken + " balls were sunk";
+        currentRound["trickshot"] = sunken;
+      })
+})
 
 // ------------------------- Logic for submission and reset -------
 submitButton = document.getElementById("submit-button")
 submitButton.addEventListener("click", ()=>{
-  teamName =  document.getElementById("team").value;
-  if (teamName === "") {
-    alert("No team name has been entered!");
+  personName = document.getElementById("person-name").value;
+  teamName =  document.getElementById("team-name").value;
+  if ((teamName === "") || (personName === "")) {
+    alert("No name/team has been entered!");
     return;
   }
-  currentRound.team = teamName;
+  currentRound["team-name"] = teamName;
+  currentRound["person-name"] = personName;
   console.log(currentRound); // for debugging
-  if (Object.keys(currentRound).length != 8) {
+  if (Object.keys(currentRound).length != 10) {
     alert("Not every test was done!");
     return;
   }
-  fetch("/lat/enterround", {
+  fetch("/kp2/enterround", {
     method: "POST",
     headers: {
 			"Accept": "application/json",
@@ -379,8 +417,54 @@ submitButton.addEventListener("click", ()=>{
     body: JSON.stringify(currentRound)
   }).then((res) => res.json())
     .then((e) => {
-      console.log(e);
-      document.getElementById("submit-button").value = e.score
+      loadScores(e);
+
+      document.getElementById("roundForm").reset();
+      ogs = document.querySelectorAll("[data-og]")
+      for (let inp of ogs) {
+        inp.innerText = inp.dataset.og;
+      }
+      currentRound = {}
     })
 
 });
+
+//
+function loadScores(e) {
+  console.log(e);
+  document.getElementById("submit-button").value = "Last score: " + e.score;
+
+  document.getElementById("table-team").innerHTML = e["team-board"];
+  document.getElementById("table-single").innerHTML = e["single-board"];
+  
+  updatePodium("team", e);
+  updatePodium("single", e);
+}
+
+function updatePodium(prefix, res) {
+  console.log(res, prefix)
+	json = JSON.parse(res[prefix + "-podium"]);
+	for (let i = 1; i < 4; i++) {
+		el = document.getElementById(prefix + "-" + i)
+		el.getElementsByTagName("p")[0].innerText = json["top"][i-1];
+		el.getElementsByClassName("podium-rank")[0].innerHTML = json["mid"][i-1] + "<br/>(" + json["bot"][i-1] + ")";
+	}
+}
+
+// on load load all scores and podiums
+fetch("/kp2/enterround", {
+  method: "POST",
+  headers: {
+    "Accept": "application/json",
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({"get": "true"})
+}).then((e) => e.json())
+  .then((res) => {
+    loadScores(res);
+  })
+  
+
+// every 55 seconds ping the server to say "hey there, I am still connected, please keep rendering frame :)"
+// if there where no pings in 60s, frame generation stops.
+setInterval(() => {fetch("http://134.28.20.53:5000/website/liveline");}, 55000) 
