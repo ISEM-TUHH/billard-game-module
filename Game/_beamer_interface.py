@@ -2,6 +2,7 @@ import requests
 import cv2
 from .GameImage import GameImage
 import numpy as np
+from flask import request
 
 # These methods mostly get called by internal functions to display the gameimage 
 
@@ -33,7 +34,9 @@ def beamer_off(self):
     black_image = np.zeros((1080,1920,3))
     self.beamer_push_image(black_image)
 
-def beamer_make_gameimage(self, coords=None):
+    return "Beamer displays a black image."
+
+def beamer_make_gameimage(self, coords=None, shots=False):
     """ Build an image with GameImage and push it to the beamer
 
     Handle situations like showing gameresults and instructions for modes.
@@ -43,6 +46,26 @@ def beamer_make_gameimage(self, coords=None):
     gameimage.addGameMode(self.supermode, self)
 
     if coords != None:
-        gameimage.placeAllBalls(coords)
+        if not shots and not self.supermode in ["game-local"]:
+            gameimage.placeAllBalls(coords)
+        else:
+            if self.supermode in ["game-local"]:
+                self.coords = coords
+                coords = self.get_current_players_ball_coords()
+            gameimage.drawBallConnections(coords) # also places balls
+        
     image = gameimage.getImageCV2()
     self.beamer_push_image(image)
+
+def beamer_correct_coords(self):
+    """ This method receives manual entries from a website (if the camera was incorrect) and forwards them to the beamer
+    """
+
+    coords = request.json
+
+    if self.supermode in ["game-local"]:
+        self.game_coords = coords
+
+    #print(coords)
+    self.beamer_make_gameimage(coords=coords)
+    return "Coords forwarded to the beamer."

@@ -23,7 +23,20 @@ def forward_coords(self):
     response = requests.get(api)
     res = response.json()
 
+
+    if self.supermode in ["game-local"]:
+        print(f"coords from camera are being saved.")
+        self.game_coords = res
+        self.submode = "round"
+
     # generate an image and place it on the beamer
     self.beamer_make_gameimage(coords = res)
 
     return jsonify(res)
+
+def camera_save_image(self):
+    camera = self.getModuleConfig("camera")
+    api = f"http://{camera['ip']}:{camera['port']}/v1/savepic"
+    response = requests.get(api)
+    res = response.json()
+    return res

@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>ECIU x ISEM</title>
+    <title>Lokales Billardspiel</title>
 	  <link rel="icon" href="{{ url_for('static', filename='favicon.ico')}}" type="image/x-icon" />
     
 
@@ -24,10 +24,10 @@
         <img src=" {{ url_for('static', filename='inst_logo.svg') }}" alt="ISEM Logo" />
       </div>
       &ensp; <!-- fixed empty space -->
-      <h1>Schlag das ISEM</h1>
+      <h1>Lokales Billardspiel</h1>
     </header>
 
-    
+    <!-- This is a ready to copy section, providing the livestream and the JS for handling the camera-->
     <section id="interface-camera" class="col">
       <div class="image-container" id="livestream-container">
 
@@ -50,8 +50,6 @@
         <img class="ball" id="ball-14" src="{{ url_for('/general/ballimagenumber') }}?n=14">
         <img class="ball" id="ball-15" src="{{ url_for('/general/ballimagenumber') }}?n=15">
         <img class="ball" id="ball-white" src="{{ url_for('/general/ballimagenumber') }}?n=16">
-
-        <i class="fas fa-flag ball" id="marker-start"></i>
 
       </div>
       <div class="button-list">
@@ -90,137 +88,50 @@
       <!-- Begin collecting information on the rounds to post in the end -->
       <section id="user-info" class="col">
         <fieldset>
-          <legend>Enter your details</legend>
-          <label for="person-name">Your name: </label>
-          <input type="text" placeholder="Your name" id="person-name">
-          <br><br>
-          <label for="team-name">Name of your team: </label>
-          <input type="text" list="teams" placeholder="Team name" id="team-name" name="team-name">
-          <datalist id="teams">
+            <legend>Player 1: Enter your details</legend>
+            <label for="person-name-1">Your name: </label>
+            <input type="text" placeholder="Your name" id="person-name-1">
+            <br><br>
+            <label for="team-name-2">Name of your team: </label>
+            <input type="text" list="teams" placeholder="Team name" id="team-name-1" name="team-name-1">
+        </fieldset>
+
+        <fieldset>
+            <legend>Player 2: Enter your details</legend>
+            <label for="person-name-2">Your name: </label>
+            <input type="text" placeholder="Your name" id="person-name-2">
+            <br><br>
+            <label for="team-name-2">Name of your team: </label>
+            <input type="text" list="teams" placeholder="Team name" id="team-name-2" name="team-name-2">
+        </fieldset>
+        
+        <datalist id="teams">
             <option value="Team 1"></option>
             <option value="Team 2"></option>
             <option value="Team 3"></option>
             <option value="Coaches"></option>
             <option value="ISEM"></option>
             <option value="Professoren"></option>
-          </datalist>
-        </fieldset>
+        </datalist>
+      </section>
+
+      <section id="game-start" class="col">
+        <input type="button" value="Start the game" id="game-start-button">
       </section>
 
       <section id="mode-select" class="col">
-        <div>
-          <!--<div class="section-heading">
-            <h2>Select your mode</h2>
-          </div>-->
-          <div class="funnel-steps">
-            <fieldset id="mode-selector-radios">
-              <legend>Choose your current mode</legend>
-              <div class="option-boxes">
-                <label class="option-box">
-                  <i class="fa-solid fa-bullseye"></i>
-                  Precision
-                  <input type="radio" name="mode" value="precision">
-                </label>
-                <label class="option-box">
-                  <i class="fa-solid fa-forward"></i>
-                  Distance
-                  <input type="radio" name="mode" value="distance">
-                </label>
-                <label class="option-box">
-                  <i class="fa-solid fa-burst"></i>
-                  Break
-                  <input type="radio" name="mode" value="break">
-                </label>
-                <label class="option-box">
-                  <i class="fa-solid fa-wand-magic-sparkles"></i>
-                  Trickshot
-                  <input type="radio" name="mode" value="trickshot">
-                </label>
-              </div>
-            </fieldset>
-          </div>
-        </div>
+        <fieldset>
+            <legend>Live round</legend>
+            <input type="button" value="1. Inspect round" id="inspect-button"><br>
+            <input type="button" value="2. Submit round" id="submit-button">
+            <div id="round-stats">
+
+            </div>
+
+        </fieldset>
       </section>
 
-      <section id="precision" class="col mode"><fieldset>
-        <legend>Precision</legend>
-        Get as close as possible to the marking on the field. You have three tries, only the best one influences your score. Decreasing the difficulty increases the penalty for missing!
-        <div class="button-list">
-          <input type="range" min="0" max="2" value="1" id="prec-difficulty">
-          <label for="prec-difficulty" data-og="Regular: x15">Regular: x15</label>
-        </div>
-
-        <div class="button-list">
-          <input type="checkbox" value="1st try" id="prec1" class="prec-checkbox">
-          <label for="prec1" data-og="Measure 1st try">Measure 1st try</label>
-          <input type="checkbox" value="2nd try" id="prec2" class="prec-checkbox">
-          <label for="prec2" data-og="Measure 2nd try">Measure 2nd try</label>
-          <input type="checkbox" value="3rd try" id="prec3" class="prec-checkbox">
-          <label for="prec3" data-og="Measure 3rd try">Measure 3rd try</label>
-        </div>
-        <div style="display: none;" id="prec-storage">
-          <!-- Results get pasted here (invisible) -->
-        </div>
-
-      </fieldset></section>
-
-      <section id="distance" class="col mode"><fieldset>
-        <legend>Distance</legend>
-        Cover as much distance as possible from one hit. Manually count and enter the number of collisions with the border. You have three tries, the sum of all goes into your score. Please mark your starting position in the beginning.
-        <div class="button-list">
-          <input type="radio" name="current_ball" value="marker-start" id="marker-start-radio" onchange="update_cur_ball()">
-          <label for="marker-start-radio" onclick="current_ball='marker-start';">Place start marker</label>
-        </div>
-
-        <div class="button-list">
-          <div>  
-            <input type="number" placeholder="" id="dist1c" value="" class="collision-counter" autocomplete="off">
-            <input type="checkbox" value="Measure 1st try" id="dist1" disabled class="dist-checkbox">
-            <label for="dist1" id="dist1l" data-og="Measure 1st try">Measure 1st try</label>
-          </div>
-          <div>
-            <input type="number" placeholder="" id="dist2c" value="" class="collision-counter" autocomplete="off">
-            <input type="checkbox" value="Measure 2nd try" id="dist2" disabled class="dist-checkbox">
-            <label for="dist2" id="dist2l" data-og="Measure 2nd try">Measure 2nd try</label>
-          </div>
-          <div>
-            <input type="number" placeholder="" id="dist3c" value="" class="collision-counter" autocomplete="off">
-            <input type="checkbox" value="Measure 3rd try" id="dist3" disabled class="dist-checkbox">
-            <label for="dist3" id="dist3l" data-og="Measure 3rd try">Measure 3rd try</label>
-          </div>
-        </div>
-        <div style="display: none;" id="dist-storage">
-          <!-- Results get pasted here (invisible) -->
-        </div>
-      </fieldset></section>
-
-      <section id="break" class="col mode"><fieldset>
-        <legend>Break</legend>
-        Sink as many balls as possible with one single hit from the base triangle formation. You have one try as this is solely a bonus task.
-        <div class="button-list">
-          <input type="checkbox" id="break-button">
-          <label for="break-button" id="break-button-label" data-og="Count sunk balls">Count sunk balls</label>
-        </div>        
-        <div style="display: none;">
-          <!-- Results get pasted here (invisible) -->
-        </div>
-      </fieldset></section>
-
-
-      <section id="trickshot" class="col mode"><fieldset>
-        <legend>Trickshot</legend>
-        Place the balls as projected and try to sink as many balls as possible in one hit by following the trickshot hints.
-        <div class="button-list">
-          <!--<input id="trickshot-load" value="Load trickshot">
-          <label for="trickshot-load" id="trickshot-load-label">Load Trickshot</label>-->
-          <input type="checkbox" id="trickshot-button">
-          <label for="trickshot-button" id="trickshot-button-label" data-og="Count sunk balls">Count sunk balls</label>
-        </div>        
-        <div style="display: none;">
-          <!-- Results get pasted here (invisible) -->
-        </div>
-      </fieldset></section>
-
+      
     </form>
     
   
@@ -322,6 +233,6 @@
 
     <!-- JavaScript einbinden -->
     <script src="{{ url_for('static', filename='sound.js') }}"></script> 
-    <script src="{{ url_for('static', filename='kp2.js') }}"></script>
+    <script src="{{ url_for('static', filename='game_local.js') }}"></script>
   </body>
 </html>

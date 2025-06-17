@@ -66,7 +66,8 @@ class Module:
 
 		# set as path on the server
 		#self.app.add_url_rule("/" + path, path, lambda: jsonify(method()))
-		self.app.add_url_rule("/" + path, path, method, methods=["GET", "POST"]) 
+		self.app.add_url_rule("/" + path, path, method, methods=["GET", "POST"])
+		self.app.add_url_rule("/" + path + ".doc", path + ".doc", lambda: method.__doc__, methods=["GET"])
 
 	def add_all_api(self, api):
 		"""Just define a nested dictionary with paths building on each nest, ending on a method. Calls Module.add_api(...) on each path/method.

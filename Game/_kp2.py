@@ -11,6 +11,7 @@ import datetime
 def get_site_kp2(self):
     self.supermode = "kp2"
     self.kp2mode = "base"
+    self.kp2_prec_difficulty = 1 # 1 is regular
 
     self.teamtableKP2 = pd.read_csv(self.current_dir + "/storage/KP2-teamtable.csv", header=0, sep="\t",index_col=None)
     self.fulltableKP2 = pd.read_csv(self.current_dir + "/storage/KP2-fulltable.csv", header=0, sep="\t",index_col=None)
@@ -37,7 +38,7 @@ def enter_round_kp2(self):
             prec.append(int(roundData[f"prec{i}"]))
             dist.append(int(roundData[f"dist{i}"]))
 
-        score = sum(dist) - 5*min(prec) + 500*anstoss + 500*trickshot
+        score = sum(dist) - min([5*(1+self.kp2_prec_difficulty*2)*i for i in prec]) + 500*anstoss + 500*trickshot
 
         timestamp = "{date:%Y-%m-%d_%H:%M:%S}".format(date=datetime.datetime.now())
 
@@ -99,7 +100,14 @@ def select_mode_kp2(self):
 
     return mode
 
+def kp2_set_precision_difficulty(self):
+    """ Process and display the selected difficulty of the precision challenge
+    """
+    res = request.json
+    self.kp2_prec_difficulty = int(res["difficulty"])
 
+    self.beamer_make_gameimage()
+    return "Updated."
 
 ###### internal 
 

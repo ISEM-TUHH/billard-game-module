@@ -10,6 +10,7 @@ import socket
 import requests
 import json
 import cv2
+import time
 
 class Game(Module):
 	"""Implements central game scheduling functions
@@ -38,10 +39,14 @@ class Game(Module):
 			"sites": {
 				"kp2": self.get_site_kp2,
 				"lat": self.get_site_lat,
-				"trickshots": self.get_site_trickshots
+				"trickshots": self.get_site_trickshots,
+				"gamelocal": self.get_site_game_local
 			},
 			"general": {
-				"ballimagenumber": self.get_ball_image
+				"ballimagenumber": self.get_ball_image,
+				"correctedcoords": self.beamer_correct_coords,
+				"beameroff": self.beamer_off,
+				"takeimage": self.take_image
 			},
 			"camera": {
 				"coords": self.forward_coords
@@ -51,10 +56,15 @@ class Game(Module):
 			},
 			"kp2": {
 				"enterround": self.enter_round_kp2,
-				"selectmode": self.select_mode_kp2
+				"selectmode": self.select_mode_kp2,
+				"cosmetics": {
+					"precdif": self.kp2_set_precision_difficulty
+				}
 			},
 			"game": {
-				"updateelo": self.do_update_elo
+				"updateelo": self.do_update_elo,
+				"startgame": self.game_local_start_round,
+				"enterround": self.game_local_enter_round
 			},
 			"trickshots": {
 				"list": self.list_trickshots,
@@ -118,17 +128,26 @@ class Game(Module):
 		_, buffer = cv2.imencode(".png", img)
 		return Response(buffer.tobytes(), mimetype="image/png")
 
+	def take_image(self):
+		""" Turn of the beamer and take an image.
+		"""
+		self.beamer_off()
+		time.sleep(1.5)
+		res = self.camera_save_image()
+		print(res)
+		return res
+
 	# INTERACTIONS WITH CAMERA MODULE ###############################################
-	from ._camera_interface import forward_coords
+	from ._camera_interface import forward_coords, camera_save_image
 
 	# INTERACTIONS WITH BEAMER MODULE ###############################################
-	from ._beamer_interface import beamer_push_image, beamer_off, beamer_make_gameimage
+	from ._beamer_interface import beamer_push_image, beamer_off, beamer_make_gameimage, beamer_correct_coords
 
 	# INTERACTIONS FOR NORMAL GAME ##################################################
-	#from ._game_local import *
+	from ._game_local import get_site_game_local, game_local_enter_round, game_local_start_round, get_current_player_name, get_remaining_balls, handle_win, change_player, filterData, get_current_players_ball_coords, get_display_string
 
 	# INTERACTIONS FOR EXAM MODE ####################################################
-	from ._kp2 import get_site_kp2, enter_round_kp2, select_mode_kp2 # import all methods from _kp2.py
+	from ._kp2 import get_site_kp2, enter_round_kp2, select_mode_kp2, kp2_set_precision_difficulty # import all methods from _kp2.py
 	from ._lat import get_site_lat, enter_round_lat # import all methods from _lat.py
 
 	# INTERACTION FOR TRICKSHOT MODE ################################################

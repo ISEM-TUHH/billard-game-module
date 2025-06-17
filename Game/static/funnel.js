@@ -6,7 +6,7 @@ const funnelQuestions = [
       type: "radio",
       options: [
         { icon: "fa-globe", text: "Billard standortverteilt spielen", follows: "single-player-selection"}, // eventually follows: "location", when we have more than one other location
-        { icon: "fa-location-dot", text: "Billard lokal spielen", follows: "two-player-selection"},
+        { icon: "fa-location-dot", text: "Billard lokal spielen", submitTo: "./sites/gamelocal"},
         { icon: "fa-wand-magic-sparkles", text: "Trickshots üben", submitTo: "./sites/trickshots"},
         { icon: "fa-clipboard", text: "Prüfungsmodus", follows: "exam-selection"}
       ]
