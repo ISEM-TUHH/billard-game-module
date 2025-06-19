@@ -177,13 +177,15 @@ class GameImage:
 
 		match supermode:
 			case "base":
-				self.instructionText("Select a Game Mode", subimg="static/images/ECIUxISEM-transparent.png")
+				#self.instructionText("Select a Game Mode", subimg="static/images/ECIUxISEM-transparent.png")
+				self.instructionText("Select a Game Mode", subimg="static/images/ISEM-only.png")
 				self.img.paste(logo, (self.w//2-350, self.h//2-350//2))
 			case "trickshots":
 				self.instructionText("Select a Trickshot")
 			case "kp2":
 				kp2mode = game.kp2mode
-				self.instructionText(" ", subimg="static/images/ECIUxISEM-transparent.png")
+				#self.instructionText(" ", subimg="static/images/ECIUxISEM-transparent.png")
+				self.instructionText(" ", subimg="static/images/ISEM-only.png")
 				if kp2mode not in ["base", "trickshot", "precision"]:
 					# draw the outline of the push unit
 					# measurements are roughlty equivalent to the real physical object
@@ -194,7 +196,9 @@ class GameImage:
 				match kp2mode:
 					case "precision":
 						dif = game.kp2_prec_difficulty
-						self.instructionText("Challenge: Precision")
+
+						text = "Challenge: Precision" if game.live_value == "" else game.live_value
+						self.instructionText(text)
 						# draw a bullseye
 						bullX, bullY = self.w//4, self.h//2
 						r = 30 # radius of each ring
@@ -227,7 +231,7 @@ class GameImage:
 						self.instructionText(f"Score: {str(game.kp2_last_score)}")
 						return
 					case "base":
-						self.img.paste(logo, (self.w//2-350, self.h//2-350//2))
+						#self.img.paste(logo, (self.w//2-350, self.h//2-350//2))
 						self.instructionText("Select a challenge on the screen")
 						return
 					case "trickshot":
@@ -237,12 +241,16 @@ class GameImage:
 						self.img.paste(timg, (0,0))
 						#self.img = timg
 						#self.draw = ImageDraw.Draw(self.img)
+						text = game.live_value
+						self.instructionText(text)
 						return
 					case "break":
-						self.instructionText("Challenge: Break")
+						text = "Challenge: Break" if game.live_value == "" else game.live_value
+						self.instructionText(text)
 						self.drawBreak(ball=False)
 					case "distance":
-						self.instructionText("Challenge: Distance")
+						text = "Challenge: Distance" if game.live_value == "" else game.live_value
+						self.instructionText(text)
 			
 			case "game-local":
 				match game.submode:
@@ -251,7 +259,7 @@ class GameImage:
 						self.img.paste(logo, (self.w//2-350, self.h//2-350//2))
 					case "break":
 						self.drawBreak()
-						self.instructionText(f"{game.get_current_player_name()} may break", subimg="static/images/isem_logo.png")
+						self.instructionText(f"{game.get_current_player_name()} may break", subimg="static/images/ISEM-only.png")
 					case "round":
 						self.instructionText(game.get_display_string())
 					case "winner":
@@ -357,8 +365,8 @@ class Trickshot:
 		draw = ImageDraw.Draw(img)
 
 		# basic form
-		draw.rectangle((0,d, d,height), fill="white")
-		draw.ellipse((0,0, d,d), fill="white")
+		draw.rectangle((0,d, d,height), fill="blue")
+		draw.ellipse((0,0, d,d), fill="blue")
 
 		# draw the actual hints (in the json: d.hit.x and .y)
 		pos_x = self.d["hit"]["x"]*d

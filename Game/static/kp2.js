@@ -124,6 +124,7 @@ for (let c of precCheckboxes) {
         label.innerText = Math.round(distance) + " mm (-" + 5*(1+2*precDifficulty)*Math.round(distance) + " points)";
 
         soundJudge(distance, [30, 120, 240, 360])
+        sender("/kp2/cosmetics/value", {"mm": Math.round(distance)})
 
         currentRound[c.id] = distance;
       }
@@ -217,6 +218,7 @@ for (let d of distCheckboxes) {
 
           label.innerText = Math.round(distance) + " mm (" + Math.round(distance) + " points)";
           currentRound[d.id] = distance;
+          sender("/kp2/cosmetics/value", {"mm": Math.round(distance)})
         }
       })
 
@@ -244,6 +246,7 @@ document.getElementById("break-button").addEventListener("change", ()=>{
         currentRound["break"] = sunken;
 
         soundJudge(nBalls, [13,14,15,15])
+        sender("/kp2/cosmetics/value", {"n": Math.round(sunken)})
       })
 })
 
@@ -274,6 +277,9 @@ document.getElementById("trickshot-button").addEventListener("change", ()=>{
         var sunken = 3 - nBalls;
         label.innerText = sunken + " balls were sunk (" + 500*sunken + " points)";
         currentRound["trickshot"] = sunken;
+
+        soundJudge(nBalls, [0,1,2,3,3])
+        sender("/kp2/cosmetics/value", {"n": Math.round(sunken)})
       })
 })
 

@@ -63,7 +63,7 @@ def beamer_correct_coords(self):
 
     coords = request.json
 
-    if self.supermode in ["game-local"]:
+    if self.supermode in ["game-local", "kp2"]:
         self.game_coords = coords
 
     #print(coords)

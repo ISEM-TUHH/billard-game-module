@@ -24,7 +24,7 @@ def forward_coords(self):
     res = response.json()
 
 
-    if self.supermode in ["game-local"]:
+    if self.supermode in ["game-local", "kp2"]:
         print(f"coords from camera are being saved.")
         self.game_coords = res
         self.submode = "round"

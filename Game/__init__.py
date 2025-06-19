@@ -58,7 +58,11 @@ class Game(Module):
 				"enterround": self.enter_round_kp2,
 				"selectmode": self.select_mode_kp2,
 				"cosmetics": {
-					"precdif": self.kp2_set_precision_difficulty
+					"precdif": self.kp2_set_precision_difficulty,
+					"value": self.kp2_get_live_value
+				},
+				"config": {
+					"updatescores": self.kp2_update_score_data_base
 				}
 			},
 			"game": {
@@ -147,7 +151,7 @@ class Game(Module):
 	from ._game_local import get_site_game_local, game_local_enter_round, game_local_start_round, get_current_player_name, get_remaining_balls, handle_win, change_player, filterData, get_current_players_ball_coords, get_display_string
 
 	# INTERACTIONS FOR EXAM MODE ####################################################
-	from ._kp2 import get_site_kp2, enter_round_kp2, select_mode_kp2, kp2_set_precision_difficulty # import all methods from _kp2.py
+	from ._kp2 import get_site_kp2, enter_round_kp2, select_mode_kp2, kp2_set_precision_difficulty, kp2_get_live_value, kp2_calc_score, kp2_update_score_data_base # import all methods from _kp2.py
 	from ._lat import get_site_lat, enter_round_lat # import all methods from _lat.py
 
 	# INTERACTION FOR TRICKSHOT MODE ################################################

@@ -20,7 +20,8 @@ def get_site_kp2(self):
     print(self.teamtableKP2.to_numpy().shape)
 
     self.list_trickshots() # cache all the trickshots
-    
+    self.live_value = ""
+
     self.beamer_make_gameimage()
     return render_template("kp2.html")
 
@@ -38,13 +39,13 @@ def enter_round_kp2(self):
             prec.append(int(roundData[f"prec{i}"]))
             dist.append(int(roundData[f"dist{i}"]))
 
-        score = sum(dist) - min([5*(1+self.kp2_prec_difficulty*2)*i for i in prec]) + 500*anstoss + 500*trickshot
+        score = max(dist) - min([5*(1+self.kp2_prec_difficulty*2)*i for i in prec]) + 500*anstoss + 500*trickshot
 
         timestamp = "{date:%Y-%m-%d_%H:%M:%S}".format(date=datetime.datetime.now())
 
         #self.teamtableKP2.loc[len(self.teamtableKP2)] = [team, score, "1"]
         self.singletableKP2.loc[len(self.singletableKP2)] = [name, team, score]
-        self.fulltableKP2.loc[len(self.fulltableKP2)] = [team, score, anstoss, str(prec), str(dist), timestamp, str(["no images"])]
+        self.fulltableKP2.loc[len(self.fulltableKP2)] = [name, team, score, anstoss, str(prec), str(dist), trickshot, timestamp, str(["no images"])]
 
         #self.teamtableKP2 = self.teamtableKP2.sort_values(by="Score", ascending=False).reset_index(drop=True)
         self.singletableKP2 = self.singletableKP2.sort_values(by="Score", ascending=False).reset_index(drop=True)
@@ -96,6 +97,8 @@ def select_mode_kp2(self):
         self.trickshot_current_id = "0"
         self.list_trickshots()
 
+    self.live_value = ""
+
     self.beamer_make_gameimage()
 
     return mode
@@ -109,7 +112,59 @@ def kp2_set_precision_difficulty(self):
     self.beamer_make_gameimage()
     return "Updated."
 
+def kp2_get_live_value(self):
+    """ Show the score of the current try during the challenges on the beamer 
+    """
+    res = request.json
+    match self.kp2mode:
+        case "precision" | "distance":
+            self.live_value = f"{res['mm']} mm"
+        case "break" | "trickshot":
+            self.live_value = f"{res['n']} "
+    print(self.live_value)
+    self.beamer_make_gameimage(self.game_coords)
+    return "Live prec"
+
+def kp2_update_score_data_base(self):
+    """ Call this method after changing the kp2_calc_score() method to update the score in each kp2 table
+    
+        Reads the self.fulltableKP2 pandas dataframe and updates this and the other tables based on all stored data in fulltable and the new score function
+    """
+    #print(self.fulltableKP2.dtypes)
+    #prec = self.fulltableKP2["prec"]
+    self.fulltableKP2["Score"] = self.fulltableKP2.apply(lambda x: self.kp2_calc_score(x["prec"], x["dist"], x["anstoss"], x["trickshot"]), axis=1)
+
+    self.singletableKP2 = self.fulltableKP2[["Name", "Team", "Score"]].copy()
+    self.singletableKP2 = self.singletableKP2.sort_values(by="Score", ascending=False).reset_index(drop=True)
+    self.fulltableKP2 = self.fulltableKP2.sort_values(by="Score", ascending=False).reset_index(drop=True)
+
+    self.teamtableKP2 = get_teamscores(self.singletableKP2) # already gets sorted
+
+    self.singletableKP2.to_csv(self.current_dir + "/storage/KP2-singletable.csv", sep="\t", index=False)
+    self.fulltableKP2.to_csv(self.current_dir + "/storage/KP2-fulltable.csv", sep="\t", index=False)
+
+    self.teamtableKP2.to_csv(self.current_dir + "/storage/KP2-teamtable.csv", sep="\t",index=False)
+
+
+    print(self.fulltableKP2)
+    return str(self.fulltableKP2)
+
+
 ###### internal 
+
+def kp2_calc_score(self, prec, dist, anstoss, trickshot):
+    """ Calculates the score based on the inputs entered by the user. Is a function as it is also used when recalculating the 
+    """
+    #print(type(prec), type(dist), prec.dtype)
+    if type(prec) == pd.core.series.Series or type(dist) == str: # when calling this method from kp2_update_score_data_base()
+        prec = [int(i) for i in strToList(prec)]
+        dist = [int(i) for i in strToList(dist)]
+
+
+    score = max(dist) - min([5*(1+self.kp2_prec_difficulty*2)*i for i in prec]) + 500*anstoss + 500*trickshot
+    #score = max([str(i)[1:-1].split(',') for i in dist]) - min([5*(1+self.kp2_prec_difficulty*2)*str(i)[1:-1].split(",") for i in prec]) + 500*anstoss + 500*trickshot
+    
+    return score
 
 def get_teamscores(df): # pass livetable
 	teams = df["Team"].unique()
@@ -120,3 +175,10 @@ def get_teamscores(df): # pass livetable
 		teamscore["Counted"].append(n)
 		teamscore["Avg Score"].append(int(dff["Score"].sum()/n))
 	return (pd.DataFrame(teamscore)).sort_values(by="Avg Score", ascending=False).reset_index(drop=True)
+
+def strToList(s):
+    """ Returns a list of strings from a string
+    Example: '[1,2,3,4,5]' => ['1','2','3','4','5']
+    """
+    a = str(s)[1:-1].split(",")
+    return a
