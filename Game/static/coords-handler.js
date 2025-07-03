@@ -65,9 +65,9 @@ function placePoint(x, y, id, realBall = true) {
   point.style.left = `${x}px`; // Set the left position
   point.style.top = `${y}px`; // Set the top position
   if (realBall) {
-    coordinates[id] = {name: id, x: x, y: y};
+    coordinates[id] = {name: id, x: x, y: y, xr: pxToReal(x), yr: pxToReal(y)};
   } else {
-    altCoordinates[id] = {name: id, x: x, y: y};
+    altCoordinates[id] = {name: id, x: x, y: y, xr: pxToReal(x), yr: pxToReal(y)};
   }
   console.log(x,y)
 }
@@ -154,16 +154,6 @@ function setManipulatedFlag(state) {
   manipulatedFlag = state;
 }
 
-// update the selected ball based on radio buttons
-function update_cur_ball() {
-  var val = document.querySelector('input[name="current_ball"]:checked').value;
-  console.log(val);
-  current_ball = val; // id of the now selected ball (or other object)
-}
-document.getElementById("ball-selector").addEventListener("click", function (e) {
-  update_cur_ball();
-})
-
 
 // take an image if something didnt work out with the camera AI, so the AI can be trained on it
 saveImageButton = document.getElementById("ai-training-button");
@@ -177,3 +167,40 @@ saveImageButton.addEventListener("click", () => {
 
 // Keep the camera alive
 setInterval(() => {fetch("http://134.28.20.53:5000/website/liveline");}, 55000) 
+
+// select all radios and sort into names -> add event listener for each
+const radios = document.querySelectorAll('input[type="radio"]');
+radios.forEach(radio => {
+    //console.log(radio.value)
+    radio.addEventListener('click', () => {
+        if (!radio.checked) {
+          return // dont do something on inactive elements
+        }
+        // Alle Labels zurücksetzen
+        //console.log(radio.parentElement)
+        var name = radio.name;
+        radios.forEach(r => {
+            if (r.name === name) {
+                const label = r.parentElement; // Das übergeordnete Label des Radio-Buttons
+                label.style.backgroundColor = "#f1f1f1";
+                label.style.border = "2px solid transparent";
+                label.classList.remove('active');
+            }
+        });
+        // Aktives Label hinzufügen
+        const activeLabel = radio.parentElement; // Das übergeordnete Label des ausgewählten Radio-Buttons
+        activeLabel.style.backgroundColor = "#e0f7fa";
+        activeLabel.style.border = "2px solid #00C1D4";
+        activeLabel.classList.add('active');
+
+        // handling depending on the type of the button (name):
+        if (name === "current_ball") {
+          current_ball = radio.value;
+          //console.log(current_ball)
+        } else if (name === "mode") {
+          // call a function from kp2.js -> this is only relevant for kp2 mode
+          updateKP2mode(radio);
+        }
+
+    });
+});

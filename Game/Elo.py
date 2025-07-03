@@ -17,7 +17,7 @@ class Elo():
         :type player: list<dict>
         :param winner: winner's index in the player list. 0.5 if draw.
         """
-        if len(players) != 2 or type(player[0]) != dict:
+        if len(players) != 2 or type(players[0]) != dict:
             print(f"Error in players argument: {players}")
         
         elo1, elo2 = players[0]["elo"], players[1]["elo"]
@@ -28,6 +28,10 @@ class Elo():
 
         nelo1 = elo1 + self.K*((1-outcome)-odd1)
         nelo2 = elo2 + self.K*(outcome-odd2)
+
+        players[0]["elo"] = nelo1
+        players[1]["elo"] = nelo2
+        return players
 
     def propability(self, elo1, elo2): 
         """Returns the propability of player with elo1 of winning agains player with elo2

@@ -177,6 +177,7 @@ class GameImage:
 
 		match supermode:
 			case "base":
+				#self.instructionText("Welcome to Billard@ISEM!", subimg="static/images/ECIUxISEM-transparent.png")
 				#self.instructionText("Select a Game Mode", subimg="static/images/ECIUxISEM-transparent.png")
 				self.instructionText("Select a Game Mode", subimg="static/images/ISEM-only.png")
 				self.img.paste(logo, (self.w//2-350, self.h//2-350//2))
@@ -231,8 +232,9 @@ class GameImage:
 						self.instructionText(f"Score: {str(game.kp2_last_score)}")
 						return
 					case "base":
-						#self.img.paste(logo, (self.w//2-350, self.h//2-350//2))
-						self.instructionText("Select a challenge on the screen")
+						self.img.paste(logo, (self.w//2-350, self.h//2-350//2))
+						text = "Select a challenge on the screen" if game.live_value == "" else game.live_value
+						self.instructionText(text)
 						return
 					case "trickshot":
 						trickshot = Trickshot(game.trickshots[str(game.trickshot_current_id)])
@@ -253,17 +255,20 @@ class GameImage:
 						self.instructionText(text)
 			
 			case "game-local":
-				match game.submode:
-					case "base":
-						self.instructionText("Enter your names and click on start")
+				self.instructionText(game.game.message)
+				match game.game.state:
+					case "pre": # before entering names
 						self.img.paste(logo, (self.w//2-350, self.h//2-350//2))
+					case "determine": # when determining who should break
+						self.placeAllBalls(game.game.display_coords)
+						self.instructionText(f"", subimg="static/images/ISEM-only.png")
 					case "break":
 						self.drawBreak()
-						self.instructionText(f"{game.get_current_player_name()} may break", subimg="static/images/ISEM-only.png")
-					case "round":
-						self.instructionText(game.get_display_string())
+						self.instructionText(f"", subimg="static/images/ISEM-only.png")
+					case "game":
+						pass # nothing besides the message should be displayed
 					case "winner":
-						self.instructionText(f"{game.get_current_player_name()} has won!")
+						pass # nothing besides the message should be displayed -> one day
 
 
 
@@ -278,7 +283,7 @@ class BilliardBall:
 
 	Each ball is initiated with its number with number 16 being the white ball. Number 1-7 are full, 8 is black, 9-15 are half.
 	"""
-	colors = ["#f7d339","#1f419f","#e44c23","#5d1c8f","#f89348","#17953b","#c71517","#20201e","#f7d339","#1f419f","#e44c23","#5d1c8f","#f89348","#17953b","#c71517","#d5d1c5","#fb48c4"] # the last entry is a dummy ball color (neon pink)
+	colors = ["#f7d339","#1f419f","#e44c23","#5d1c8f","#f89348","#17953b","#c71517","#20201e","#f7d339","#1f419f","#e44c23","#5d1c8f","#f89348","#17953b","#c71517","#d5d1c5","#2cff05"]#"#fb48c4"] # the last entry is a dummy ball color (neon pink)
 
 	def __init__(self, n):
 		current_dir = os.path.dirname(__file__) # finding the Roboto-Black.ttf/navigating the dirs

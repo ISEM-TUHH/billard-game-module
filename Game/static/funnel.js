@@ -5,7 +5,7 @@ const funnelQuestions = [
       name: "mode",
       type: "radio",
       options: [
-        { icon: "fa-globe", text: "Billard standortverteilt spielen", follows: "single-player-selection"}, // eventually follows: "location", when we have more than one other location
+        { icon: "fa-globe", text: "Billard standortverteilt spielen", submitTo: "./sites/gameonline"}, // eventually follows: "location", when we have more than one other location
         { icon: "fa-location-dot", text: "Billard lokal spielen", submitTo: "./sites/gamelocal"},
         { icon: "fa-wand-magic-sparkles", text: "Trickshots üben", submitTo: "./sites/trickshots"},
         { icon: "fa-clipboard", text: "Prüfungsmodus", follows: "exam-selection"}
@@ -108,6 +108,7 @@ const funnelQuestions = [
     if (step.type === 'radio' || step.type === 'checkbox') {
       const container = document.createElement('div');
       container.className = 'option-boxes';
+      container.style = "grid-template-columns: repeat(2, 1fr);"
   
       step.options.forEach(opt => {
         const label = document.createElement('label');
@@ -200,22 +201,6 @@ const funnelQuestions = [
         fieldset.appendChild(label);
       });
   
-      /*const dsLabel = document.createElement('label');
-      dsLabel.style.display = 'block';
-      dsLabel.style.marginTop = '1rem';
-      const dsCheckbox = document.createElement('input');
-      dsCheckbox.type = 'checkbox';
-      dsCheckbox.required = true;
-      dsCheckbox.style.marginRight = '0.5rem';
-      dsLabel.appendChild(dsCheckbox);
-      dsLabel.append(' Hiermit akzeptiere ich die ');
-      const dsLink = document.createElement('a');
-      dsLink.href = 'https://www.tuhh.de/tuhh/datenschutz';
-      dsLink.textContent = 'Datenschutzbestimmungen';
-      dsLink.target = '_blank';
-      dsLabel.appendChild(dsLink);
-      dsLabel.append('.');
-      fieldset.appendChild(dsLabel);*/
     } else if (step.type === "selection") {
       step.fields
 
@@ -225,56 +210,12 @@ const funnelQuestions = [
     //nextBtn.style.display = currentStep < funnelQuestions.length - 1 ? 'inline-block' : 'none';
     submitBtn.style.display = currentStep === funnelQuestions.length - 1 ? 'inline-block' : 'none';
   }
-  
-  // Weiter-Button
-  /*nextBtn.addEventListener('click', () => {
-    const step = funnelQuestions[currentStep];
-    if (
-      collectedData[step.name] === undefined ||
-      (Array.isArray(collectedData[step.name]) && collectedData[step.name].length === 0) ||
-      collectedData[step.name] === ""
-    ) {
-      alert("Bitte wÃ¤hle eine Option aus oder fÃ¼lle das Feld aus.");
-      return;
-    }
-    currentStep++; // change next step here
-    step.follows
-    renderStep();
-  });
-  */
+
+
+  document.addEventListener('DOMContentLoaded', renderStep);
+
   prevBtn.addEventListener('click', () => {
     let step = funnelQuestions[currentStep];
     currentStep = funnelQuestions.findIndex(obj => obj.name == step.isAfter);
     renderStep();
   });
-  
-  document.addEventListener('DOMContentLoaded', renderStep);
-  
-  document.getElementById("funnel-form").addEventListener("submit", async function (e) {
-    e.preventDefault();
-  
-    const formData = new FormData(this);
-  
-    try {
-      const response = await fetch("./sendgrid_email.php", {
-        method: "POST",
-        body: formData
-      });
-  
-      const text = await response.text();
-      if (text.includes("erfolgreich versendet")) {
-        document.getElementById("successModal").style.display = "block";
-        document.getElementById("funnel-form").reset();
-        document.getElementById("funnel-steps").innerHTML = "";
-        currentStep = 0;
-        renderStep();
-      } else {
-        alert("Es gab ein Problem beim Versenden der Bewerbung. Melde' dich gern einfach per E-Mail bei Nikola.Bursac@isem-tuhh.de");
-        console.log(text);
-      }
-    } catch (error) {
-      console.error("Fehler beim Versenden des Formulars:", error);
-      alert("Ein technischer Fehler ist aufgetreten. Melde' dich gern einfach per E-Mail bei Nikola.Bursac@isem-tuhh.de");
-    }
-  });
-  

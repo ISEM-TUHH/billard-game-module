@@ -17,14 +17,13 @@ def get_site_kp2(self):
     self.fulltableKP2 = pd.read_csv(self.current_dir + "/storage/KP2-fulltable.csv", header=0, sep="\t",index_col=None)
     self.singletableKP2 = pd.read_csv(self.current_dir + "/storage/KP2-singletable.csv", header=0, sep="\t",index_col=None)
 
-    print(self.teamtableKP2.to_numpy().shape)
+    #print(self.teamtableKP2.to_numpy().shape)
 
     self.list_trickshots() # cache all the trickshots
-    self.live_value = ""
+    self.live_value = "Welcome to the final challenge!"
 
     self.beamer_make_gameimage()
     return render_template("kp2.html")
-
 
 def enter_round_kp2(self):
     #name = request.form.get("name")
@@ -70,18 +69,21 @@ def enter_round_kp2(self):
     print(score)
     
     copyT = self.teamtableKP2.copy()
-    print(copyT)
+    T_ind1 = copyT.copy()
+    T_ind1.index += 1 # increase the index by 1 to start at 1 (= the best result is rank 1 not 0)
     copyT.columns = ["top", "mid", "bot"]
     copy = self.singletableKP2.copy()
+    S_ind1 = copy.copy()
     copy.columns = ["top", "bot", "mid"]
+    S_ind1.index += 1
 
     
 
     return jsonify({
 		"score": score,
-		"single-board": self.singletableKP2.to_html().replace('border="1"', "").replace('style="text-align: right;"', ""),
+		"single-board": S_ind1.to_html().replace('border="1"', "").replace('style="text-align: right;"', ""),
 		"single-podium": copy[:3].to_json(),
-		"team-board": self.teamtableKP2.to_html().replace('border="1"', "").replace('style="text-align: right;"', ""),
+		"team-board": T_ind1.to_html().replace('border="1"', "").replace('style="text-align: right;"', ""),
 		"team-podium": copyT[:3].to_json()
 	})
 
@@ -121,7 +123,7 @@ def kp2_get_live_value(self):
             self.live_value = f"{res['mm']} mm"
         case "break" | "trickshot":
             self.live_value = f"{res['n']} "
-    print(self.live_value)
+    #print(self.live_value)
     self.beamer_make_gameimage(self.game_coords)
     return "Live prec"
 
@@ -146,7 +148,7 @@ def kp2_update_score_data_base(self):
     self.teamtableKP2.to_csv(self.current_dir + "/storage/KP2-teamtable.csv", sep="\t",index=False)
 
 
-    print(self.fulltableKP2)
+    #print(self.fulltableKP2)
     return str(self.fulltableKP2)
 
 

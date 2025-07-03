@@ -1,7 +1,7 @@
 import numpy as np
 
 class GameEngine:
-    """ This class implements basic physics based calculations for determining good hits
+    """ This class implements basic physics based calculations for determining good hits.
 
     The holes get evenly spaced out along the edges of the defined size
     """

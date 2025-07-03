@@ -1,91 +1,6 @@
-<!DOCTYPE html>
-<html lang="de">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-    <title>ECIU x ISEM</title>
-	  <link rel="icon" href="{{ url_for('static', filename='favicon.ico')}}" type="image/x-icon" />
-    
-
-    <!-- Externe CSS-Datei einbinden -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles-kp2.css') }}" />
-
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-  </head>
-
-  <body>
-    <script src="{{ url_for('static', filename='sender.js')}}"></script>
-
-    <header>
-      <div class="logo">
-        <img src=" {{ url_for('static', filename='inst_logo.svg') }}" alt="ISEM Logo" />
-      </div>
-      &ensp; <!-- fixed empty space -->
-      <h1>Schlag das ISEM</h1>
-    </header>
-
-    
-    <section id="interface-camera" class="col">
-      <div class="image-container" id="livestream-container">
-
-        <!--colors = ["#f7d339","#1f419f","#e44c23","#5d1c8f","#f89348","#17953b","#c71517","#20201e","#f7d339","#1f419f","#e44c23","#5d1c8f","#f89348","#17953b","#c71517","#d5d1c5"]-->
-        <img src="http://134.28.20.53:5000/website/video_feed" id="livestream">
-        <!--<img src=" {{url_for('static', filename='image-90.png')}} " id="livestream">-->
-        <img class="ball" id="ball-1" src="{{ url_for('/general/ballimagenumber') }}?n=1">
-        <img class="ball" id="ball-2" src="{{ url_for('/general/ballimagenumber') }}?n=2">
-        <img class="ball" id="ball-3" src="{{ url_for('/general/ballimagenumber') }}?n=3">
-        <img class="ball" id="ball-4" src="{{ url_for('/general/ballimagenumber') }}?n=4">
-        <img class="ball" id="ball-5" src="{{ url_for('/general/ballimagenumber') }}?n=5">
-        <img class="ball" id="ball-6" src="{{ url_for('/general/ballimagenumber') }}?n=6">
-        <img class="ball" id="ball-7" src="{{ url_for('/general/ballimagenumber') }}?n=7">
-        <img class="ball" id="ball-eight" src="{{ url_for('/general/ballimagenumber') }}?n=8">
-        <img class="ball" id="ball-9" src="{{ url_for('/general/ballimagenumber') }}?n=9">
-        <img class="ball" id="ball-10" src="{{ url_for('/general/ballimagenumber') }}?n=10">
-        <img class="ball" id="ball-11" src="{{ url_for('/general/ballimagenumber') }}?n=11">
-        <img class="ball" id="ball-12" src="{{ url_for('/general/ballimagenumber') }}?n=12">
-        <img class="ball" id="ball-13" src="{{ url_for('/general/ballimagenumber') }}?n=13">
-        <img class="ball" id="ball-14" src="{{ url_for('/general/ballimagenumber') }}?n=14">
-        <img class="ball" id="ball-15" src="{{ url_for('/general/ballimagenumber') }}?n=15">
-        <img class="ball" id="ball-white" src="{{ url_for('/general/ballimagenumber') }}?n=16">
-
-        <i class="fas fa-flag ball" id="marker-start"></i>
-
-      </div>
-      <div class="button-list">
-        <input type="checkbox" id="manipulation-flag">
-        <label for="manipulation-flag">Manual entries</label>
-      </div>
-      <details>
-        <summary>Place balls</summary>
-        
-        <div id="ball-selector">
-          <label><input type="radio" name="current_ball" value="ball-1" checked>1: Gelb</label>
-          <label><input type="radio" name="current_ball" value="ball-2">2: Blau</label>
-          <label><input type="radio" name="current_ball" value="ball-3">3: Rot</label>
-          <label><input type="radio" name="current_ball" value="ball-4">4: Lila</label>
-          <label><input type="radio" name="current_ball" value="ball-5">5: Orange</label>
-          <label><input type="radio" name="current_ball" value="ball-6">6:Grün</label>
-          <label><input type="radio" name="current_ball" value="ball-7">7: Karmin</label>
-          <label><input type="radio" name="current_ball" value="ball-eight">8: Schwarz</label>
-          <label><input type="radio" name="current_ball" value="ball-9">9: Halb Gelb</label>
-          <label><input type="radio" name="current_ball" value="ball-10">10: Halb Blau</label>
-          <label><input type="radio" name="current_ball" value="ball-11">11: Halb Rot</label>
-          <label><input type="radio" name="current_ball" value="ball-12">12:Halb Lila</label>
-          <label><input type="radio" name="current_ball" value="ball-13">13: Halb Orange</label>
-          <label><input type="radio" name="current_ball" value="ball-14">14: Halb Grün</label>
-          <label><input type="radio" name="current_ball" value="ball-15">15: Halb Karmin</label>
-          <label><input type="radio" name="current_ball" value="ball-white">Weiß</label>
-        </div>
-
-        <input type="button" value="Save image for AI training" id="ai-training-button">
-      </details>
-      <script src="{{ url_for('static', filename='coords-handler.js')}}"></script>
-    </section>
-
-
+{% set title = "Schlag das ISEM" %}
+{% extends "base.html" %}
+{% block content %}
     <form name="round" id="roundForm" action="" method="POST">
       <!-- Begin collecting information on the rounds to post in the end -->
       <section id="user-info" class="col">
@@ -97,12 +12,12 @@
           <label for="team-name">Name of your team: </label>
           <input type="text" list="teams" placeholder="Team name" id="team-name" name="team-name">
           <datalist id="teams">
-            <option value="Team 1"></option>
-            <option value="Team 2"></option>
-            <option value="Team 3"></option>
-            <option value="Coaches"></option>
             <option value="ISEM"></option>
-            <option value="Professoren"></option>
+            <option value="spica"></option>
+            <option value="WBTI"></option>
+            <!--<option value="Coaches"></option>
+            <option value="ISEM"></option>
+            <option value="Professoren"></option>-->
           </datalist>
         </fieldset>
       </section>
@@ -168,23 +83,26 @@
         <legend>Distance</legend>
         Cover as much distance as possible from one hit. Manually count and enter the number of collisions with the border. You have three tries, the sum of all goes into your score. Please mark your starting position in the beginning.
         <div class="button-list">
-          <input type="radio" name="current_ball" value="marker-start" id="marker-start-radio" onchange="update_cur_ball()">
-          <label for="marker-start-radio" onclick="current_ball='marker-start';">Place start marker</label>
+          
+          <label><!--for="marker-start-radio" onclick="current_ball='marker-start';">-->
+            <input type="radio" name="current_ball" value="marker-start" id="marker-start-radio"><!--onchange="update_cur_ball()">-->
+            Place start marker
+          </label>
         </div>
 
         <div class="button-list">
           <div>  
-            <input type="number" placeholder="" id="dist1c" value="" class="collision-counter" autocomplete="off">
+            <input type="number" placeholder="" id="dist1c" value="" class="collision-counter" autocomplete="off" name="aaa">
             <input type="checkbox" value="Measure 1st try" id="dist1" disabled class="dist-checkbox">
             <label for="dist1" id="dist1l" data-og="Measure 1st try">Measure 1st try</label>
           </div>
           <div>
-            <input type="number" placeholder="" id="dist2c" value="" class="collision-counter" autocomplete="off">
+            <input type="number" placeholder="" id="dist2c" value="" class="collision-counter" autocomplete="off" name="aaa">
             <input type="checkbox" value="Measure 2nd try" id="dist2" disabled class="dist-checkbox">
             <label for="dist2" id="dist2l" data-og="Measure 2nd try">Measure 2nd try</label>
           </div>
           <div>
-            <input type="number" placeholder="" id="dist3c" value="" class="collision-counter" autocomplete="off">
+            <input type="number" placeholder="" id="dist3c" value="" class="collision-counter" autocomplete="off" name="aaa">
             <input type="checkbox" value="Measure 3rd try" id="dist3" disabled class="dist-checkbox">
             <label for="dist3" id="dist3l" data-og="Measure 3rd try">Measure 3rd try</label>
           </div>
@@ -276,52 +194,11 @@
 							Average<br/>7200
 						</div>
 					</div>
-          <div id="table-team" class="table-div">Table gets put here...</div>
+        </div>
+        <div id="table-team" class="table-div">Table gets put here...</div>
       </fieldset>
     </section>
 
-    <!--<footer>
-      <div class="content-wrapper">
-        <p>
-          <a href="https://www.linkedin.com/company/tuhh-isem" target="_blank">ISEM auf LinkedIn</a> |
-          <a href="https://isem-karriere.de/datenschutz/" target="_blank">Datenschutz</a> |
-          <a href="https://www.tuhh.de/isem/impressum" target="_blank">Impressum</a>
-        </p>
-      </div>
-    </footer>-->
-
-    <!-- Audio files -->
-    <div style="display: none;" id="sounds">
-        <audio name="sound-0" data-group="0"><source src="{{ url_for('static', filename='sounds/perfect1.mp3') }}"></audio>
-        <audio name="sound-1" data-group="0"><source src="{{ url_for('static', filename='sounds/very good.mp3') }}"></audio>
-        <audio name="sound-2" data-group="0"><source src="{{ url_for('static', filename='sounds/very good (2).mp3') }}"></audio>
-
-        <audio name="sound-3" data-group="1"><source src="{{ url_for('static', filename='sounds/good2.mp3') }}"></audio>
-
-        <audio name="sound-4" data-group="2"><source src="{{ url_for('static', filename='sounds/medium.mp3') }}"></audio>
-        <audio name="sound-5" data-group="2"><source src="{{ url_for('static', filename='sounds/medium (6).mp3') }}"></audio>
-        <audio name="sound-6" data-group="2"><source src="{{ url_for('static', filename='sounds/medium (5).mp3') }}"></audio>
-        <audio name="sound-7" data-group="2"><source src="{{ url_for('static', filename='sounds/medium (4).mp3') }}"></audio>
-        <audio name="sound-8" data-group="2"><source src="{{ url_for('static', filename='sounds/medium (2).mp3') }}"></audio>
-
-        <audio name="sound-9" data-group="3"><source src="{{ url_for('static', filename='sounds/bad1.mp3') }}"></audio>
-        <audio name="sound-10" data-group="3"><source src="{{ url_for('static', filename='sounds/bad2.mp3') }}"></audio>
-        <audio name="sound-11" data-group="3"><source src="{{ url_for('static', filename='sounds/bad3.mp3') }}"></audio>
-        <audio name="sound-12" data-group="3"><source src="{{ url_for('static', filename='sounds/bad4.mp3') }}"></audio>
-        <audio name="sound-13" data-group="3"><source src="{{ url_for('static', filename='sounds/bad5.mp3') }}"></audio>
-        <audio name="sound-14" data-group="3"><source src="{{ url_for('static', filename='sounds/bad6.mp3') }}"></audio>
-        <audio name="sound-15" data-group="3"><source src="{{ url_for('static', filename='sounds/bad.mp3') }}"></audio>
-        <audio name="sound-16" data-group="3"><source src="{{ url_for('static', filename='sounds/bad 2.mp3') }}"></audio>
-        <audio name="sound-17" data-group="3"><source src="{{ url_for('static', filename='sounds/bad (2).mp3') }}"></audio>
-        <audio name="sound-18" data-group="3"><source src="{{ url_for('static', filename='sounds/bad (3).mp3') }}"></audio>
-
-        <audio name="sound-19" data-group="4"><source src="{{ url_for('static', filename='sounds/very bad.mp3') }}"></audio>
-        <audio name="sound-20" data-group="4"><source src="{{ url_for('static', filename='sounds/very bad 2.mp3') }}"></audio>
-        <audio name="sound-21" data-group="4"><source src="{{ url_for('static', filename='sounds/very bad (2).mp3') }}"></audio>
-    </div>
-
-    <!-- JavaScript einbinden -->
-    <script src="{{ url_for('static', filename='sound.js') }}"></script> 
     <script src="{{ url_for('static', filename='kp2.js') }}"></script>
-  </body>
-</html>
+
+{% endblock %}

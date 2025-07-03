@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+    <header>
+        <title>Register a new player</title>
+    </header>
+    <body>
+        <h1>Register a new player</h1>
+        <form action="/sites/gameonline" method="POST">
+            Name: <input type="text" id="username" name="name" placeholder="Name"><br>
+            Team: <input type="text" id="userteam" name="team" placeholder="Team"><br>
+            Password: <input type="password" id="password" name="auth" placeholder="Password" onkeyup="check();"><br>
+            Repeat Password: <input type="password" id="confirm_password" name="password2" placeholder="Repeat Password" onkeyup="check();">
+            <span id="message"></span><br>
+            I want my profile to be publicly visible: <input type="checkbox" id="public" name="public"><br>
+            <input type="submit" value="Register">
+        </form>
+    </body>
+    <script>
+        var check = function() {
+            if (document.getElementById('password').value ==
+                document.getElementById('confirm_password').value) {
+                document.getElementById('message').style.color = 'green';
+                document.getElementById('message').innerHTML = 'matching';
+            } else {
+                document.getElementById('message').style.color = 'red';
+                document.getElementById('message').innerHTML = 'not matching';
+            }
+        }
+    </script>
+</html>

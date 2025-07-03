@@ -1,19 +1,25 @@
 // The camera interface and some calibrations get set in coords-handler.js, which must be loaded on the page before this script.
-
-
+currentRound = {"trickshot": 0, "break": 0};
+oldMode = "none"; // track the current mode  
 // select the mode -> make all other mode-sections invisible
-document.getElementById("mode-selector-radios").addEventListener("click", function(e) {
-  var val = document.querySelector('input[name="mode"]:checked').value;
-
+//document.getElementById("mode-selector-radios").addEventListener("click", function(e) {
+function updateKP2mode(e) {
+  var val = e.value;//document.querySelector('input[name="mode"]:checked').value;
+  if (val === oldMode) {
+    return;
+  }
+  oldMode = val;
   // update the backend -> beamer
-  fetch("/kp2/selectmode", {
+  /*fetch("/kp2/selectmode", {
     method: "POST",
     headers: {
 			"Accept": "application/json",
 			"Content-Type": "application/json"
 		},
     body: JSON.stringify({"mode": val})
-  })
+  });*/
+  console.log(val)
+  sender("/kp2/selectmode", {"mode": val})
 
   // make all the other invisible
   for (let i of ["precision", "distance", "break","trickshot"]) {
@@ -38,11 +44,11 @@ document.getElementById("mode-selector-radios").addEventListener("click", functi
     current_ball = "marker-start"
   }
 
-});
+}
 
 
 // select all radios and sort into names -> add event listener for each
-const radios = document.querySelectorAll('input[type="radio"]');
+/*const radios = document.querySelectorAll('input[type="radio"]');
 console.log(radios);
 radios.forEach(radio => {
     radio.addEventListener('change', () => {
@@ -62,7 +68,7 @@ radios.forEach(radio => {
         activeLabel.style.border = "2px solid #00C1D4";
         activeLabel.classList.add('active');
     });
-});
+});*/
 
 // ----------------------------------- Precision logic -------------
 // -> Kalibrierung: einfach eine Kugel auf das (projizierte) Bild legen und messen.
@@ -125,6 +131,9 @@ for (let c of precCheckboxes) {
 
         soundJudge(distance, [30, 120, 240, 360])
         sender("/kp2/cosmetics/value", {"mm": Math.round(distance)})
+        setTimeout(() => {
+          sender("/general/settext", {"text": ""})
+        }, 10000);
 
         currentRound[c.id] = distance;
       }
@@ -219,6 +228,9 @@ for (let d of distCheckboxes) {
           label.innerText = Math.round(distance) + " mm (" + Math.round(distance) + " points)";
           currentRound[d.id] = distance;
           sender("/kp2/cosmetics/value", {"mm": Math.round(distance)})
+          setTimeout(() => {
+            sender("/general/settext", {"text": ""})
+          }, 10000);
         }
       })
 
@@ -247,6 +259,9 @@ document.getElementById("break-button").addEventListener("change", ()=>{
 
         soundJudge(nBalls, [13,14,15,15])
         sender("/kp2/cosmetics/value", {"n": Math.round(sunken)})
+        setTimeout(() => {
+          sender("/general/settext", {"text": ""})
+        }, 10000);
       })
 })
 
@@ -268,7 +283,7 @@ document.getElementById("trickshot-button").addEventListener("change", ()=>{
       return; // if this is an uncheck event -> only measure data when checking the element
     }
     var label = document.querySelector("label[for=" + self.id + "]");
-    var oldText = label.innerText;
+    var oldText = label.innerText;currentRound
     label.innerText = "Counting balls...";
 
     getCameraCoordinates()
@@ -280,6 +295,9 @@ document.getElementById("trickshot-button").addEventListener("change", ()=>{
 
         soundJudge(nBalls, [0,1,2,3,3])
         sender("/kp2/cosmetics/value", {"n": Math.round(sunken)})
+        setTimeout(() => {
+          sender("/general/settext", {"text": ""})
+        }, 10000);
       })
 })
 
@@ -311,16 +329,32 @@ submitButton.addEventListener("click", ()=>{
       loadScores(e);
 
       document.getElementById("roundForm").reset();
-      ogs = document.querySelectorAll("[data-og]")
-      for (let inp of ogs) {
-        inp.innerText = inp.dataset.og;
-      }
-      currentRound = {}
-    })
 
+    })
+    .then(() => {
+      setTimeout(() => {
+        sender("/general/settext", {"text": "Welcome to the final challenge!"});
+      }, 15000)
+    })
 });
 
-//
+// reset the form
+document.getElementById("roundForm").addEventListener("reset", () => {
+    // the timeout of 100ms is a hack, as the firing order of events (form reset) is wrong otherwise
+    setTimeout(() => {
+    ogs = document.querySelectorAll("[data-og]");
+    for (let inp of ogs) {
+      inp.innerText = inp.dataset.og;
+    }
+    for (let c of col_counters) {
+      c.dispatchEvent(new Event("input"))
+    }
+    currentRound = {"trickshot": 0, "break": 0};
+    }, 100)
+})
+
+
+// Events happening onload
 function loadScores(e) {
   //console.log(e);
   document.getElementById("submit-button").value = "Last score: " + e.score;

@@ -50,8 +50,8 @@ def beamer_make_gameimage(self, coords=None, shots=False):
             gameimage.placeAllBalls(coords)
         else:
             if self.supermode in ["game-local"]:
-                self.coords = coords
-                coords = self.get_current_players_ball_coords()
+                self.game.coords = coords
+                coords = self.game.get_current_players_ball_coords()
             gameimage.drawBallConnections(coords) # also places balls
         
     image = gameimage.getImageCV2()
@@ -69,3 +69,9 @@ def beamer_correct_coords(self):
     #print(coords)
     self.beamer_make_gameimage(coords=coords)
     return "Coords forwarded to the beamer."
+
+def beamer_update_manual_text(self):
+    res = request.json
+    self.live_value = res["text"]
+    self.beamer_make_gameimage()
+    return "Top"

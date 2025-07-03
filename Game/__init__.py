@@ -11,6 +11,7 @@ import requests
 import json
 import cv2
 import time
+import logging
 
 class Game(Module):
 	"""Implements central game scheduling functions
@@ -27,6 +28,10 @@ class Game(Module):
 		self.current_dir = current_dir
 		Module.__init__(self, config=f"{current_dir}/{config}", template_folder=f"{current_dir}/{template_folder}")
 
+		# disable logging every request, as there are a lot of requests
+		log = logging.getLogger('werkzeug')
+		log.setLevel(logging.ERROR)
+
 		self.storage = current_dir + "/" + storage_folder
 		with open(f"{self.storage}/players.json") as f:
 			self.players = json.load(f)
@@ -40,13 +45,16 @@ class Game(Module):
 				"kp2": self.get_site_kp2,
 				"lat": self.get_site_lat,
 				"trickshots": self.get_site_trickshots,
-				"gamelocal": self.get_site_game_local
+				"gamelocal": self.get_site_game_local,
+				"gameonline": self.get_site_game_online,
+				"register_new": self.get_site_register_player
 			},
 			"general": {
 				"ballimagenumber": self.get_ball_image,
 				"correctedcoords": self.beamer_correct_coords,
 				"beameroff": self.beamer_off,
-				"takeimage": self.take_image
+				"takeimage": self.take_image,
+				"settext": self.beamer_update_manual_text
 			},
 			"camera": {
 				"coords": self.forward_coords
@@ -68,7 +76,11 @@ class Game(Module):
 			"game": {
 				"updateelo": self.do_update_elo,
 				"startgame": self.game_local_start_round,
-				"enterround": self.game_local_enter_round
+				"enterround": self.game_local_enter_round,
+				"determinestart": self.game_determine_start
+			},
+			"online": {
+				"startgame": self.online_start_game
 			},
 			"trickshots": {
 				"list": self.list_trickshots,
@@ -145,10 +157,12 @@ class Game(Module):
 	from ._camera_interface import forward_coords, camera_save_image
 
 	# INTERACTIONS WITH BEAMER MODULE ###############################################
-	from ._beamer_interface import beamer_push_image, beamer_off, beamer_make_gameimage, beamer_correct_coords
+	from ._beamer_interface import beamer_push_image, beamer_off, beamer_make_gameimage, beamer_correct_coords, beamer_update_manual_text
 
 	# INTERACTIONS FOR NORMAL GAME ##################################################
-	from ._game_local import get_site_game_local, game_local_enter_round, game_local_start_round, get_current_player_name, get_remaining_balls, handle_win, change_player, filterData, get_current_players_ball_coords, get_display_string
+	from ._game_local import get_site_game_local, game_local_enter_round, game_local_start_round, game_determine_start
+	# INTERACTION FOR ONLINE GAME
+	from ._game_online import get_site_game_online, online_start_game, get_site_register_player
 
 	# INTERACTIONS FOR EXAM MODE ####################################################
 	from ._kp2 import get_site_kp2, enter_round_kp2, select_mode_kp2, kp2_set_precision_difficulty, kp2_get_live_value, kp2_calc_score, kp2_update_score_data_base # import all methods from _kp2.py

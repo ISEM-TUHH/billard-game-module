@@ -1,27 +1,36 @@
-{% set title = "Lokales Billardspiel" %}
+{% set title = "Schlag das ISEM" %}
 {% extends "base.html" %}
 {% block content %}
     <form name="round" id="roundForm" action="" method="POST">
       <!-- Begin collecting information on the rounds to post in the end -->
       <section id="user-info" class="col">
         <fieldset>
-            <legend>Player 1: Enter your details</legend>
+            <legend>Player: Enter your details</legend>
             <label for="person-name-1">Your name: </label>
             <input type="text" placeholder="Your name" id="person-name-1">
             <br><br>
-            <label for="team-name-2">Name of your team: </label>
+            <label for="team-name-1">Name of your team: </label>
             <input type="text" list="teams" placeholder="Team name" id="team-name-1" name="team-name-1">
+            <br><br>
+            <label for="person-auth-1">Password: </label>
+            <input type="password" placeholder="Password" id="person-auth-1" name="person-auth-1">
+            <br>
+            <a href="/sites/register_new">Register a new player</a>
         </fieldset>
 
         <fieldset>
-            <legend>Player 2: Enter your details</legend>
-            <label for="person-name-2">Your name: </label>
-            <input type="text" placeholder="Your name" id="person-name-2">
-            <br><br>
-            <label for="team-name-2">Name of your team: </label>
-            <input type="text" list="teams" placeholder="Team name" id="team-name-2" name="team-name-2">
+            <legend>Select the table you want to play against</legend>
+            <label for="table-2">Table: </label>
+            <select id="table-2">
+                <option value="0">Open for all</option>
+                {% for o in table_list %}
+                <option value="{{ o[0] }}">{{ o[1] }}, {{ o[2] }}</option>
+                {% endfor %}
+            </select>
         </fieldset>
         
+        <input type="button" id="startgame-button" value="Start game">
+
         <datalist id="teams">
             <option value="Team 1"></option>
             <option value="Team 2"></option>
@@ -33,20 +42,10 @@
       </section>
 
       <section id="game-start" class="col">
-        <fieldset>
-          <legend>Start the game</legend>
-          <input type="button" value="Start the game" id="game-start-button">
-        </fieldset>
-        <fieldset>
-          <legend>Decide the break</legend>
-          <div class="button-list">
-            <input type="checkbox" id="prec1-button" class="prec-checkbox" value="player1">
-            <label for="prec1-button" id="prec1-button-label" data-og="1st player precision">1st player precision</label>
-            
-            <input type="checkbox" id="prec2-button" class="prec-checkbox" value="player2">
-            <label for="prec2-button" id="prec2-button-label" data-og="2nd player precision">2nd player precision</label>
-          </div>
-        </fieldset>
+        <input type="button" value="Start the game" id="game-start-button">
+      </section>
+
+      <section id="mode-select" class="col">
         <fieldset>
             <legend>Live round</legend>
             <input type="button" value="1. Inspect round" id="inspect-button"><br>
@@ -54,12 +53,18 @@
             <div id="round-stats">
 
             </div>
+
         </fieldset>
       </section>
 
-
       
     </form>
+    
+  
+  <section id="submit-round" class="col">
+      Submit your results: <input type="button" value="submit" id="submit-button"><br>
+      <div id="results"><!-- Your total score is: 1870 points, rank 3/10--></div> 
+    </section>
 
     <section id="scoreboard" class="col">
       <fieldset id="single">
@@ -112,6 +117,15 @@
       </fieldset>
     </section>
 
+    <!--<footer>
+      <div class="content-wrapper">
+        <p>
+          <a href="https://www.linkedin.com/company/tuhh-isem" target="_blank">ISEM auf LinkedIn</a> |
+          <a href="https://isem-karriere.de/datenschutz/" target="_blank">Datenschutz</a> |
+          <a href="https://www.tuhh.de/isem/impressum" target="_blank">Impressum</a>
+        </p>
+      </div>
+    </footer>-->
+
     <script src="{{ url_for('static', filename='game_local.js') }}"></script>
-  
 {% endblock %}

@@ -29,6 +29,7 @@ class Module:
 		cors = CORS(self.app) # allow all cross origin requests
 		self.app.add_url_rule("/id", "id", lambda: jsonify({"id": self.id}))
 		self.app.add_url_rule("/api-doc", "api-doc", lambda: jsonify({"api": self.api_flat}))
+		#self.app.add_url_rule("/meta/shutdown", "shutdown", lambda)
 
 		self.api_flat = ["/id"] # list of all api endpoints as full strings
 		self.available_modules = None # change via scan_network method, initialized as None to signal it hasn't scanned yet
@@ -129,6 +130,11 @@ class Module:
 		"""
 		modules = self.config["modules"]
 		return next((x for x in modules if x["name"] == name), None)
+
+	def shutdown(self):
+		""" Shutdown the module's computer. Not implemented yet
+		"""
+		return
 
 
 if __name__ == "__main__":
