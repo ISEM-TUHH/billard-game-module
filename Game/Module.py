@@ -136,16 +136,11 @@ class Module:
 		"""
 		return
 
+	#%% Actual meta methods
 
-if __name__ == "__main__":
-	#print(Module.__doc__)
-	#print(Module.add_api.__doc__)
-	mod = Module()
-	mod.add_api(lambda: "1234", "v1/coords")
-	mod.add_api(lambda: "14", "v1/pic") 
-	#print(mod.api["id"]())
-	#print(mod.api)
-	mod.add_website("base/index.html")
-	# to run the actual api server
-	#mod.scan_network()
-	mod.app.run()
+	def fetchGit(self):
+		""" CI/CD implementation: hit this API endpoint to fetch a branch provided in POST json data and restart the service """
+
+
+
+

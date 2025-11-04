@@ -1,0 +1,20 @@
+[
+    {
+        "name": "Mathis",
+        "team": "ISEM",
+        "elo": 1000,
+        "id": "MathisANDISEM"
+    },
+    {
+        "name": "Felix",
+        "team": "ISEM",
+        "elo": 1000,
+        "id": "FelixANDISEM"
+    },
+    {
+        "name": "Niko",
+        "team": "ISEM",
+        "elo": 1000,
+        "id": "NikoANDISEM"
+    }
+]
