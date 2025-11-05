@@ -29,11 +29,11 @@ class Game(Module):
 		self.current_dir = current_dir
 		self.storage = current_dir + "/" + storage_folder
 
-		Module.__init__(self, config=f"{current_dir}/{config}", template_folder=f"{current_dir}/{template_folder}", storage_folder=self.storage)
+		Module.__init__(self, config=f"{current_dir}/{config}", template_folder=f"{current_dir}/{template_folder}", storage_folder=self.storage, static_folder=f"{current_dir}/static")
 
 		# disable logging every request, as there are a lot of requests
 		log = logging.getLogger('werkzeug')
-		log.setLevel(logging.ERROR)
+		#log.setLevel(logging.ERROR)
 
 		with open(f"{self.storage}/players.json") as f:
 			self.players = json.load(f)
