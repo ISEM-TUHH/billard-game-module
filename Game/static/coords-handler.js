@@ -166,7 +166,7 @@ saveImageButton.addEventListener("click", () => {
 })
 
 // Keep the camera alive
-setInterval(() => {fetch("http://134.28.20.53:5000/website/liveline");}, 55000) 
+// setInterval(() => {fetch("http://134.28.20.53:5000/website/liveline");}, 55000) 
 
 // select all radios and sort into names -> add event listener for each
 const radios = document.querySelectorAll('input[type="radio"]');

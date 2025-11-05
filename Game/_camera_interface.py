@@ -35,8 +35,18 @@ def forward_coords(self):
     return jsonify(res)
 
 def camera_save_image(self):
+    """ Save the current image and (if passed) coordinates of the balls for AI training later on """
     camera = self.getModuleConfig("camera")
     api = f"http://{camera['ip']}:{camera['port']}/v1/savepic"
-    response = requests.get(api)
+
+    # coordinates of balls
+    try:
+        # may not always be defined
+        coords = {"coords": self.game_coords, "action": "save-labels"}
+    except:
+        coords = {"action": "save-image-only"}
+
+    response = requests.post(api, json=coords, headers={"content-type": "application/json"})
     res = response.json()
     return res
+    #return "aaa"
