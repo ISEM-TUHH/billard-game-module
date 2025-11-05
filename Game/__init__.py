@@ -1,4 +1,5 @@
-from .Module import Module
+from .billard_base_module.Module import Module
+
 from .GameImage import GameImage, BilliardBall
 from .Elo import Elo
 import numpy as np
@@ -26,13 +27,14 @@ class Game(Module):
 	def __init__(self, config="config/config.json", storage_folder="storage", template_folder="templates"):
 		current_dir = os.path.dirname(__file__)
 		self.current_dir = current_dir
-		Module.__init__(self, config=f"{current_dir}/{config}", template_folder=f"{current_dir}/{template_folder}")
+		self.storage = current_dir + "/" + storage_folder
+
+		Module.__init__(self, config=f"{current_dir}/{config}", template_folder=f"{current_dir}/{template_folder}", storage_folder=self.storage, static_folder=f"{current_dir}/static")
 
 		# disable logging every request, as there are a lot of requests
 		log = logging.getLogger('werkzeug')
-		log.setLevel(logging.ERROR)
+		#log.setLevel(logging.ERROR)
 
-		self.storage = current_dir + "/" + storage_folder
 		with open(f"{self.storage}/players.json") as f:
 			self.players = json.load(f)
 
