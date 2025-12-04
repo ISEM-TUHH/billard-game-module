@@ -41,6 +41,7 @@ def beamer_make_gameimage(self, coords=None, shots=False):
 
     Handle situations like showing gameresults and instructions for modes.
     """
+    raise AssertionError("The old function beamer_make_gameimage was called! Remove pls")
     gameimage = GameImage()
     
     gameimage.addGameMode(self.supermode, self)
@@ -60,18 +61,25 @@ def beamer_make_gameimage(self, coords=None, shots=False):
 def beamer_correct_coords(self):
     """ This method receives manual entries from a website (if the camera was incorrect) and forwards them to the beamer
     """
-
     coords = request.json
+    #print(coords)
 
-    if self.supermode in ["game-local", "kp2"]:
-        self.game_coords = coords
+    # order the camera module to cache the current image. When the coords are commited, they are saved with the last cached image for training purposes.
+    self.camera.cache_image()
+
+    #if self.supermode in ["game-local", "kp2"]:
+    self.game_coords = coords
 
     #print(coords)
-    self.beamer_make_gameimage(coords=coords)
+    self.gameimage.update_definition({"type": "balls", "coords": coords})
+    self.beamer.push_image(self.gameimage.getImageCV2())
+    #self.beamer_make_gameimage(coords=coords)
     return "Coords forwarded to the beamer."
 
 def beamer_update_manual_text(self):
     res = request.json
-    self.live_value = res["text"]
-    self.beamer_make_gameimage()
-    return "Top"
+    #self.live_value = res["text"]
+    #self.beamer_make_gameimage()
+    self.gameimage.update_text(res["text"])
+    self.beamer.push_image(self.gameimage.getImageCV2())
+    return f"Written text to beamer: '{res["text"]}'"

@@ -76,7 +76,7 @@ var refPoint = {x: 565, y: 557}; //reference point towards the distance is calcu
 
 
 var debugObject = 0;
-
+/*
 var precDifficultyRange = document.getElementById("prec-difficulty");
 var precDifficulty = 1
 precDifficultyRange.addEventListener("change", ()=>{
@@ -89,8 +89,9 @@ precDifficultyRange.addEventListener("change", ()=>{
 
   precDifficulty = val;
 })
+*/
 
-
+/*
 var precCheckboxes = document.getElementsByClassName("prec-checkbox");
 for (let c of precCheckboxes) {
   c.addEventListener("change", () => {  
@@ -140,7 +141,7 @@ for (let c of precCheckboxes) {
     })
   });
 }
-
+*/
 
 
 // ----------------------------------- Distance logic ----------------
@@ -377,7 +378,7 @@ function updatePodium(prefix, res) {
 }
 
 // on load load all scores and podiums
-fetch("/kp2/enterround", {
+/*fetch("/kp2/enterround", {
   method: "POST",
   headers: {
     "Accept": "application/json",
@@ -387,7 +388,7 @@ fetch("/kp2/enterround", {
 }).then((e) => e.json())
   .then((res) => {
     loadScores(res);
-  })
+  })*/
   
 
 // every 55 seconds ping the server to say "hey there, I am still connected, please keep rendering frame :)"

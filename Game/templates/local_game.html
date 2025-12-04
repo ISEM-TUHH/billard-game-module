@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block content %}
+
+  This is the website for the Local Billard gamemode
+    <form name="round" id="roundForm" action="" method="POST" class="contains-columns">
+      <!-- Begin collecting information on the rounds to post in the end -->
+      <!--<section id="session-info" class="col global-config">
+        <fieldset>
+          <legend>Game configurations</legend>
+          <label for="event-run">Semester:</label><input type="text" placeholder="WS25/26" id="semester" name="semester">
+          <label for="attestation">Attestation:</label><input type="number" placeholder="1" id="attestation" name="attestation" min="1" max="3">
+          <br>
+          <label for="mystery-challenge">Mystery Challenge:</label>
+          <select id="mystery-challenge" name="mystery-challenge">
+            {% for challenge in mystery_challenges %}
+            <option value="{{ challenge }}">{{ challenge }}</option>
+            {% endfor %}
+          </select>
+          <label for="number_teams"># of Teams:</label><input type="number" name="number_teams" id="number_teams" min="1">
+
+        </fieldset>
+      </section>-->
+
+
+      <!--<section id="user-info" class="col global-config">
+        <fieldset>
+          <legend>Enter your details</legend>
+          <label for="person-name">Your name: </label>
+          <input type="text" placeholder="Your name" id="person-name">
+          <br><br>
+          <label for="team-name">Name of your team: </label>
+          <input type="text" list="teams" placeholder="Team name" id="team-name" name="team-name">
+          <datalist id="teams">
+            {% for team in teams %}
+            <option value="{{ team }}"></option>
+            {% endfor %}
+          </datalist>
+        </fieldset>
+      </section>-->
+      <div class="mode">
+        <section id="player-details" class="col">
+          <button type="button" class="collapsible">Player selection</button>
+          <div class="collapsible-content">
+            <fieldset>
+              Enter your details!
+              <hr>
+              <div class="button-list">
+                <!--<input type="range" min="0" max="2" value="1" id="prec-difficulty">
+                <label for="prec-difficulty" data-og="Regular: x15">Regular: x15</label>-->
+                <input type="text" name="player1" placeholder="Player 1">
+                <input type="text" name="team1" placeholder="Team 1" list="existing-teams">
+              </div>
+              <hr>
+              <div class="button-list">
+                <input type="text" name="player2" placeholder="Player 2">
+                <input type="text" name="team2" placeholder="Team 2" list="existing-teams">
+              </div>
+              <datalist id="existing-teams">
+                {% for team in teams %}
+                <option value="{{ team }}">{{ team }}</option>
+                {% endfor %}
+              </datalist>
+              <hr>
+              <hr>
+            </fieldset>
+          </div>
+          <!--<script src="{{ url_for('static', filename='gamemodes/precision.js') }}"></script>-->
+        </section>
+
+
+
+      </div>
+
+    </form>
+    
+  
+    <section id="submit-round" class="col">
+      Submit your results: <input type="button" value="submit" id="submit-button"><br>
+      <div id="results"><!-- Your total score is: 1870 points, rank 3/10--></div> 
+    </section>
+    <!--<script src="{{ url_for('static', filename='kp2_submit.js') }}"></script>-->
+    <script src="{{ url_for('static', filename='vanillaController.js') }}"></script>
+
+{% endblock %}

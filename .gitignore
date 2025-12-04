@@ -4,6 +4,7 @@ utils/
 
 # empty storage files are kept: git update-index --assume-unchanged Game/storage/*
 Game/storage/
+Game/gamemodes/resources/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

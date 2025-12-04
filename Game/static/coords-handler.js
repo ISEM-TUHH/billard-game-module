@@ -42,7 +42,7 @@ async function getCameraCoordinates() {
   var keys = Object.keys(data);
   for (let i of keys) {
     b = data[i]
-    console.log(b);
+    //console.log(b);
     var x = b.x; // these are in real dimensions (mm)
     var y = b.y;
     var id = "ball-" + b.name;
@@ -52,6 +52,41 @@ async function getCameraCoordinates() {
   }
 
   return;// data; // Gibt die Koordinaten zurück
+}
+
+// returns coordinates as promise -> handle using .then((res) => {...})
+function getCameraCoordinatesAsync() {
+  //var data = [];
+  if (!manipulatedFlag) { //only if we want new coordinates
+    return fetch("/camera/coords").then((res) => res.json())
+      .then((res) => {
+        coordinates = {}; // reset coordinates
+        // remove all old positions
+        for (let b of balls) {
+          b.style.display = "none";
+        }
+
+        // add new balls
+        var keys = Object.keys(res);
+        for (let i of keys) {
+          b = res[i]
+          //console.log(b);
+          var x = b.x; // these are in real dimensions (mm)
+          var y = b.y;
+          var id = "ball-" + b.name;
+          if (!manipulatedFlag) {
+            placePointFromRealDim(x,y,id);
+          }
+        }
+        return res;
+      });
+  } else {
+    return Promise.resolve();
+  }
+  //for (let b of data) {
+  //  coordinates["ball-" + b.name] = b; // -> doing this in placing ball
+    // place all balls on the image
+
 }
 
 // --------------------- Functions for placing/deleting balls ----------------------------
@@ -69,7 +104,7 @@ function placePoint(x, y, id, realBall = true) {
   } else {
     altCoordinates[id] = {name: id, x: x, y: y, xr: pxToReal(x), yr: pxToReal(y)};
   }
-  console.log(x,y)
+  //console.log(x,y)
 }
 
 function placePointFromRealDim(xr, yr, id) {
@@ -204,3 +239,16 @@ radios.forEach(radio => {
 
     });
 });
+
+// Provide the coords in a format usable for the backend
+function coordinatesBackend() {
+  var sendCoords = {}; 
+  for (let c of Object.keys(coordinates)) {
+      //console.log(c)
+      var newName = c.replace("ball-","");
+      var coord = coordinates[c];
+      sendCoords[newName] = {"name": newName, "x": pxToReal(coord.x), "y": pxToReal(coord.y)};
+      //console.log(newName, coord);
+  }
+  return sendCoords
+}

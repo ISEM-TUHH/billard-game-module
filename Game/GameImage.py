@@ -3,8 +3,15 @@ from PIL import Image, ImageDraw, ImageFont
 import json # for testing
 import os
 import cv2
+from random import randint
+import copy
+import qrcode
 
-from .GameEngine import GameEngine
+#from .GameEngine import GameEngine
+
+def ie(dic, key, default):
+	""" If key in dic returns value in dic else default """
+	return dic[key] if key in dic else default
 
 class GameImage:
 	"""Class to generate an image from different game modes and other information
@@ -17,16 +24,223 @@ class GameImage:
 	"""
 	ballDiameter = 57 # diameter of a billiard ball (snooker) in mm
 
-	def __init__(self, size=(2230, 1115), phys=1):
-		self.img = Image.new(mode="RGB", size=size, color="#000000")
+	def __init__(self, definition=[], size=(2230, 1115), phys=1, img_cache={
+		"isem-logo": "static/images/ISEM-only.png", # small logo without text for subimg display
+		"isem-logo-big": "static/images/isem_logo_big.png", # big logo with text for central display
+		"feedback-form-qr": "https://www.youtube.com/watch?v=XfELJU1mRMg" # link to the feedback form
+	}):
+		self.img = Image.new(mode="RGBA", size=size, color="#000000ff")
 		#self.img = Image.new(mode="RGB", size=size, color="#50b12c")
 		self.draw = ImageDraw.Draw(self.img)
 		self.phys = phys
 		self.w, self.h = size
 		self.current_dir = os.path.dirname(__file__)
 
+		self.FLAG_MODIFIED = False # track if the image has been updated since the last redraw
+
+
+		# list of graphical parts that can only exist max once.
+		self.static = ["balls", "text", "team", "break", "central_image"]
+
+		# loading of common referenced images (ISEM logo etc), provide directly
+		self.img_cache = {}
+		for k,v in img_cache.items():
+			if type(v) is str:
+				if v.startswith("http"):
+					self.img_cache[k] = qrcode.make(v).convert("RGBA") # generate a qrcode and change mode from "1" to "RGBA" so it can be pasted
+				else:
+					self.img_cache[k] = Image.open(os.path.join(self.current_dir, v))
+			else:
+				self.img_cache[k] = v
+
+		self.definition = definition
+		if len(definition) != 0:
+			self.draw_from_dict(definition)
+
+	def copy(self):
+		""" Creates a new object with the same definition list. Also copies the loaded img_cache to minimize storage operations. """
+
+		return GameImage(definition=self.definition.copy(), img_cache=self.img_cache)
+
+	def draw_from_dict(self, definition, draw=True):
+		""" Draw the gameimage from a list<dictionary> specifying the subparts. Execution flow is from top to bottom, so lower parts are on a higher image layer. """
+		self.img = Image.new(mode="RGBA", size=(self.w, self.h), color="#000000ff")
+		#self.img = Image.new(mode="RGB", size=size, color="#50b12c")
+		self.draw = ImageDraw.Draw(self.img)
+
+		if None in definition:
+			for part in definition:
+				if part is None: continue
+				self.update_definition(part)
+			return self.definition
+
+		self.definition = definition
+		for part in self.definition:
+			#part["ref"] = ie(part, "ref", randint(0, int(1e6))) if part["type"] not in self.static else part["type"] # random reference id
+			part["ref"] = ie(part, "ref", randint(0, int(1e6)) if part["type"] not in self.static else part["type"])
+
+			if not draw: continue
+
+			match part["type"]:
+				case "balls":
+					self.placeAllBalls(part["coords"])
+					if "draw_lines" in part.keys():
+						self.drawBallConnections(part["coords"])
+				case "text":
+					self.instructionText(part["text"], subimg=(part["subimg"] if "subimg" in part.keys() else None))
+				case "team":
+					self.nameTeamText(parts["player_name"], parts["player_team"])
+				case "break":
+					self.drawBreak(ball=part["draw_ball"])
+				case "central_image":
+					self.centralImage(part["img"])
+				case "line":
+					self.line(part["c1"], part["c2"], color=ie(part, "color", "white"), width=ie(part, "width", 3))
+				case "rectangle":
+					self.rectangle(part["c1"], part["c2"], outline=ie(part, "outline", "white"), width=ie(part, "width", 3), fill=ie(part, "fill", None))
+				case "bullseye":
+					self.bullseye(center=ie(part, "center", None), r=ie(part, "radius", 30))
+				case "polygon":
+					self.draw.polygon(part["points"], fill=ie(part, "fill", None), outline=ie(part, "outline", "white"), width=ie(part, "width", 3))
+				case "arrow_bottom":
+					self.arrow_bottom(**part) # bottom, orientation, length, head_with|line_width|color
+				case "arrow":
+					self.arrow(**part) # needs coords start, end. Otherwise takes same optional arguments as arrow_bottom
+
+		return self.definition
+
+	def redraw(self):
+		self.draw_from_dict(self.definition)
+
+	def update_definition(self, val, ref=None, subfield=None, new_instance=False, layer=-1, remove=False):
+		""" Adds a new part to the image definition if ref is None or no current entry has the same ref. If subfield != None, looks for the key in a part with given ref and only updates that. """
+		self.FLAG_MODIFIED = True
+
+		if type(val) is dict and "type" in val.keys() and val["type"] in self.static: # handle static parts
+			ref = val["type"]
+		if type(val) is dict and "ref" in val.keys():
+			ref = val["ref"]
+
+		# if the passed dict has remove==True, remove it. 
+		if type(val) is dict and "remove" in val.keys() and val["remove"]:
+			remove = True
+
+		if remove:
+			self.rm_definition(ref)
+			return
+		# debug
+		#print("available ref:", [p["ref"] for p in self.definition])
+		#print("this ref:", ref)
+
+		if ref is not None and (ref in [p["ref"] for p in self.definition] or ref in self.static):
+			index = next((index for (index, d) in enumerate(self.definition) if d["ref"] == ref), None)
+
+			print("GI index", index, "is none:", (index is None))
+
+			if ref in self.static and index is None:
+				val["ref"] = ref
+				self.definition.append(val)
+
+			elif not subfield is None:
+				assert subfield in self.definition[index].keys(), f"The given subfield {subfield} does not exist in the part {self.definition[index]['type']} with keys {self.definition[index].keys()}."
+
+				self.definition[index][subfield] = val
+
+			else:
+				#print("GI update:", val, "ref:", ref, "index:", index)
+				self.definition[index] = val | {"ref": ref}
+				#print("Success? GI at index:", self.definition[index])
+
+		else: # add a new part at the specified layer (-1 for last, other negative indices are supported too, but always +1)
+			if ref is None:
+				val["ref"] = randint(0, int(1e6)) if ref != None else ref
+			if layer == -1:
+				self.definition.append(val)
+			else:
+				if layer < 0:
+					layer += 1
+				self.definition.insert(layer, val)
+
+	def rm_definition(self, ref):
+		""" Remove an element from the definition by ref """
+		index = next((index for (index, d) in enumerate(self.definition) if d["ref"] == ref), None)
+		if index is not None:
+			self.definition.pop(index)
+
+	def update_text(self, text):
+		self.update_definition(text, ref="text", subfield="text")
+
 	def getImageCV2(self):
+		if self.FLAG_MODIFIED:
+			self.redraw()
 		return np.array(self.img)[:,:,[2,1,0]] # shift from rgb to bgr
+
+	def line(self, c1, c2, color="white", width=3): # TODO: add different coordinate formats
+		if type(c1) is dict:
+			c1 = (c1["x"], c1["y"])
+			c2 = (c2["x"], c2["y"])
+		self.draw.line([c1, c2], fill=color, width=width)
+
+	def rectangle(self, c1, c2, outline="white", width=5, fill=None):
+		self.draw.rectangle([c1, c2], outline=outline, width=width, fill=fill)
+
+	def bullseye(self, center=None, r=30):
+		if center is None:
+			bullX, bullY = self.w//4, self.h//2
+		bullX, bullY = center[0], center[1]
+		r = 30 # radius of each ring
+		#print(bullX, bullY)
+		for i in [4,2,0]:
+			white = 2*(i+1)*r
+			black = 2*i*r
+			
+			self.draw.ellipse((bullX-white, bullY-white, bullX+white, bullY+white), fill="#FFFFFF")
+			self.draw.ellipse((bullX-black, bullY-black, bullX+black, bullY+black), fill="#000000")
+		# inner circle:
+		self.draw.ellipse((bullX-r, bullY-r, bullX+r, bullY+r), fill="#000000")
+
+	def arrow_bottom(self, bottom, orientation, length, head_width=50, line_width=10, color="white", **kwargs):
+		""" Draws and arrow by specifying the bottom point. bottom as np.array([x, y]), orientation in degrees relative to +x-axis in mathemtical positive direction"""
+
+		# TODO: add feature to put text on the arrow?
+		bot = np.array([bottom["x"], bottom["y"]])
+
+		start_head = length - head_width
+		polygon = np.array([
+			[0, 0], # bottom
+			#[start_head, 0], # start of head
+			[length, 0], # head
+			[start_head, -head_width/2],
+			[length, 0],
+			[start_head, +head_width/2],
+		]).T
+
+		rad = np.pi*orientation/180
+		cs = np.cos(rad)
+		sn = np.sin(rad)
+		rot = np.array([[cs, sn], [-sn, cs]])
+
+		arrow = [(int(c[0]), int(c[1])) for c in ((rot @ polygon).T + bot)]
+
+		#print(arrow)
+		self.draw.line(arrow, width=line_width, fill=color)
+		self.draw.circle(arrow[1], radius=line_width//2, fill=color, width=0)
+		#self.draw.polygon(arrow[2:], outline=color, width=line_width, fill=color)
+
+	def arrow(self, start, end, offset=0, **kwargs):
+		""" Arrow pointing from start to end """
+		top = np.array([end["x"], end["y"]])
+		bot = np.array([start["x"], start["y"]])
+
+		u = top - bot
+		length = np.linalg.norm(u)
+		orientation = np.angle(u[0] - 1j*u[1], deg=True) # gets the complex angle: -u[1] due to orientation of the coordinate system in PIL vs normal maths :)
+		if offset != 0: 
+			bot = bot + offset/length * u
+			length = length - 2*offset
+		
+		#print("ARROW", length, orientation)
+		self.arrow_bottom({"x": bot[0], "y": bot[1]}, orientation, length, **kwargs)
 
 	def placeBall(self, pos, n, d=None):
 		"""Place a ball on the canvas self.img based on its number
@@ -34,7 +248,7 @@ class GameImage:
 		:param pos: (x,y) center of the ball in mm from the top left
 		:type pos: tuple<int>
 		:param n: number of the ball
-		:type n: int
+		:type n: int or str
 		:param d: diameter of the ball in pixels, automatically determined to be accurate according to self.phys and 
 		:type d: optional int
 		"""
@@ -52,16 +266,25 @@ class GameImage:
 		:param data: dictionary matching the number of a ball (key) to its position (tuple x,y) from the upper left in mm. Can also just be the output of Camera.get_coords (.../v1/getcoords)
 		:type data: dict<tuple<float>> or list<dict>
 		"""
+		unique_map = {
+			"eight": 8,
+			"white": 16,
+			"dummy": 17,
+			"correct": 18,
+			"incorrect": 19
+		}
+
 		for b in data:			
 			if type(data) == list:
 				rawN = b["name"]
-				number = 8 if rawN=="eight" else (16 if rawN=="white" else int(rawN))
+				#number = rawN if type(rawN) is int else unique_map[rawN]
+				#number = 8 if rawN=="eight" else (16 if rawN=="white" else int(rawN))
 				x,y = b["x"],b["y"]
 				self.placeBall((x,y),number)
 				continue
 			elif "x" in data[b].keys():
 				pos = (data[b]["x"], data[b]["y"])
-				self.placeBall(pos, b)
+				self.placeBall(pos, data[b]["name"])
 			else:
 				#print(b)
 				self.placeBall(data[b], int(b))
@@ -99,13 +322,14 @@ class GameImage:
 				xh, yh = hole["x"], hole["y"]
 				xwe, ywe = end_white["x"], end_white["y"]
 
-				self.draw.line([(xw,yw),(xwe,ywe)], fill="grey", width=4)
-				self.draw.line([(x,y),(xh,yh)], fill="grey", width=4)
+				kwargs = {"offset": 20, "color": "grey", "line_width": 5, "head_width": 10}
+				self.arrow(end=hole, start=localData["white"], **kwargs) # ball to hole
+				self.arrow(end=start_white, start=end_white, **kwargs) # white to ball
+				#self.draw.line([(xw,yw),(xwe,ywe)], fill="grey", width=4)
+				#self.draw.line([(x,y),(xh,yh)], fill="grey", width=4)
 
 		if drawBalls:
 			self.placeAllBalls(data2)
-
-	
 
 	def instructionText(self, text, subimg=None):
 		"""Place text on top and flipped on the bottom of the image. Font size is chosen automatically.
@@ -114,7 +338,7 @@ class GameImage:
 		:type text: str
 		:param subimg: Image to be placed directly under the text
 		:type subimg: optional PIL Image or relative path to image 
-		"""
+		"""		
 		fs = int(self.h/15)# if self.w/len(text) < # TODO: make it more dynamic 
 		font = ImageFont.truetype(self.current_dir + "/../Roboto-Black.ttf", fs)
 
@@ -122,17 +346,33 @@ class GameImage:
 		img = Image.new(mode="RGBA", size=(self.w, int(3*fs)), color="#00000000")
 		draw = ImageDraw.Draw(img)
 
-		_,_, w, h = draw.textbbox((0,0), text, font = font)
-		draw.text(((self.w-w)//2, 0), text, font=font, fill="white", background="#00000000")
-
-		if subimg != None:
+		if subimg != None: # draw subimg before text to control layering
 			size = self.w, int(1.5*fs)
 			if type(subimg) == str:
-				# load from file
-				subimg = Image.open(self.current_dir + "/" + subimg)
+				if subimg in self.img_cache.keys():
+					subimg = self.img_cache[subimg]
+				else:
+					# load from file
+					subimg = Image.open(self.current_dir + "/" + subimg)
 			subimg.thumbnail(size, Image.Resampling.LANCZOS)
 			w,h = subimg.size
 			img.paste(subimg, ((self.w-w)//2, int(1.5*fs)))
+
+		_,_, w, h = draw.textbbox((0,0), text.replace("**", ""), font = font)
+		center = (self.w - w)//2
+
+		# quasi markdown format
+		if "**" in text:
+			offset_left = 0
+			for i, textpart in enumerate(text.split("**")):
+				_, _, w2, h2 = draw.textbbox((0, 0), textpart, font = font, stroke_width=3)
+				if i%2 == 1:
+					draw.text((center + offset_left, 0), textpart, font = font, stroke_width=3, stroke_fill="green", fill="white", background="#00000000")
+				else:
+					draw.text((center + offset_left, 0), textpart, font = font, fill="white", background="#00000000")
+				offset_left += w2
+		else:
+			draw.text((center, 0), text, font=font, fill="white", background="#00000000")
 
 		self.img.paste(img, (0,0), img)
 		timg = img.transpose(Image.ROTATE_180)
@@ -156,7 +396,7 @@ class GameImage:
 		self.img.paste(timg, (self.w - int(1.5*fs),0), timg)
 
 	def drawBreak(self, ball=True):
-		""" Draw the basic triangle and optionally the white ball for break """
+		""" Draw the basic triangle for a break and optionally the white ball for break """
 		center = self.h//2
 		offTop = 160
 		offFront = 290
@@ -164,6 +404,23 @@ class GameImage:
 		if ball:
 			self.placeBall((4*self.w//5, center), "white")
 
+	def centralImage(self, img):
+		""" Draw an (PIL) image in the center of the image. Scaling is currently done before using img.resize((w, h)) """
+		# TODO: add sizing options
+		if type(img) is str:
+			if img in self.img_cache.keys():
+				img = self.img_cache[img]
+			else:
+				img = Image.open(img, ) # TODO: is this the correct file path format?
+		w, h = img.size
+		#print("CENTRAL IMAGE", w, h)
+		if img.mode == "1": # black and white qr codes
+			#print(img.size)
+			self.img.paste(img, ((self.w - w)//2, (self.h - h)//2))
+		else:
+			self.img.paste(img, ((self.w - w)//2, (self.h - h)//2), mask=img.split()[3])
+
+	# OLD
 	def addGameMode(self, supermode, game):
 		""" Add an overlay to the image depending on the current game supermode.
 
@@ -180,7 +437,8 @@ class GameImage:
 				#self.instructionText("Welcome to Billard@ISEM!", subimg="static/images/ECIUxISEM-transparent.png")
 				#self.instructionText("Select a Game Mode", subimg="static/images/ECIUxISEM-transparent.png")
 				self.instructionText("Select a Game Mode", subimg="static/images/ISEM-only.png")
-				self.img.paste(logo, (self.w//2-350, self.h//2-350//2))
+				#self.img.paste(logo, (self.w//2-350, self.h//2-350//2))
+				self.centralImage(logo)
 			case "trickshots":
 				self.instructionText("Select a Trickshot")
 			case "kp2":
@@ -282,18 +540,26 @@ class BilliardBall:
 	"""Class to store each Billiard Balls graphical attributes
 
 	Each ball is initiated with its number with number 16 being the white ball. Number 1-7 are full, 8 is black, 9-15 are half.
+
+	Special balls are dummy (17), correct (18) and incorrect (19)
 	"""
-	colors = ["#f7d339","#1f419f","#e44c23","#5d1c8f","#f89348","#17953b","#c71517","#20201e","#f7d339","#1f419f","#e44c23","#5d1c8f","#f89348","#17953b","#c71517","#d5d1c5","#2cff05"]#"#fb48c4"] # the last entry is a dummy ball color (neon pink)
+	white = "#d5d1c5"
+	colors = ["#f7d339","#1f419f","#e44c23","#5d1c8f","#f89348","#17953b","#c71517","#20201e","#f7d339","#1f419f","#e44c23","#5d1c8f","#f89348","#17953b","#c71517", white, "#058aff", "#69f902", "#f9021f"]#"#fb48c4"] # the last entry is a dummy ball color (neon pink)
+
 
 	def __init__(self, n):
+		unique_map = {
+			"eight": 8,
+			"white": 16,
+			"dummy": 17,
+			"correct": 18,
+			"incorrect": 19
+		}
+
 		current_dir = os.path.dirname(__file__) # finding the Roboto-Black.ttf/navigating the dirs
 		self.fontpath = current_dir + "/../Roboto-Black.ttf"
 
-		if n == "white":
-			n = 16
-		elif n == "eight":
-			n = 8
-		n = int(n)
+		n = int(n) if n not in unique_map.keys() else unique_map[n]
 		self.indexNumber = n
 		self.n = n if n != 16 and n != 17 else "" # empty string for the white and dummy ball
 		self.type = "half" if (n>8 and n<16) else "full"
@@ -303,7 +569,7 @@ class BilliardBall:
 			self.type = "white"
 
 		self.color = self.colors[n-1]
-		self.white = self.colors[-2]
+		#self.white = self.colors[-2]
 
 
 	def getImg(self, d):
@@ -324,10 +590,10 @@ class BilliardBall:
 			draw.rectangle((0,4*d//5,d,d), fill=self.white, outline=self.white)
 			draw.ellipse((-d//2,-d//2,3*d//2,3*d//2), outline="#00000000", width=d//2)
 
-		if self.indexNumber != 17: # do not draw a white inner circle for dummy balls
+		if self.indexNumber < 17: # do not draw a white inner circle for dummy/special balls
 			draw.ellipse((d//4,d//4, 3*d//4, 3*d//4), fill=self.white, outline=self.white) # inner white circle
-		_,_, w, h = draw.textbbox((0,d//20), str(self.n), font = self.font)
-		draw.text(((d-w)//2, (d-h)//2), str(self.n), font=self.font, fill="black")
+			_,_, w, h = draw.textbbox((0,d//20), str(self.n), font = self.font)
+			draw.text(((d-w)//2, (d-h)//2), str(self.n), font=self.font, fill="black")
 		draw.ellipse((0,0,d,d), outline=self.white) # draw a white circle around it (good for balls with weak colors)
 
 		return img
@@ -458,7 +724,7 @@ class Trickshot:
 if __name__ == "__main__":
 	#data = {"1": (400,300), "2": (654,76), "16": (1200,900), "14": (1800,400), "8": (700,300), "5": (588,833)}
 	g = GameImage(phys=0.5, size=(2230,1115))
-	g.instructionText("Platziere die Kugeln auf den Projektionen")
+	g.instructionText("Platziere die **Kugeln** auf den Projektionen")
 	g.nameTeamText("Mathis", "ISEM")
 	#g.placeAllBalls(data)
 	#g.drawArrow((100,100),(300,600))

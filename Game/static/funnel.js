@@ -1,47 +1,15 @@
 // Fragen, Optionen und Inputfelder fÃ¼r den Funnel
 const funnelQuestions = [
     {
-      question: "1. Wähle den Modus aus",
+      question: "Wähle den Modus aus",//"1. Wähle den Modus aus",
       name: "mode",
       type: "radio",
       options: [
-        { icon: "fa-globe", text: "Billard standortverteilt spielen", submitTo: "./sites/gameonline"}, // eventually follows: "location", when we have more than one other location
-        { icon: "fa-location-dot", text: "Billard lokal spielen", submitTo: "./sites/gamelocal"},
-        { icon: "fa-wand-magic-sparkles", text: "Trickshots üben", submitTo: "./sites/trickshots"},
-        { icon: "fa-clipboard", text: "Prüfungsmodus", follows: "exam-selection"}
-      ]
-    },
-    /*{
-      question: "2. Wähle den anderen Standort aus",
-      name: "location",
-      type: "radio",
-      options: [
-        { icon: "fa-people-group", text: "München" },
-        { icon: "fa-users", text: "Gern in Kleingruppen, in denen man sich austauschen kann" },
-        { icon: "fa-comments", text: "Der Austausch ist sehr wichtig, die Arbeit erledige ich dann effizienter allein." },
-        { icon: "fa-user", text: "Am liebsten arbeite ich allein meine Aufgaben ab" }
-      ]
-    },*/
-    {
-      question: "2. Wähle deinen Spielernamen aus.", // Selector for online play
-      name: "single-player-selection",
-      isAfter: "mode", // zu faul für Rückwärtssuche
-      type: "selection-dynamic",
-      options: "/v1/getlocalplayers",
-      enter: [
-        { name: "Dein Name", team: "Dein Team"}
-      ]
-    },
-    {
-      question: "2. Wählt die Spieler aus",
-      name: "two-player-selection",
-      isAfter: "mode",
-      type: "inputs",
-      fields: [
-        { label: "1. Name ", type: "text", name: "name1", placeholder: ""},
-        { label: "1. Team ", type: "text", name: "team1", placeholder: ""},
-        { label: "2. Name ", type: "text", name: "name2", placeholder: ""},
-        { label: "2. Team ", type: "text", name: "team2", placeholder: ""},
+        { icon: "fa-globe", text: "Billard standortverteilt spielen", submitTo: "./gamemode/online_game"}, // eventually follows: "location", when we have more than one other location
+        { icon: "fa-location-dot", text: "Billard lokal spielen", submitTo: "./gamemode/local_game"},
+        //{ icon: "fa-wand-magic-sparkles", text: "Trickshots üben", submitTo: "./sites/trickshots"},
+        { icon: "fa-robot", text: "KP II", submitTo: "./gamemode/kp2"}
+        //{ icon: "fa-clipboard", text: "Prüfungsmodus", follows: "exam-selection"}
       ]
     },
     {
@@ -54,16 +22,6 @@ const funnelQuestions = [
         { icon: "fa-brain", text: "LAT", submitTo: "./sites/lat"},
         //{ icon: "fa-mountain", text: "Gute Noten standen bei mir im Vordergrund. Mit viel Engagement habe ich es zu guten Ergebnissen gebracht." },
         //{ icon: "fa-star", text: "Sehr gute Noten zu erreichen, ist mir schon immer leichtgefallen." }
-      ]
-    },
-    {
-      question: "6. Wie kÃ¶nnen wir Dich erreichen?",
-      name: "kontakt",
-      type: "inputs",
-      fields: [
-        { label: "Dein Name *", type: "text", name: "name", placeholder: "Max Mustermann" },
-        { label: "Deine E-Mail-Adresse *", type: "email", name: "email", placeholder: "Max@Mustermann.de" },
-        { label: "Deine Telefonnummer *", type: "tel", name: "telefon", placeholder: "+49 151 ..." }
       ]
     }
   ];

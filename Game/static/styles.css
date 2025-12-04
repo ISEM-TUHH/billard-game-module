@@ -6,6 +6,8 @@ body {
     background-color: #fff;
     margin: 0;
     padding: 0;
+    /*display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));*/
   }
 
 header {
@@ -64,7 +66,7 @@ header .logo img {
   margin: 0.5rem;
 }
 
-/* CSS Grid fÃ¼r Antwortoptionen */
+/* CSS Grid fuer Antwortoptionen */
 .option-boxes {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -72,7 +74,7 @@ header .logo img {
 }
 
 .option-box {
-  background: #f1f1f1;
+  background: #e1e1e1;
   padding: 1.5rem;
   text-align: center;
   border-radius: 8px;
@@ -197,15 +199,33 @@ input[type="radio"]:checked + .option-box {
   }
 }
 
-.col { /* column class for 2 cols */
-  float: left;
-  width: 47%;
+.col {
+  float: right;
+  width: 94%;
   padding: 2rem;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   margin: 1rem;
   box-sizing: border-box;
-  vertical-align: top;
+  vertical-align: top; 
+}
+
+#right-column, #left-column {
+  width: 50%;
+  float: left;
+}
+
+.col-left {/*
+  left: 20px;
+  position: absolute;*/
+  float: left;
+  width: 94%;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  margin: 1rem;
+  box-sizing: border-box;
+  /*vertical-align: top;*/
 }
 
 .button-list {
@@ -220,7 +240,7 @@ input[type="radio"]:checked + .option-box {
 }
 .button-list label,
 .cool-label  {
-  background: #f1f1f1;
+  background: #e1e1e1;
   padding: 0.5rem;
   text-align: center;
   border-radius: 8px;
@@ -232,7 +252,7 @@ input[type="radio"]:checked + .option-box {
   margin: 5px;
 }
 .button-list input[type="number"] {
-  background: #f1f1f1;
+  background: #e1e1e1;
   padding: 0.5rem;
   text-align: center;
   border-radius: 8px;
@@ -255,13 +275,17 @@ input[type="radio"]:checked + .option-box {
   border-color: #00C1D4;
 }
 .button-list input[type="checkbox"]:disabled+label{
-  background: #f1f1f1;
+  background: #e1e1e1;
   border: 2px solid transparent;
   color: #678ea9;
   cursor: not-allowed;
 }
 
 /* podium */
+
+.new-history-entry {
+  background-color: #ff4f4f;
+}
 
 .podium-container {
     display: flex;
@@ -298,18 +322,58 @@ input[type="radio"]:checked + .option-box {
 }
 
 .table-div {
+    width: 50%;
+    box-sizing: border-box;
     overflow: auto;
+    float: left;
+    padding: 2.5rem;
+    text-align: center;
+    align-items: center;
     /*height: 100px;*/
 }
-th{
-    text-align: left;
+.table-div table {
+  margin: 0 auto; /* centering the table in table-div */
+}
+
+.table-div table tbody {
+  counter-reset: rowNumber;
+}
+.table-div table tbody tr::before {
+  display: table-cell;
+  counter-increment: rowNumber;
+  content: counter(rowNumber) ".";
+  padding: 5px;
+  text-align: right;  
+}
+.table-div table thead th {
+  background-color: #8bb6df;
+}
+
+th {
+  padding: 5px;
+}
+td {
+  padding: 5px;
 }
 tr:nth-child(even) {
-    background-color: #8bb6df;
+    background-color: #ccc;
 }
 tr:nth-child(odd) {
     background-color: #f1f1ee;
 }
+.table-div tbody tr:nth-of-type(1) {
+  background-color: #ffe400;
+  font-weight: bold;
+}
+.table-div tbody tr:nth-of-type(2) {
+  background-color: #dadbdd;
+  font-weight: bold;
+}
+.table-div tbody tr:nth-of-type(3) {
+  background-color: #db8a2e;
+  font-weight: bold;
+}
+
 
 #home-button {
   font-size: 2rem;
@@ -349,7 +413,7 @@ tr:nth-child(odd) {
 for ball selection 
 */
 #ball-selector label {
-  background: #f1f1f1;
+  background: #e1e1e1;
   padding: 0.5rem;
   text-align: center;
   border-radius: 8px;
@@ -372,14 +436,14 @@ input[type="radio"] {
 /*
  Mode selection
 */
-.option-boxes {
+/*.option-boxes {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
-}
-.mode {
+}*/
+/*.mode {
   display: none;
-}
+}*/
 
 fieldset input[type="button"] {
   background: #f1f1f1;
@@ -397,4 +461,86 @@ fieldset input[type="button"]:hover {
   background-color: #e0f7fa;
   /*border-color: #00C1D4;*/
   border: 2px solid #00C1D4;
+}
+
+
+/* COLLAPSIBLE, EXPANDING, GROWING BOXES */
+
+.collapsible {
+  background-color: #777;
+  color: white;
+  cursor: pointer;
+  padding: 18px;
+  width: 100%;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: 15px;
+}
+
+.collapsible-content {
+  padding: 0 18px;
+  /*display: none;*/
+  background-color: #f1f1f1;
+
+  /* Animation */
+  -moz-transition: height .3s;
+  -ms-transition: height .3s;
+  -o-transition: height .3s;
+  -webkit-transition: height .3s;
+  transition: height .3s;
+  height: 0;
+  overflow: hidden;
+}
+
+.collapsible-content hr {
+  border: 1px solid #9b9b9e;
+}
+
+.deactivated {    
+  pointer-events: none;
+  opacity: 0.4;
+}
+
+.results {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+/* gamemode result boxes */
+.results .open-game { /* unplayed */
+  border-radius: 10px;
+  border: 2px solid black;
+  background-color: #e1e1e1;
+  padding: 10px;
+  margin: 0 12px;
+  opacity: 0.4; /* deactivated look */
+}
+
+.results .current-game {
+  border-radius: 10px;
+  border: 2px solid #e1e1e1;
+  background-color: #e1e1e1;
+  padding: 10px;
+  margin: 0 12px;
+  opacity: 1;
+}
+
+.results .finished-game {
+  border-radius: 10px;
+  border: 2px solid #38b000;
+  background-color: #9ef01a;
+  padding: 10px;
+  margin: 0 12px;
+  opacity: 1;
+}
+
+.results .failed-game {
+  border-radius: 10px;
+  border: 2px solid #FF5555;
+  background-color: #FF937E;
+  padding: 10px;
+  margin: 0 12px;
+  opacity: 1;
 }

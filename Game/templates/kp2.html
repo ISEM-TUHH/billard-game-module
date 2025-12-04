@@ -1,18 +1,38 @@
-{% set title = "Schlag das ISEM" %}
 {% extends "base.html" %}
 {% block content %}
-    <form name="round" id="roundForm" action="" method="POST">
+    <form name="round" id="roundForm" action="" method="POST" class="contains-columns">
       <!-- Begin collecting information on the rounds to post in the end -->
-      <section id="user-info" class="col">
+      <section id="session-info" class="col global-config">
+        <fieldset>
+          <legend>Game configurations</legend>
+          <label for="event-run">Semester:</label><input type="text" placeholder="WS25/26" id="semester" name="semester">
+          <label for="attestation">Attestation:</label><input type="number" placeholder="1" id="attestation" name="attestation" min="1" max="3">
+          <br>
+          <label for="mystery-challenge">Mystery Challenge:</label>
+          <select id="mystery-challenge" name="mystery-challenge">
+            {% for challenge in mystery_challenges %}
+            <option value="{{ challenge }}">{{ challenge }}</option>
+            {% endfor %}
+          </select>
+          <label for="number_teams"># of Teams:</label><input type="number" name="number_teams" id="number_teams" min="1">
+
+        </fieldset>
+      </section>
+
+
+      <section id="user-info" class="col global-config">
         <fieldset>
           <legend>Enter your details</legend>
           <label for="person-name">Your name: </label>
-          <input type="text" placeholder="Your name" id="person-name">
+          <input type="text" placeholder="Your name" id="person-name" name="player">
           <br><br>
           <label for="team-name">Name of your team: </label>
-          <input type="text" list="teams" placeholder="Team name" id="team-name" name="team-name">
+          <input type="text" list="teams" placeholder="Team name" id="team-name" name="team">
           <datalist id="teams">
-            <option value="ISEM"></option>
+            {% for team in teams %}
+            <option value="{{ team }}"></option>
+            {% endfor %}
+            <!--<option value="ISEM"></option>
             <option value="spica"></option>
             <option value="WBTI"></option>
             <!--<option value="Coaches"></option>
@@ -22,132 +42,127 @@
         </fieldset>
       </section>
 
-      <section id="mode-select" class="col">
-        <div>
-          <!--<div class="section-heading">
-            <h2>Select your mode</h2>
-          </div>-->
-          <div class="funnel-steps">
-            <fieldset id="mode-selector-radios">
-              <legend>Choose your current mode</legend>
-              <div class="option-boxes">
-                <label class="option-box">
-                  <i class="fa-solid fa-bullseye"></i>
-                  Precision
-                  <input type="radio" name="mode" value="precision">
-                </label>
-                <label class="option-box">
-                  <i class="fa-solid fa-forward"></i>
-                  Distance
-                  <input type="radio" name="mode" value="distance">
-                </label>
-                <label class="option-box">
-                  <i class="fa-solid fa-burst"></i>
-                  Break
-                  <input type="radio" name="mode" value="break">
-                </label>
-                <label class="option-box">
-                  <i class="fa-solid fa-wand-magic-sparkles"></i>
-                  Trickshot
-                  <input type="radio" name="mode" value="trickshot">
-                </label>
-              </div>
-            </fieldset>
-          </div>
+      <section id="precision" class="col mode">
+        <button type="button" class="collapsible">Precision</button>
+        <div class="collapsible-content">
+          <fieldset>
+            <legend>Precision</legend>
+            Get as close as possible to the marking on the field. You have five tries, only the best one influences your score. Decreasing the difficulty increases the penalty for missing!
+            <div class="results">
+              {% for n in precision_results %}
+              <div class="open-game">Try {{ n }}</div>
+              {% endfor %}
+            </div>
+            <hr>
+            <div class="button-list setting">
+              <!--<input type="range" min="0" max="2" value="1" id="prec-difficulty">
+              <label for="prec-difficulty" data-og="Regular: x15">Regular: x15</label>-->
+              <input type="range" min="0" max="2" value="1" id="difficulty" name="difficulty">
+              <label for="difficulty" data-og="Medium: x15" class="output">Medium, x15</label>
+            </div>
+            <hr>
+            {{ precision_flow|safe }}
+            <hr>
+            <!--<div class="button-list step">
+              <input type="checkbox" value="1st try" id="prec1" class="prec-checkbox">
+              <label for="prec1" data-og="1">1</label>
+              <input type="checkbox" value="2nd try" id="prec2" class="prec-checkbox">
+              <label for="prec2" data-og="2">2</label>
+              <input type="checkbox" value="3rd try" id="prec3" class="prec-checkbox">
+              <label for="prec3" data-og="3">3</label>
+              <input type="checkbox" value="4th try" id="prec4" class="prec-checkbox">
+              <label for="prec4" data-og="4">4</label>
+              <input type="checkbox" value="5th try" id="prec5" class="prec-checkbox">
+              <label for="prec5" data-og="5">5</label>
+            </div>-->
+
+
+          </fieldset>
         </div>
+        <!--<script src="{{ url_for('static', filename='gamemodes/precision.js') }}"></script>-->
       </section>
 
-      <section id="precision" class="col mode"><fieldset>
-        <legend>Precision</legend>
-        Get as close as possible to the marking on the field. You have three tries, only the best one influences your score. Decreasing the difficulty increases the penalty for missing!
-        <div class="button-list">
-          <input type="range" min="0" max="2" value="1" id="prec-difficulty">
-          <label for="prec-difficulty" data-og="Regular: x15">Regular: x15</label>
+      <section id="distance" class="col mode">
+        <button type="button" class="collapsible">Distance</button>
+        <div class="collapsible-content">
+          <fieldset>
+            <legend>Distance</legend>
+            Cover as much distance as possible from one hit. Manually count and enter the number of collisions with the border. You have five tries, the best of all goes into your score.
+            <div class="results">
+              {% for n in distance_results %}
+              <div class="open-game">Try {{ n }}</div>
+              {% endfor %}
+            </div><!--<br><br>-->
+            <hr>
+            {{ distance_flow|safe }}
+            <hr>
+          </fieldset>
         </div>
+        <!--<script src="{{ url_for('static', filename='gamemodes/distance.js') }}"></script>-->
+      </section>
 
-        <div class="button-list">
-          <input type="checkbox" value="1st try" id="prec1" class="prec-checkbox">
-          <label for="prec1" data-og="Measure 1st try">Measure 1st try</label>
-          <input type="checkbox" value="2nd try" id="prec2" class="prec-checkbox">
-          <label for="prec2" data-og="Measure 2nd try">Measure 2nd try</label>
-          <input type="checkbox" value="3rd try" id="prec3" class="prec-checkbox">
-          <label for="prec3" data-og="Measure 3rd try">Measure 3rd try</label>
+      <section id="break" class="col mode">
+        <button type="button" class="collapsible">Break</button>
+        <div class="collapsible-content">
+          <fieldset>
+            <legend>Break</legend>
+            Sink as many balls as possible with one single hit from the base triangle formation. You have one try as this is solely a bonus task.
+            <hr>
+              <div class="results">
+                {% for n in break_results %}
+                <div class="open-game">Try {{ n }}</div>
+                {% endfor %}
+              </div>          
+            <hr>
+              {{ break_flow|safe }}
+            <hr>
+            <!--<div class="button-list step">
+              <input type="checkbox" id="break-button">
+              <label for="break-button" id="break-button-label" data-og="Count sunk balls">Count sunk balls</label>
+            </div>-->      
+            <div style="display: none;">
+              <!-- Results get pasted here (invisible) -->
+            </div>
+          </fieldset>
         </div>
-        <div style="display: none;" id="prec-storage">
-          <!-- Results get pasted here (invisible) -->
-        </div>
-
-      </fieldset></section>
-
-      <section id="distance" class="col mode"><fieldset>
-        <legend>Distance</legend>
-        Cover as much distance as possible from one hit. Manually count and enter the number of collisions with the border. You have three tries, the sum of all goes into your score. Please mark your starting position in the beginning.
-        <div class="button-list">
-          
-          <label><!--for="marker-start-radio" onclick="current_ball='marker-start';">-->
-            <input type="radio" name="current_ball" value="marker-start" id="marker-start-radio"><!--onchange="update_cur_ball()">-->
-            Place start marker
-          </label>
-        </div>
-
-        <div class="button-list">
-          <div>  
-            <input type="number" placeholder="" id="dist1c" value="" class="collision-counter" autocomplete="off" name="aaa">
-            <input type="checkbox" value="Measure 1st try" id="dist1" disabled class="dist-checkbox">
-            <label for="dist1" id="dist1l" data-og="Measure 1st try">Measure 1st try</label>
-          </div>
-          <div>
-            <input type="number" placeholder="" id="dist2c" value="" class="collision-counter" autocomplete="off" name="aaa">
-            <input type="checkbox" value="Measure 2nd try" id="dist2" disabled class="dist-checkbox">
-            <label for="dist2" id="dist2l" data-og="Measure 2nd try">Measure 2nd try</label>
-          </div>
-          <div>
-            <input type="number" placeholder="" id="dist3c" value="" class="collision-counter" autocomplete="off" name="aaa">
-            <input type="checkbox" value="Measure 3rd try" id="dist3" disabled class="dist-checkbox">
-            <label for="dist3" id="dist3l" data-og="Measure 3rd try">Measure 3rd try</label>
-          </div>
-        </div>
-        <div style="display: none;" id="dist-storage">
-          <!-- Results get pasted here (invisible) -->
-        </div>
-      </fieldset></section>
-
-      <section id="break" class="col mode"><fieldset>
-        <legend>Break</legend>
-        Sink as many balls as possible with one single hit from the base triangle formation. You have one try as this is solely a bonus task.
-        <div class="button-list">
-          <input type="checkbox" id="break-button">
-          <label for="break-button" id="break-button-label" data-og="Count sunk balls">Count sunk balls</label>
-        </div>        
-        <div style="display: none;">
-          <!-- Results get pasted here (invisible) -->
-        </div>
-      </fieldset></section>
+        <!--<script src="{{ url_for('static', filename='gamemodes/break.js') }}"></script>-->
+      </section>
 
 
-      <section id="trickshot" class="col mode"><fieldset>
-        <legend>Trickshot</legend>
-        Place the balls as projected and try to sink as many balls as possible in one hit by following the trickshot hints.
-        <div class="button-list">
-          <!--<input id="trickshot-load" value="Load trickshot">
-          <label for="trickshot-load" id="trickshot-load-label">Load Trickshot</label>-->
-          <input type="checkbox" id="trickshot-button">
-          <label for="trickshot-button" id="trickshot-button-label" data-og="Count sunk balls">Count sunk balls</label>
-        </div>        
-        <div style="display: none;">
-          <!-- Results get pasted here (invisible) -->
+      <section id="longest_break" class="col mode">
+        <button type="button" class="collapsible">Longest Break</button>
+        <div class="collapsible-content">
+          <fieldset>
+            <legend>Longest Break</legend>
+            Place the balls as projected and try to sink as many balls as possible in consecutive shots. If no ball is sunk in a round, the game is over.
+            <!--<div class="button-list step">
+              <input type="checkbox" id="trickshot-button">
+              <label for="trickshot-button" id="trickshot-button-label" data-og="Count sunk balls">Count sunk balls</label>
+            </div>-->            
+            <div class="results">
+              {% for n in longest_break_results %}
+              <div class="open-game">Try {{ n }}</div>
+              {% endfor %}
+            </div><!--<br><br>-->
+            <hr>
+            {{ longest_break_flow|safe }}
+            <hr>
+          </fieldset>
         </div>
-      </fieldset></section>
+        <!--<script src="{{ url_for('static', filename='gamemodes/longest_break.js') }}"></script>-->
+      </section>
 
     </form>
     
   
-  <section id="submit-round" class="col">
+    <section id="submit-round" class="col">
       Submit your results: <input type="button" value="submit" id="submit-button"><br>
-      <div id="results"><!-- Your total score is: 1870 points, rank 3/10--></div> 
+      <div id="result-overview"><!-- Your total score is: 1870 points, rank 3/10--></div><br>
+      
     </section>
+    <script src="{{ url_for('static', filename='kp2_submit.js') }}"></script>
 
-    <section id="scoreboard" class="col">
+    <!--<section id="scoreboard" class="col-left">
       <fieldset id="single">
         <legend>Individual</legend>
         <div id="podium-single", class="podium-container">
@@ -197,8 +212,9 @@
         </div>
         <div id="table-team" class="table-div">Table gets put here...</div>
       </fieldset>
-    </section>
+    </section>-->
 
-    <script src="{{ url_for('static', filename='kp2.js') }}"></script>
+    <!--<script src="{{ url_for('static', filename='kp2.js') }}"></script>-->
+    <script src="{{ url_for('static', filename='kp2Controller.js') }}"></script>
 
 {% endblock %}

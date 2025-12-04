@@ -15,13 +15,17 @@ def forward_coords(self):
 
     This prevents the user from having to directly connect to the camera module. Also updates the beamer with a current game image and overlays depending on the current mode.
     """
+    self.beamer.play_sound("please_dont_touch_the_balls")
     self.beamer_off() # project a black screen before taking the image so that the proection cant influence the Camera AI.
-    time.sleep(1.5)
+    time.sleep(0.1)
     
-    camera = self.getModuleConfig("camera")
-    api = f"http://{camera['ip']}:{camera['port']}/v1/coords"
-    response = requests.get(api)
-    res = response.json()
+    #camera = self.getModuleConfig("camera")
+    #api = f"http://{camera['ip']}:{camera['port']}/v1/coords"
+    #response = requests.get(api)
+    #res = response.json()
+
+    res = self.camera.get_coords()
+    self.beamer.play_sound("finished")
 
 
     if self.supermode in ["game-local", "kp2"]:
@@ -30,14 +34,17 @@ def forward_coords(self):
         self.submode = "round"
 
     # generate an image and place it on the beamer
-    self.beamer_make_gameimage(coords = res)
+    self.gameimage.update_definition({"type": "balls", "coords": res})
+    self.beamer.push_image(self.gameimage.getImageCV2())
 
     return jsonify(res)
 
 def camera_save_image(self):
-    """ Save the current image and (if passed) coordinates of the balls for AI training later on """
+    """ OUTDATED Save the current image and (if passed) coordinates of the balls for AI training later on """
     camera = self.getModuleConfig("camera")
     api = f"http://{camera['ip']}:{camera['port']}/v1/savepic"
+
+    assert "Old method camera_save_image (_camera_interface.py) was called. Replace with self.camera.save_image()"
 
     # coordinates of balls
     try:

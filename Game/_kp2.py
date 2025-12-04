@@ -22,8 +22,8 @@ def get_site_kp2(self):
     self.list_trickshots() # cache all the trickshots
     self.live_value = "Welcome to the final challenge!"
 
-    self.beamer_make_gameimage()
-    return render_template("kp2.html")
+    #self.beamer_make_gameimage()
+    return self.render_template_camera("kp2.html")
 
 def enter_round_kp2(self):
     #name = request.form.get("name")
@@ -101,7 +101,7 @@ def select_mode_kp2(self):
 
     self.live_value = ""
 
-    self.beamer_make_gameimage()
+    #self.beamer_make_gameimage()
 
     return mode
 
@@ -111,7 +111,7 @@ def kp2_set_precision_difficulty(self):
     res = request.json
     self.kp2_prec_difficulty = int(res["difficulty"])
 
-    self.beamer_make_gameimage()
+    #self.beamer_make_gameimage()
     return "Updated."
 
 def kp2_get_live_value(self):
@@ -124,7 +124,7 @@ def kp2_get_live_value(self):
         case "break" | "trickshot":
             self.live_value = f"{res['n']} "
     #print(self.live_value)
-    self.beamer_make_gameimage(self.game_coords)
+    #self.beamer_make_gameimage(self.game_coords)
     return "Live prec"
 
 def kp2_update_score_data_base(self):
