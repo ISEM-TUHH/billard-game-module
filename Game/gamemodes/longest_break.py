@@ -73,13 +73,15 @@ class LongestBreak(GameMode):
                     "type": "button",
                     "name": "keep", # this is the key in the returned json
                     "placeholder": "Keep",
-                    "value": "Keep" # this gets shown to the user
+                    "value": "Keep", # this gets shown to the user
+                    "class": "submit-step" # this enables the JS event to submit the step on click
                 },
                 {
                     "type": "button",
                     "name": "discard",
                     "placeholder": "Discard",
-                    "value": "Discard"
+                    "value": "Discard",
+                    "class": "submit-step"
                 }]
             ],
             "finished": [
@@ -97,7 +99,8 @@ class LongestBreak(GameMode):
                     "name": "next_try",
                     "id": "next_try",
                     "placeholder": "Next Try",
-                    "value": "Next Try"
+                    "value": "Next Try",
+                    "class": "submit-step"
                 }]
             ]
         }

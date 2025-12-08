@@ -85,7 +85,7 @@ class GameImage:
 				case "balls":
 					self.placeAllBalls(part["coords"])
 					if "draw_lines" in part.keys():
-						self.drawBallConnections(part["coords"])
+						self.drawBallConnectionsOld(part["coords"])
 				case "text":
 					self.instructionText(part["text"], subimg=(part["subimg"] if "subimg" in part.keys() else None))
 				case "team":
@@ -106,6 +106,8 @@ class GameImage:
 					self.arrow_bottom(**part) # bottom, orientation, length, head_with|line_width|color
 				case "arrow":
 					self.arrow(**part) # needs coords start, end. Otherwise takes same optional arguments as arrow_bottom
+				case "possible_shots":
+					self.drawBallConnections(**part)
 
 		return self.definition
 
@@ -134,8 +136,6 @@ class GameImage:
 
 		if ref is not None and (ref in [p["ref"] for p in self.definition] or ref in self.static):
 			index = next((index for (index, d) in enumerate(self.definition) if d["ref"] == ref), None)
-
-			print("GI index", index, "is none:", (index is None))
 
 			if ref in self.static and index is None:
 				val["ref"] = ref
@@ -235,7 +235,10 @@ class GameImage:
 		u = top - bot
 		length = np.linalg.norm(u)
 		orientation = np.angle(u[0] - 1j*u[1], deg=True) # gets the complex angle: -u[1] due to orientation of the coordinate system in PIL vs normal maths :)
-		if offset != 0: 
+		if 2*offset >= length:
+			#offset =
+			pass 
+		elif offset != 0: 
 			bot = bot + offset/length * u
 			length = length - 2*offset
 		
@@ -289,7 +292,7 @@ class GameImage:
 				#print(b)
 				self.placeBall(data[b], int(b))
 
-	def drawBallConnections(self, data, drawBalls=True):
+	def drawBallConnectionsOld(self, data, drawBalls=True):
 		""" Draw a line between the white ball an every other ball. If the white ball is not found on the image, exit.
 
 		:param data: coordinates as passed from the camera
@@ -330,6 +333,22 @@ class GameImage:
 
 		if drawBalls:
 			self.placeAllBalls(data2)
+
+	def drawBallConnections(self, shots, offset=35, line_width=6, head_width=12, **kwargs):
+		""" Takes the output of GameEngine.getShots and draws arrows accordingly. Each shot path gets the color of the ball it is supposed to sink (except for the black ball, which would not be visible)
+
+		Args:
+			shots (dict): output of GameEngine.getShots like {"1": {"hole": {"x": 123, "y": 123}, "ball": ..., "end-white": ..., "white": ...}, ...}
+			kwargs (optional): arguments passed to GameImage.arrow()
+		"""
+		offset = 35 # 35mm offset to the start and end of the arrow from the passed coordinates
+		for ballName, shot in shots.items():
+			color = BilliardBall.getColor(ballName)
+			if ballName == "eight":
+				color = "#FFFFFF"
+			print("drawBallConnections:", ballName, color)
+			self.arrow(shot["white"], shot["end-white"], offset=offset, color=color, line_width=line_width, head_width=head_width, **kwargs)
+			self.arrow(shot["ball"], shot["hole"], offset=offset, color=color, line_width=line_width, head_width=head_width, **kwargs)
 
 	def instructionText(self, text, subimg=None):
 		"""Place text on top and flipped on the bottom of the image. Font size is chosen automatically.
@@ -545,21 +564,21 @@ class BilliardBall:
 	"""
 	white = "#d5d1c5"
 	colors = ["#f7d339","#1f419f","#e44c23","#5d1c8f","#f89348","#17953b","#c71517","#20201e","#f7d339","#1f419f","#e44c23","#5d1c8f","#f89348","#17953b","#c71517", white, "#058aff", "#69f902", "#f9021f"]#"#fb48c4"] # the last entry is a dummy ball color (neon pink)
-
+	unique_map = {
+		"eight": 8,
+		"white": 16,
+		"dummy": 17,
+		"correct": 18,
+		"incorrect": 19
+	}
 
 	def __init__(self, n):
-		unique_map = {
-			"eight": 8,
-			"white": 16,
-			"dummy": 17,
-			"correct": 18,
-			"incorrect": 19
-		}
+
 
 		current_dir = os.path.dirname(__file__) # finding the Roboto-Black.ttf/navigating the dirs
 		self.fontpath = current_dir + "/../Roboto-Black.ttf"
 
-		n = int(n) if n not in unique_map.keys() else unique_map[n]
+		n = int(n) if n not in self.unique_map.keys() else self.unique_map[n]
 		self.indexNumber = n
 		self.n = n if n != 16 and n != 17 else "" # empty string for the white and dummy ball
 		self.type = "half" if (n>8 and n<16) else "full"
@@ -571,6 +590,25 @@ class BilliardBall:
 		self.color = self.colors[n-1]
 		#self.white = self.colors[-2]
 
+	@classmethod
+	def getColor(cls, n):
+		""" Get the hexcode of the color of the ball based on the n value (number or str keys) """
+		n = int(n) if n not in cls.unique_map.keys() else cls.unique_map[n]
+		return cls.colors[n-1]
+
+	@classmethod
+	def getGroup(cls, n):
+		""" Get the group of the color of the ball based on the n value (number or str keys). Everything over 16 is dummy."""
+		n = int(n) if n not in cls.unique_map.keys() else cls.unique_map[n]
+		if n == 8:
+			group = "eight"
+		elif n == 16:
+			group = "white"
+		elif n > 16:
+			group = "dummy"
+		else:
+			group = "half" if (n>8 and n<16) else "full"
+		return group
 
 	def getImg(self, d):
 		"""Get the image of the ball with its number, half or full and color.

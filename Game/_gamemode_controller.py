@@ -43,9 +43,12 @@ def gamemode_controller(self):
     signal = out["signal"]
     match signal:
         case "finished":
-            # The gamemode finished as intended, ran through all steps: Collect score
-            hist = self.GAMEMODES[selected_gamemode].history(add=out["hist-package"])
-            del out["hist-package"] # not necessary, maybe passing it could be useful
+            # The gamemode finished as intended, ran through all steps: Collect score/history
+            if "hist-package" not in out.keys() and hasattr(self.GAMEMODES[selected_gamemode], "HISTORY"):
+                hist = self.GAMEMODES[selected_gamemode].history()
+            else:
+                hist = self.GAMEMODES[selected_gamemode].history(add=out["hist-package"])
+                del out["hist-package"] # not necessary, maybe passing it could be useful
             out["history"] = hist
 
             #self.GAMEMODES[selected_gamemode].reset()

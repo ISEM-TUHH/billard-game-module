@@ -40,6 +40,8 @@ function kp2Controller(jsonData, set_activity=true) {
                     })
                 }
             }
+
+            res.signal = res.kp2_signal; // inside the server, we distinguish between the signal and the kp2_signal of the output. In the frontend, this is not needed anymore. To be unified with singular gamemodes, we reassign the signal key.
             
             return res
         })

@@ -53,12 +53,12 @@
               <div class="open-game">Try {{ n }}</div>
               {% endfor %}
             </div>
-            <hr>
-            <div class="button-list setting">
+            <!--<hr>--> <!-- hidden like the entire setting -->
+            <div class="button-list setting" style="display: none"> <!-- Currently hide this setting, as it is not used -->
               <!--<input type="range" min="0" max="2" value="1" id="prec-difficulty">
               <label for="prec-difficulty" data-og="Regular: x15">Regular: x15</label>-->
-              <input type="range" min="0" max="2" value="1" id="difficulty" name="difficulty">
-              <label for="difficulty" data-og="Medium: x15" class="output">Medium, x15</label>
+              <input type="range" min="0" max="2" value="0" id="difficulty" name="difficulty" autocomplete='off'>
+              <label for="difficulty" data-og="Medium: x15" class="output">x15</label>
             </div>
             <hr>
             {{ precision_flow|safe }}

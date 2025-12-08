@@ -29,19 +29,47 @@ def classify_region(coord, region_img, translator):
     return region
 
 def project_line(coord, corner1, corner2):
-    """ Draws a mathematical line segment between the two corners (each in coords dict format) and finds the closest point to the passed coord on the line. If the projection would be outside the line segment, it returns the closest corner. """
-    c1, c2, c = coord_to_vec(corner1), coord_to_vec(corner2), coord_to_vec(coord)
+    """ Draws a mathematical line segment between the two corners and finds the closest point to the passed coord on the line. If the projection would be outside the line segment, it returns the closest corner. 
+    
+    Args:
+        coord, corner1, corner2 (dict|np.array): coordinates, either a dict like {"x": 123, "y": 456} or np.array([123, 456]). All must have the same type.
+    """
+    if type(corner1) is dict:
+        c1, c2, c = coord_to_vec(corner1), coord_to_vec(corner2), coord_to_vec(coord)
+    c1, c2, c = corner1, corner2, coord
     v = c2 - c1
     u = c - c1
 
     alpha = np.dot(v/np.linalg.norm(v), u/np.linalg.norm(v))
-    print("OUT of common_utils.project_line:", alpha, v, u, c1, c2, c)
     if alpha < 0:
         return corner1
     if alpha > 1:
         return corner2
     else:
         return vec_to_coord(c1 + alpha*v)
+
+def project_on_segment(coord, corner1, corner2):
+    """ Based on two ends of a line segment, this returns a True if the passed coord projects onto the line segment (between the points) and False otherwise. Additionally, returns the distance of the point to the line segment (if the first is True, else int(1e9)) 
+    
+    Args:
+        coord, corner1, corner2 (dict|np.array): coordinates, either a dict like {"x": 123, "y": 456} or np.array([123, 456]). All must have the same type.
+    """
+    if type(corner1) is dict:
+        c1, c2, c = coord_to_vec(corner1), coord_to_vec(corner2), coord_to_vec(coord)
+    c1, c2, c = corner1, corner2, coord
+
+
+    v = c2 - c1
+    u = c - c1
+    nv = np.linalg.norm(v)
+
+    alpha = np.dot(v/nv, u/nv)
+    if alpha < 0 or alpha > 1:
+        return False, int(1e9)
+    else:
+        distance = np.abs(np.linalg.norm(np.cross(c2-c1, c1-c))/nv)
+        return True, distance
+
 
 def get_border_intercept(coordStart, coordPass, size=(2230, 1115)):
     """ Determines a point somewhere outside the playing field on a line drawn from a starting point through a passing point. Used for drawing. """
@@ -71,14 +99,17 @@ def coords_report(coordsNew, coordsOld):
     appearedBalls = ballsNew - ballsOld
     keptBalls = ballsNew & ballsOld
 
-    legalSunkenBalls = sunkenBalls.copy() - {"white", "eight"}
+    legalSunkenBalls = sunkenBalls - {"white", "eight"}
+    legalBallsNew = ballsNew - {"white", "eight"}
     report = {
         "eight_sunk": "eight" in sunkenBalls,
         "white_sunk": "white" in sunkenBalls,
         "n_sunk": len(sunkenBalls),
         "n_sunk_legal": len(legalSunkenBalls), # only considering legal balls to sink
         "n_sunk_half": len([k for k in legalSunkenBalls if int(k) > 8 and int(k) < 16]), 
-        "n_sunk_full": len([k for k in legalSunkenBalls if int(k) < 8])
+        "n_sunk_full": len([k for k in legalSunkenBalls if int(k) < 8]),
+        "left_half": len([k for k in legalBallsNew if int(k) > 8 and int(k) < 16]), 
+        "left_full": len([k for k in legalBallsNew if int(k) < 8]),
     }
 
     return report

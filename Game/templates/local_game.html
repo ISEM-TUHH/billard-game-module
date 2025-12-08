@@ -38,22 +38,24 @@
         </fieldset>
       </section>-->
       <div class="mode">
-        <section id="player-details" class="col">
+        <section id="player-details" class="col step">
           <button type="button" class="collapsible">Player selection</button>
           <div class="collapsible-content">
             <fieldset>
               Enter your details!
               <hr>
-              <div class="button-list">
+              <div class="button-list single-player-details">
                 <!--<input type="range" min="0" max="2" value="1" id="prec-difficulty">
                 <label for="prec-difficulty" data-og="Regular: x15">Regular: x15</label>-->
                 <input type="text" name="player1" placeholder="Player 1">
                 <input type="text" name="team1" placeholder="Team 1" list="existing-teams">
+                <input type="checkbox" name="tooltips1" id="tooltips1"><label for="tooltips1">Show tooltips</label>
               </div>
               <hr>
-              <div class="button-list">
+              <div class="button-list single-player-details">
                 <input type="text" name="player2" placeholder="Player 2">
                 <input type="text" name="team2" placeholder="Team 2" list="existing-teams">
+                <input type="checkbox" name="tooltips2" id="tooltips2"><label for="tooltips2">Show tooltips</label>
               </div>
               <datalist id="existing-teams">
                 {% for team in teams %}
@@ -61,13 +63,44 @@
                 {% endfor %}
               </datalist>
               <hr>
-              <hr>
+              <div class="button-list">
+                <input type="button" name="local-game-player" class="submit-step" value="Start game">
+              </div>
             </fieldset>
           </div>
           <!--<script src="{{ url_for('static', filename='gamemodes/precision.js') }}"></script>-->
         </section>
 
+        <section id="shootout" class="col step">
+          <button type="button" class="collapsible">Shootout</button>
+          <div class="collapsible-content">
+            <fieldset>
+              Each player has one chance to get as close as possible to the blue circle. The winner gets to break.
+              <div class="results">
+                The first player can start
+              </div>
+              <hr>
+              <div class="button-list">
+                <input type="checkbox" id="local-game-shootout" name="local-game-shootout" class="submit-step"><label for="local-game-shootout">Submit</label>
+              </div>
+            </fieldset>
+          </div>
+        </section>
 
+        <section id="play" class="col step">
+          <button type="button" class="collapsible">Shootout</button>
+          <div class="collapsible-content">
+            <fieldset>
+              Play a normal game of billiards. After every hit, collect the coordinates of all balls.
+              <hr>
+              <div class="results">Play the break</div>
+              <hr>
+              <div class="button-list">
+                <input type="checkbox" id="local-game-play" name="local-game-play" class="submit-step"><label for="local-game-play">Submit</label>
+              </div>
+            </fieldset>
+          </div>
+        </section>
 
       </div>
 
@@ -80,5 +113,6 @@
     </section>
     <!--<script src="{{ url_for('static', filename='kp2_submit.js') }}"></script>-->
     <script src="{{ url_for('static', filename='vanillaController.js') }}"></script>
+    <script src="{{ url_for('static', filename='local_game.js') }}"></script>
 
 {% endblock %}

@@ -29,8 +29,8 @@ class Elo():
         nelo1 = elo1 + self.K*((1-outcome)-odd1)
         nelo2 = elo2 + self.K*(outcome-odd2)
 
-        players[0]["elo"] = nelo1
-        players[1]["elo"] = nelo2
+        players[0]["elo"] = round(nelo1)
+        players[1]["elo"] = round(nelo2)
         return players
 
     def propability(self, elo1, elo2): 

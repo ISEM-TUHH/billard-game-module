@@ -1,4 +1,5 @@
 from .common_utils import *
+from ..GameEngine import GameEngine
 #from Elo import Elo
 
 import numpy as np
@@ -15,7 +16,7 @@ class Game:
 
         self.active_player = None
         self.history = {
-            "start_time": datetime.datetime.now(),
+            "start_time": str(datetime.datetime.now()),
             "setup": {
                 "player1": player1.copy(),
                 "player2": player2.copy()
@@ -26,6 +27,8 @@ class Game:
         }
 
         self.gid = secrets.token_hex(32) # random 32 byte hexadecimal identifier
+
+        self.engine = GameEngine() # GameEngine object provides methods to get (direct) shot suggestions. They are only shown if the active player wants them to
 
     def change_player(self):
         self.inactive_player = self.player1 if self.active_player == self.player1 else self.player2
@@ -79,17 +82,19 @@ class Game:
         self.active_player["task"] = "break"
         self.inactive_player["task"] = "wait"      
         
-        return {"winner": self.active_player}
+        return {"winner": self.active_player, "distance1": distance1, "distance2": distance2}
 
     def evaluate_play(self, auth, coordinates):
         if not auth == self.active_player["token"]:
             return False # false player
 
         report = coords_report(coordinates, self.last_coordinates)
+        self.last_coordinates = coordinates
 
         player_name = self.active_player["name"]
         other_player_name = self.inactive_player["name"]
         message = player_name # This message tracks the reasoning of the round evaluation
+        short_message = ""
         img_definition = [
             {
                 "type": "balls",
@@ -124,7 +129,7 @@ class Game:
                 self.active_player["group"] = "striped"
                 self.inactive_player["group"] = "solid"
             else:
-                message += f"More solid than striped balls sunk ({report['n_sunk_full']} vs. {report['n_sunk_half']}), assigned group striped, play again"
+                message += f"More solid than striped balls sunk ({report['n_sunk_full']} vs. {report['n_sunk_half']}), assigned group solid, play again"
                 self.active_player["group"] = "solid"
                 self.inactive_player["group"] = "striped"
 
@@ -151,6 +156,11 @@ class Game:
 
             message += f"[{report['left_full']} solid and {report['left_half']} striped left] "
 
+            # debug
+            print("GAMEMODEL evaluate play: report: ", report)
+            print(" - active player:", self.active_player)
+            print(" - group key:", group_key, "wrong group key:", wrong_group_key, "group:", group)
+
             if self.active_player["left"] == 0:
                 self.active_player["task"] = "sink eight"
                 message += "[No more balls of own group left, now sink the eight] "
@@ -158,24 +168,25 @@ class Game:
             if report["eight_sunk"]:
                 if self.active_player["task"] is "sink eight":
                     # this player wins
+                    # define self.message which gets displayed on the table
+                    short_message = f"{self.active_player['name']} wins"
                     message += "Sunk eight and wins the game [END]"
-                    pass
                 else:
+                    short_message = f"{self.inactive_player['name']} wins since {self.active_player['name']} sunk the 8 Ball"
                     message += "Sunk eight when not supposed to, the other player wins [END]"
                     # this player loses
                     self.change_player # in the end, the active player should be the winner
-                    pass
             elif report["white_sunk"]:
                 message += "White ball sunk, the other player now places the ball in the rectangle and plays"
                 self.change_player()
                 img_definition = [
                     {
                         "type": "rectangle", # where to put the white ball
-                        "c1": {"x": 1500, "y": 10},
-                        "c2": {"x": 2100, "y": 1100}
+                        "c1": [1500, 10],
+                        "c2": [2100, 1100]
                     }
                 ]
-            elif report[wrong_group_key] != 0:
+            elif report["n_sunk_" + wrong_group_key] != 0:
                 # balls of the wrong group sunk
                 message += "Ball of the wrong group sunk, the other player now plays"
                 self.change_player()
@@ -187,22 +198,34 @@ class Game:
                 message += "Only sunk balls of own team, play again"
             
 
-        text1 = f'{self.player1["name"]} {7 - self.player1["left"]}' # example: "Mathis 7"
-        text2 = f'{7 - self.player2["left"]} {self.player2["name"]}'
+        text1 = f'{self.player1["name"]} ({self.player1["group"]}) {7 - self.player1["left"]}' # example: "Mathis 7"
+        text2 = f'{7 - self.player2["left"]} ({self.player2["group"]}) {self.player2["name"]}'
         if self.active_player is self.player1:
             text = f"**{text1}** : {text2}" # example: "**Mathis 7** : 6 Felix" will show as emphasized "Mathis 7" (bold or whatever is currently implemented in GameImage.instructionText) if it is Mathis turn
         else:
             text = f"{text1} : **{text2}**"
 
+        if self.active_player["tooltips"] and not "[END]" in message: # if the now active player wants to have tooltips, get and show them
+            group = self.active_player["group"] if self.active_player["left"] != 0 else "eight"
+            shots = self.engine.getShots(coordinates, group=group)
+            img_definition.append({"type": "possible_shots", "shots": shots})
+            self.history["outcome"] = {
+                "winner": self.active_player["name"], # maybe id?
+                "elo_exchange": 0 # dummy at the moment. TODO: add ELO system
+            }
+
         img_definition += [{
             "type": "text", "text": text
+        },{
+            "ref": "balls", "remove": True # do not display the balls
         }]
         
-        print(message)
+        print("GAME MODEL message:", message)
         self.history["rounds"].append({
-            "timestamp": datetime.datetime.now(),
+            "timestamp": str(datetime.datetime.now()),
             "message": message,
             "report": report,
             "coordinates": coordinates
         })
+        self.short_message = short_message
         return message, img_definition, action_list

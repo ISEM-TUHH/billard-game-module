@@ -17,7 +17,7 @@ def forward_coords(self):
     """
     self.beamer.play_sound("please_dont_touch_the_balls")
     self.beamer_off() # project a black screen before taking the image so that the proection cant influence the Camera AI.
-    time.sleep(0.1)
+    time.sleep(0.3)
     
     #camera = self.getModuleConfig("camera")
     #api = f"http://{camera['ip']}:{camera['port']}/v1/coords"

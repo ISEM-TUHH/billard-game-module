@@ -9,7 +9,7 @@ from .GameMode import GameMode
 class Precision(GameMode):
     """ The goal is to get as close as possible to the projected bullseye. """
 
-    def __init__(self, data_storage="", bullseye=[2230//4, 1115//2], settings={"difficulty": 1}):
+    def __init__(self, data_storage="", bullseye=[2230//4, 1115//2], settings={"difficulty": 0}):
         self.__file__ = __file__
 
         self.gamemode_name = "Precision"
@@ -18,7 +18,7 @@ class Precision(GameMode):
         self.bullseye_center = bullseye
 
         self.SETTINGS = settings
-        self.difficulty = settings["difficulty"]
+        self.difficulty = int(settings["difficulty"])
         self.penalty_factor = lambda: 5*(1+2*self.difficulty) # TODO: rework this formula
 
         self.state = "init"
@@ -28,11 +28,11 @@ class Precision(GameMode):
         self.last_coords = {}
 
         self.gameimage = GameImage()
-        self.gameimage.draw_from_dict(self.start_geometry(), draw=False)
+        self.gameimage.draw_from_dict(self.start_geometry(default_difficulty=self.difficulty), draw=False)
 
         self.TREE = {
             "init": [
-                lambda inp: self.check_starting_positions(inp, starting_positions=lambda: [self.start_points[int(self.difficulty)]]),
+                lambda inp: self.check_starting_positions(inp, starting_positions=lambda: [self.start_points[int(self.difficulty)]], update_gameimage=self.gameimage),
                 {"True": "strike", "False": "init"},
                 lambda: self.gameimage.definition,
                 ["Start"]

@@ -63,7 +63,7 @@ class KP2(GameMode):
         self.img_definiton = [ # TODO: outsource to config file?
             {
                 "type": "text",
-                "text": "Welcome to the KP2 challenge! Select a gamemode"
+                "text": "Welcome to the MDP2 challenge! Select a gamemode"
             },
             {
                 "type": "central_image",

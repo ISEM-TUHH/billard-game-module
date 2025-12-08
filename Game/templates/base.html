@@ -97,7 +97,7 @@
             <label><input type="radio" name="current_ball" value="ball-white">Weiß</label>
           </div>
 
-          <input type="button" value="Save image for AI training" id="ai-training-button">
+          <!--<input type="button" value="Save image for AI training" id="ai-training-button">-->
         </details>
       </section>
 
@@ -128,11 +128,19 @@
             Individual
             <table>
               <thead>
-                <tr><th></th><th>Player</th><th>Team</th><th>Score</th><th>Semester</th><th>Attestation</th></tr>
+                <tr><th></th>
+                  {% for column in single_columns %}
+                  <th>{{ column }}</th>
+                  {% endfor %}
+                </tr>
               </thead>
               <tbody>
                 {% for entry in single_table %}
-                <tr><td>{{ entry[1] }}</td><td>{{ entry[2] }}</td><td>{{ entry[0] }}</td><td>{{ entry[3] }}</td><td>{{ entry[4] }}</td></tr>
+                <tr>
+                  {% for e in entry %}
+                  <td>{{ e }}</td>
+                  {% endfor %}
+                </tr>
                 {% endfor %}
               </tbody>
             </table>

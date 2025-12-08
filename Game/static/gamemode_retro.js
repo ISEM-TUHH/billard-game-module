@@ -8,7 +8,11 @@ function getAllInputValues(container) {
     values = {}
     container.querySelectorAll("input").forEach((input, index) => {
         if (input.name != "") {
-            values[input.name] = input.value;
+            if (input.type === "checkbox") {
+                values[input.name] = input.checked;
+            } else {
+                values[input.name] = input.value;
+            }
         }
     })
     container.querySelectorAll("select").forEach((input, index) => {
@@ -32,7 +36,7 @@ function checkAllSet(values) {
 }
 
 function activate_step(gamemode, new_step, index=NaN) {
-    //console.log("ACTIVATE STEP", new_step, gamemode)
+    console.log("ACTIVATE STEP", new_step, gamemode)
     gamemode.querySelectorAll(".step").forEach((step, i) => {
         if (!isNaN(index)) {
             if (index === i) {
@@ -108,9 +112,9 @@ document.querySelectorAll(".mode").forEach((gamemode) => { // for all gamemodes:
                     }
                 }
                 if (values_available) {
-                    step.querySelector("input").disabled = false;
+                    step.querySelector("input.submit-step").disabled = false;
                 } else {
-                    step.querySelector("input").disabled = true
+                    step.querySelector("input.submit-step").disabled = true
                 }
 
             })
@@ -120,10 +124,10 @@ document.querySelectorAll(".mode").forEach((gamemode) => { // for all gamemodes:
         
         var fetchFun = getCoordsAndConfirm;
         var event_to_listen = "change";
-        submit_inputs = [step.querySelector("input[type=checkbox]")];
-        if (submit_inputs[0] != step.querySelector("input")) { // on special occasions like the longest break gamemode, we have interactions that dont need coordinates. They can be detected if the first input is not a checkbox (this is a definiton!!).
+        submit_inputs = [step.querySelector("input[type=checkbox].submit-step")];
+        if (submit_inputs[0] != step.querySelector("input.submit-step")) { // on special occasions like the longest break gamemode, we have interactions that dont need coordinates. They can be detected if the first input is not a checkbox (this is a definiton!!).
             var all_input_types = [];
-            step.querySelectorAll("input").forEach((otherInput) => {all_input_types.push(otherInput.type); })
+            step.querySelectorAll("input.submit-step").forEach((otherInput) => {all_input_types.push(otherInput.type); })
             if (all_input_types.every((v, i, arr) => v === arr[0])) { // if all input types are equal
                 if (all_input_types[0] === "button") {// if they are all buttons
                     submit_inputs = step.querySelectorAll("input[type=button]")
@@ -153,7 +157,7 @@ document.querySelectorAll(".mode").forEach((gamemode) => { // for all gamemodes:
                 fetchFun(e, jsonData)
                     .then((res) => {
                         //DOEVENTS = false;
-                        activate_step(gamemode, res.kp2_signal); // show the next step, disable the previous /////////////////////////////////////////////////////// HERE THE KP2 signal is chosen, TODO: unify with normal games?
+                        activate_step(gamemode, res.signal); // show the next step, disable the previous /////////////////////////////////////////////////////// HERE THE KP2 signal is chosen, TODO: unify with normal games?
                         if (step.id.split("-").slice(-1)[0] === "finished") {
                             // if this gamemode round is finished: reset all labels to their data-og value
 
@@ -167,26 +171,38 @@ document.querySelectorAll(".mode").forEach((gamemode) => { // for all gamemodes:
                                 element.checked = false;
                             })
                         } 
-                        if (res.kp2_signal === "finished") {
+                        if (res.signal === "finished") {
                             // update the result bar
-                            var element = gamemode.querySelector(".results").querySelectorAll("div")[res.was_round];//.querySelector(".open-game")// automatically selects the first available open game 
-                            console.log(element, res.was_round, res.score);
-                            if (res.score != -1) {
-                                element.innerText = res.message; // 
-                                element.classList.add("finished-game");
-                                element.classList.remove("open-game");
-                            } else {
-                                element.innerText = "0";
-                                element.classList.add("failed-game");
-                                element.classList.remove("open-game")
+                            var element = gamemode.querySelector(".results").querySelectorAll("div")[res.was_round];//.querySelector(".open-game")// automatically selects the first available open game
+                            if (res.hasOwnProperty("was_round")) {
+                                console.log(element, res.was_round, res.score);
+                                if (res.score != -1) {
+                                    element.innerText = res.message; // 
+                                    element.classList.add("finished-game");
+                                    element.classList.remove("open-game");
+                                } else {
+                                    element.innerText = "0";
+                                    element.classList.add("failed-game");
+                                    element.classList.remove("open-game")
+                                }
                             }
-
                         } else {
-                            if (res.hasOwnProperty("message") && e.target.labels.length > 0) {
-                                e.target.labels[0].innerText = res.message;
+                            if (res.hasOwnProperty("message")) {
+                                if (res.hasOwnProperty("log_to")) { // if the logging location is specified, write to that object (must have innerText property, so e.g. a button is not possible yet. Should be easy to add.). Logging location must be inside step container.
+                                    step.querySelector(res.log_to).innerText = res.message;
+                                } else if (e.target.labels.length > 0) {
+                                    e.target.labels[0].innerText = res.message;
+                                }
                             }
                             e.target.disabled = false;
                         }
+
+                        if (res.hasOwnProperty("history")) {
+                            var ev = new CustomEvent("update_scoreboard", {detail: res.history});
+                            //console.log("HISTORY EVENT", ev, ev.detail);
+                            window.dispatchEvent(ev);
+                        }
+
                         DOEVENTS = true;
                     })
             })

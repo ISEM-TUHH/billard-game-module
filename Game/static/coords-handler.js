@@ -191,14 +191,14 @@ function setManipulatedFlag(state) {
 
 
 // take an image if something didnt work out with the camera AI, so the AI can be trained on it
-saveImageButton = document.getElementById("ai-training-button");
+/*saveImageButton = document.getElementById("ai-training-button");
 saveImageButton.addEventListener("click", () => {
     fetch("/general/takeimage")
         .then((res) => res.json())
         .then((res) => {
             saveImageButton.value = "Click to save image. " + res["answer"];
         })
-})
+})*/
 
 // Keep the camera alive
 // setInterval(() => {fetch("http://134.28.20.53:5000/website/liveline");}, 55000) 

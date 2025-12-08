@@ -6,9 +6,11 @@
 
 function vanillaController(jsonData, set_activity=false) {
     // set_activity argument is only for compatability reasons, not used
-    jsonData["gmode"] = current_gamemode
+    jsonData["gmode"] = current_gamemode;
 
-    fetch("/gamemodecontroller", {
+    console.log("SEND:", jsonData); 
+
+    return fetch("/gamemodecontroller", {
         method: "POST",
         headers: {
             'Accept': 'application/json',
@@ -18,7 +20,7 @@ function vanillaController(jsonData, set_activity=false) {
     })
         .then((res) => res.json())
         .then((res) => {
-            console.log("SEND:", jsonData, "RECEIVED:", res);
+            console.log("RECEIVED:", res);
 
             if (res.hasOwnProperty("notification")) {
                 tempAlert(res.notification, 6000);

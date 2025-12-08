@@ -28,9 +28,13 @@ function update_scoreboard(histdata) {
         } else {
             coloring = "";
         }
+        text += "<tr" + coloring + ">";
+        for (let j = 0; j < sd[i].length; j++) {
+            text += "<td>" + sd[i][j] + "</td>";
+        }
+        text += "</tr>";
 
-
-        text += "<tr" + coloring + "><td>" + sd[i][1] + "</td><td>" + sd[i][2] + "</td><td>" + sd[i][0] + "</td><td>" + sd[i][3] + "</td><td>" + sd[i][4] + "</td></tr>";
+        //text += "<tr" + coloring + "><td>" + sd[i][0] + "</td><td>" + sd[i][1] + "</td><td>" + sd[i][2] + "</td><td>" + sd[i][3] + "</td><td>" + sd[i][4] + "</td></tr>";
     }
     //console.log("HISTORY:", histdata, "text:", text)
     singles.getElementsByTagName("tbody")[0].innerHTML = text
