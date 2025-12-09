@@ -36,7 +36,8 @@ def project_line(coord, corner1, corner2):
     """
     if type(corner1) is dict:
         c1, c2, c = coord_to_vec(corner1), coord_to_vec(corner2), coord_to_vec(coord)
-    c1, c2, c = corner1, corner2, coord
+    else:
+        c1, c2, c = corner1, corner2, coord
     v = c2 - c1
     u = c - c1
 
@@ -56,7 +57,8 @@ def project_on_segment(coord, corner1, corner2):
     """
     if type(corner1) is dict:
         c1, c2, c = coord_to_vec(corner1), coord_to_vec(corner2), coord_to_vec(coord)
-    c1, c2, c = corner1, corner2, coord
+    else:
+        c1, c2, c = corner1, corner2, coord
 
 
     v = c2 - c1

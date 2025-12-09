@@ -264,7 +264,7 @@ class KP2(GameMode):
         overview["Zone 1"] = int(np.sum([50 for x in precision.values() if x["distance"] < 22]))
         overview["Two Walls"] = 150 if np.all([x["collisions"] >= 2 for x in distance.values()]) else 0
         overview["Break"] = int(np.sum([200 for x in single_break.values() if x["sunk_legal"] >= 1]))
-        overview["Longest Break"] = int(np.sum([x["score"] for x in longest_break.values() if x["decision"] == "kept"])) # calculation done in gamemode
+        overview["Longest Break"] = int(np.sum([x["sunk_legal"] for x in longest_break.values() if x["decision"] == "kept"])) # calculation done in gamemode
 
         # Longest Distance: check if the current entry will be the final entry of the session. If true, check if it is the longest distance of all entries of the session and change the value. Otherwise, assign the 250p to the entry with the longest distance among the saved entries
         if len(session_hist) + 1 == int(self.history_base["number_teams"]):
@@ -295,9 +295,9 @@ class KP2(GameMode):
 
         
         # Check if passed
-        passed_precision = 2 == [x["distance"] <= 180 for x in precision.values()].count(True)
-        passed_distance = 2 == [x["collisions"] >= 2 for x in distance.values()].count(True)
-        passed_longestbreak = 2 == [x["sunk_legal"] >= 1 for x in longest_break.values()].count(True)
+        passed_precision = 2 <= [x["distance"] <= 180 for x in precision.values()].count(True)
+        passed_distance = 2 <= [x["collisions"] >= 2 for x in distance.values()].count(True)
+        passed_longestbreak = 2 <= [x["sunk_legal"] >= 1 for x in longest_break.values()].count(True)
         overview["Passed"] = 500 if (passed_precision and passed_distance and passed_longestbreak) else 0
 
         # Mystery challenge
@@ -315,7 +315,7 @@ class KP2(GameMode):
 
     def mystery_distance_4b(self, session=0, **kwargs):
         """ Fantastic Four: Hit 4 borders in (at least) one distance shot """
-        return 200 if max([x["collisions"] for x in session["distance"].values()]) >= 4 else 0
+        return 350 if max([x["collisions"] for x in session["distance"].values()]) >= 4 else 0
         
 
     def mystery_distance_500(self, session_hist=0, history_addons=0, **kwargs):

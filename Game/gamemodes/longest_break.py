@@ -10,7 +10,7 @@ from .GameMode import GameMode
 class LongestBreak(GameMode):
     """ The goal is to get the longest possible streak of sinking balls with each hit. """
 
-    def __init__(self, data_storage=None, can_discard=True, scored=2, tries=5, round_tracker=None):
+    def __init__(self, data_storage=None, can_discard=True, scored=2, tries=5, round_tracker=None, can_play_on=True):
         self.__file__ = __file__
 
         self.gamemode_name = "Longest Break" # this is the name of the gamemode. For the template, use this to lowercase and with all spaces as _
@@ -30,6 +30,7 @@ class LongestBreak(GameMode):
         self.round_tracker = round_tracker
         self.scored = scored
         self.can_discard = can_discard
+        self.can_play_on = can_play_on # if this round can be kept after the first hit
 
         self.last_coords = {"white": {"name": "white", "x": 100, "y": 100}}
 
@@ -127,11 +128,11 @@ class LongestBreak(GameMode):
             self.round_tracker[index] = 0
             self.HISTORY["decision"] = "kept" # dont change, kp2.score depends on it
             return "keep", {}, {"message": "Kept"}
-        self.score = -1
+        #self.score = -1 # keep the score, dont remove it
         self.message = "Discarded"
         self.round_tracker[index] = "x" #-1
         self.HISTORY["decision"] = "discarded"
-        return "discard", {}, {"message": "Discarded"}
+        return "discard", {}, {"message": f"{self.score} points", "discarded": True}
 
     def determine_hit(self, inp):
         """ Determines if a finished hit is valid: if a ball was sunk, stay in this state and add to score tracker, if no ball was sunk, progress to state finished """
@@ -147,9 +148,9 @@ class LongestBreak(GameMode):
         print(report)
         self.last_coords = coords
 
-        can_hit_again = True # if the player can make another strike
+        can_hit_again = self.can_play_on #True # if the player can make another strike
 
-        if report["eight_sunk"]:
+        if report["eight_sunk"] and report["left_full"] > 0:
             # if the black ball was sunk: end game, 0 points
             self.score = 0
             message = "Eight Ball sunk"
@@ -175,6 +176,10 @@ class LongestBreak(GameMode):
             self.score += report["n_sunk_full"] * score_full
             self.sunken_legal += report["n_sunk_full"]
             message = f"Score {self.score}, hit again!"
+        elif report["eight_sunk"] and report["left_full"] == 0:
+            self.score += score_full
+            message = "All possible balls sunk! Congrats!"
+            can_hit_again = False
         else:
             # if no full ball was sunk
             can_hit_again = False
@@ -210,15 +215,19 @@ class LongestBreak(GameMode):
             self.HISTORY["progress"] = []
         self.HISTORY["progress"].append(report) # this list will get serialized upon pd.json_normalize
 
+        forward_returns = {"message": message}
+
         if not can_hit_again:
             self.HISTORY["progress"] = str(self.HISTORY["progress"])
             self.HISTORY["end_reason"] = message
             self.HISTORY["sunk_legal"] = self.score
             message = f"{self.score} points"
+            forward_returns = {"message": message}
 
-            if self.is_first_hit:
+            if self.is_first_hit: # either if no ball was sunk or if this round cant continue, because it was never intended to go on beyond the first hit
                 index = self.round_tracker.index(None)
-                self.round_tracker[index] = 0
+                self.round_tracker[index] = "x"
+                forward_returns["discarded"] = True
 
         local_returns = {"gameimage-updates": gi_update}
         for g in gi_update:
@@ -226,7 +235,7 @@ class LongestBreak(GameMode):
         if can_hit_again == True:
             local_returns["sound"] = "hell-yeah"
 
-        return can_hit_again, local_returns, {"message": message}
+        return can_hit_again, local_returns, forward_returns
             
         
     def setup_next_round(self):
@@ -242,29 +251,32 @@ class LongestBreak(GameMode):
         finished = scores.count(0)
         if finished == self.scored:
             next_can_discard = True
-            next_can_play = False
+            #next_can_play = True #False
+            next_can_play_on = False
         elif unplayed == self.scored - finished:
             next_can_discard = False
-            next_can_play = True
+            #next_can_play = True
+            next_can_play_on = True
         else:
             next_can_discard = True
-            next_can_play = True
+            #next_can_play = True
+            next_can_play_on = True
 
         print("NEXT ROUND SETUP DEBUG")
         print("next_can_discard", next_can_discard)
-        print("next_can_play", next_can_play)
+        print("next_can_play_on", next_can_play_on)
         print("round_tracker", self.round_tracker)
         print("finished", finished)
         print("self.scored", self.scored)
 
 
-        if not next_can_play:
-            self.reset(inplace=True, can_discard=next_can_discard, round_tracker=self.round_tracker, scored=self.scored)
-            self.score = -1 # already specify as discarded round
-            return "skip_round", {}, {}
-        else:
-            self.reset(inplace=True, can_discard=next_can_discard, round_tracker=self.round_tracker, scored=self.scored)
-            return False, {}, {}
+        #if not next_can_play:
+        #    self.reset(inplace=True, can_discard=next_can_discard, round_tracker=self.round_tracker, scored=self.scored)
+        #    self.score = -1 # already specify as discarded round
+        #    return "skip_round", {}, {}
+        #else:
+        self.reset(inplace=True, can_discard=next_can_discard, can_play_on=next_can_play_on, round_tracker=self.round_tracker, scored=self.scored)
+        return False, {}, {}
 
 
     def start_geometry(self):

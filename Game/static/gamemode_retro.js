@@ -176,12 +176,12 @@ document.querySelectorAll(".mode").forEach((gamemode) => { // for all gamemodes:
                             var element = gamemode.querySelector(".results").querySelectorAll("div")[res.was_round];//.querySelector(".open-game")// automatically selects the first available open game
                             if (res.hasOwnProperty("was_round")) {
                                 console.log(element, res.was_round, res.score);
-                                if (res.score != -1) {
+                                if (!res.hasOwnProperty("discarded")) {
                                     element.innerText = res.message; // 
                                     element.classList.add("finished-game");
                                     element.classList.remove("open-game");
                                 } else {
-                                    element.innerText = "0";
+                                    element.innerText = res.message;
                                     element.classList.add("failed-game");
                                     element.classList.remove("open-game")
                                 }

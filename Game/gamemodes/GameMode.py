@@ -214,6 +214,8 @@ class GameMode:
         teams = hist.groupby("team")["score"].mean().sort_values(ascending=False, ignore_index=True)
         teamsTop3 = teams.iloc[:3]
 
+        print(teams)
+
         if add is not None: # if there is something new added to the history, actually save the file
             self.save_history(new_hist)
 

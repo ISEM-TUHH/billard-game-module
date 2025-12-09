@@ -104,7 +104,7 @@ class Game:
         action_list = [] # collect keywords, which will get translated into some kind of action later on
 
         if self.active_player["group"] is None:
-            # open game
+            # open game: both players can sink balls of both groups, but as soon as they sink more from one than the other group, that group gets assigned to them and the game is "closed". During the break, the black ball can be sunk without loosing the game (a lot of randomnes)
             message += ": (open game) "
             if report["eight_sunk"]:
                 message += "Sunk the eight ball, the other player now breaks"
@@ -166,7 +166,7 @@ class Game:
                 message += "[No more balls of own group left, now sink the eight] "
 
             if report["eight_sunk"]:
-                if self.active_player["task"] is "sink eight":
+                if self.active_player["task"] == "sink eight":
                     # this player wins
                     # define self.message which gets displayed on the table
                     short_message = f"{self.active_player['name']} wins"
