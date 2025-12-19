@@ -36,6 +36,7 @@ PORT=XXX
 ```
 To be able to communicate with the global API to play online games you need to be registered with us. Write us an e-mail if you want to get registered. We will provide you with a `TID` and `TAUTH`
 
+Important: The API is not publicly available yet, we are working on it.
 
 ## Documentation
 Documentation is generated using sphinx. A prebuild PDF can be found in `docs/latex`.
