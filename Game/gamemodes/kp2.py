@@ -12,7 +12,7 @@ from .longest_break import LongestBreak
 from .single_break import Break
 
 class KP2(GameMode):
-    """ This class builds upon lower level gamemodes to deliver the entire user experience for the KP2 events """
+    """ This class builds upon lower level gamemodes to deliver the entire user experience for the KP2 events. The teaching unit is also known as MPD2. """
 
     def __init__(self, starting_mode="precision"):
         self.__file__ = __file__
@@ -284,7 +284,7 @@ class KP2(GameMode):
                 max_saved_index = session_hist["distance.closest500"].idxmax()
                 max_saved = session_hist["distance.closest500"][max_saved_index]
                 if max_saved < self.history_addons["distance.closest500"]:
-                    overview["Mystery Challenge"] = 250
+                    overview["Mystery Challenge"] = 350
                 else:
                     hist.at[max_saved_index, "overview.Mystery Challenge"] = 250
                     hist.at[max_saved_index, "score"] += 250
@@ -314,30 +314,30 @@ class KP2(GameMode):
     # TODO: correct exact score numbers
 
     def mystery_distance_4b(self, session=0, **kwargs):
-        """ Fantastic Four: Hit 4 borders in (at least) one distance shot """
+        """ Fantastic Four: Hit 4 borders in (at least) one distance shot, get 350p """
         return 350 if max([x["collisions"] for x in session["distance"].values()]) >= 4 else 0
         
 
     def mystery_distance_500(self, session_hist=0, history_addons=0, **kwargs):
-        """ And I would walk 500 miles...: Try to be the closest to 500cm in the distance shot (session wide)
+        """ And I would walk 500 miles...: Try to be the closest to 500cm in the distance shot (session wide). The closest team in the session gets 350p
         
         THIS is implemented in the KP2.score, as it manipulates the history.
         """
         return
 
     def mystery_precision_600(self, session=0, **kwargs):
-        """ It all adds up: The accumulated distance from the bullseye over all precision shots must not be larger than 600mm """
-        return 200 if np.sum([x["distance"] for x in session["precision"].values()]) else 0
+        """ It all adds up: The accumulated distance from the bullseye over all precision shots must not be larger than 600mm, earn 350p """
+        return 350 if np.sum([x["distance"] for x in session["precision"].values()]) else 0
 
     def mystery_precision_2bull(self, session=0, **kwargs):
         """ (2): Hit the bullseye at least twice during the precision challenge (<15mm) """
-        return 50 if 2 <= [x["distance"] <= 22 for x in session["precision"].values()].count(True) else 0
+        return 350 if 2 <= [x["distance"] <= 22 for x in session["precision"].values()].count(True) else 0
 
     def mystery_longestbreak_3solid(self, session=0, **kwargs):
         """ One's company, two's a crowd and three's a party: Sink three solids in at least one round of the longest break """
-        return 200 if np.any([x["sunk_legal"] >= 3 for x in session["longest_break"].values()]) else 0
+        return 350 if np.any([x["sunk_legal"] >= 3 for x in session["longest_break"].values()]) else 0
 
 
     def mystery_longestbreak_break(self, session=0, **kwargs):
         """ Not catchin' a break: Sink at least one solid in every round of the longest break """
-        return 200 if np.all([x["sunk_legal"] >= 1 for x in session["longest_break"].values()]) else 0
+        return 350 if np.all([x["sunk_legal"] >= 1 for x in session["longest_break"].values()]) else 0

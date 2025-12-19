@@ -382,7 +382,7 @@ class GameMode:
                 other = ""
                 #if "value" in specials.keys():
                 #    other = f"value='{specials['value']}'"
-                print(specials)
+                #print(specials)
                 for k2, v2 in specials.items(): # dont iterate over k,v (already used above)
                     other += f" {k2}='{v2}'"
                 html += f"<input{other}>" # TODO: how to reset on reset command?

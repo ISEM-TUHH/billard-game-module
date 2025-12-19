@@ -49,21 +49,25 @@ class LongestBreak(GameMode):
         self.is_first_hit = True
         self.TREE = {
             "init": [
-                lambda inp: self.check_starting_positions(inp, starting_positions=self.active_challenge["coordinates"]),
-                {"True": "strike", "False": "init", "skip_round": "finished"},
-                lambda: [
-                    {
+            #    lambda inp: self.check_starting_positions(inp, starting_positions=self.active_challenge["coordinates"]),
+            #    {"True": "strike", "False": "init", "skip_round": "finished"},
+            #    lambda: [
+            #        {
+            #            "type": "balls",
+            #            "coords": self.active_challenge["coordinates"],
+            #            "ref": "balls-start"
+            #        }
+            #    ] + self.img_definition,
+            #    ["Start"]
+            #],
+            #"strike": [
+                self.determine_hit,
+                {"True": "strike", "False": "finished", "decide_keep": "decide_keep"},
+                lambda: [{
                         "type": "balls",
                         "coords": self.active_challenge["coordinates"],
                         "ref": "balls-start"
-                    }
-                ] + self.img_definition,
-                ["Start"]
-            ],
-            "strike": [
-                self.determine_hit,
-                {"True": "strike", "False": "finished", "decide_keep": "decide_keep"},
-                lambda: self.img_definition,
+                    }] + self.img_definition,
                 ["Measure"]
             ],
             "decide_keep": [
@@ -281,7 +285,7 @@ class LongestBreak(GameMode):
 
     def start_geometry(self):
         """ Provides the basic starting image. Also defines the regions according to distance defined here """
-        distance = 270 # distance from the green rectangle to the border: legal region. Outside the rectangle, the ball is allowed to move
+        distance = 320 #270 # distance from the green rectangle to the border: legal region. Outside the rectangle, the ball is allowed to move
         w, h = 2230, 1115
         base = [
             {

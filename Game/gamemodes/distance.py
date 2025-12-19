@@ -38,23 +38,6 @@ class Distance(GameMode):
 
         self.TREE = {
             "init": [
-                lambda inp: self.check_starting_positions(inp, starting_positions=[self.starting_point_raw]), # function to call on input
-                {"True": "strike", "False": "init"}, # based on the output, what should be done next?
-                lambda: [   # gameimage definition that should be shown on here. As lambda expression to be evaluated on call (dynamically change values from self.[attribute])
-                    {
-                        "type": "text",
-                        "text": "Distance Challenge: Place the ball on the starting point",
-                        "subimg": "isem-logo"
-                    },
-                    {
-                        "type": "balls", # starting point
-                        "coords": self.starting_point,
-                        "ref": "balls-base"
-                    }
-                ],
-                ["Start"] # describe name of button and special inputs that should be shown here
-            ],
-            "strike": [
                 self.calculate_score,
                 {"True": "finished"}, # no other outputs possible
                 lambda: [

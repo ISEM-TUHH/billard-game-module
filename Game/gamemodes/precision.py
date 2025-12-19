@@ -32,12 +32,12 @@ class Precision(GameMode):
 
         self.TREE = {
             "init": [
-                lambda inp: self.check_starting_positions(inp, starting_positions=lambda: [self.start_points[int(self.difficulty)]], update_gameimage=self.gameimage),
-                {"True": "strike", "False": "init"},
-                lambda: self.gameimage.definition,
-                ["Start"]
-            ],
-            "strike": [
+            #    lambda inp: self.check_starting_positions(inp, starting_positions=lambda: [self.start_points[int(self.difficulty)]], update_gameimage=self.gameimage),
+            #    {"True": "strike", "False": "init"},
+            #    lambda: self.gameimage.definition,
+            #    ["Start"]
+            #],
+            #"strike": [
                 self.determine_precision,
                 {"True": "finished"},
                 lambda: self.gameimage.definition,
