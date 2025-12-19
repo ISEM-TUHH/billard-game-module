@@ -14,8 +14,26 @@
 
   </head>
 
+  <script>
+      function tempAlert(msg,duration) {
+          if (msg.length === 0) {
+              console.log("No notification to display")
+              return;
+          }
+
+          var el = document.createElement("div");
+          el.setAttribute("style","position:absolute;top:10px;left:10px;background-color:#00C1D4;padding:5px;border-radius:5px;font-size:2vw;");
+          el.innerHTML = msg;
+          setTimeout(function(){
+              el.parentNode.removeChild(el);
+          },duration);
+          document.body.appendChild(el);
+      }
+  </script>
+
   <body>
     <script src="{{ url_for('static', filename='sender.js')}}"></script>
+    <script src="{{ url_for('static', filename='gamemode_controller.js') }}"></script>
 
     <header>
       <a href="/"><i class="fa-solid fa-house" id="home-button"></i></a>
@@ -26,67 +44,154 @@
       <h1>{{title}}</h1>
     </header>
 
-    
-    <section id="interface-camera" class="col">
-      <div class="image-container" id="livestream-container">
+    <div id="left-column">
+      <section id="interface-camera" class="col">
+        <div class="image-container" id="livestream-container">
+          <!--<img src="http://127.0.0.1:5002/website/video_feed", id="livestream">-->
+          <!--<img src="http://134.28.20.53:5000/website/video_feed" id="livestream">-->
+          <img src="{{camera_address_video_feed}}" id="livestream">
+          <!--<img src=" {{url_for('static', filename='image-90.png')}} " id="livestream">-->
+          <img class="ball" id="ball-1" src="{{ url_for('/general/ballimagenumber') }}?n=1">
+          <img class="ball" id="ball-2" src="{{ url_for('/general/ballimagenumber') }}?n=2">
+          <img class="ball" id="ball-3" src="{{ url_for('/general/ballimagenumber') }}?n=3">
+          <img class="ball" id="ball-4" src="{{ url_for('/general/ballimagenumber') }}?n=4">
+          <img class="ball" id="ball-5" src="{{ url_for('/general/ballimagenumber') }}?n=5">
+          <img class="ball" id="ball-6" src="{{ url_for('/general/ballimagenumber') }}?n=6">
+          <img class="ball" id="ball-7" src="{{ url_for('/general/ballimagenumber') }}?n=7">
+          <img class="ball" id="ball-eight" src="{{ url_for('/general/ballimagenumber') }}?n=8">
+          <img class="ball" id="ball-9" src="{{ url_for('/general/ballimagenumber') }}?n=9">
+          <img class="ball" id="ball-10" src="{{ url_for('/general/ballimagenumber') }}?n=10">
+          <img class="ball" id="ball-11" src="{{ url_for('/general/ballimagenumber') }}?n=11">
+          <img class="ball" id="ball-12" src="{{ url_for('/general/ballimagenumber') }}?n=12">
+          <img class="ball" id="ball-13" src="{{ url_for('/general/ballimagenumber') }}?n=13">
+          <img class="ball" id="ball-14" src="{{ url_for('/general/ballimagenumber') }}?n=14">
+          <img class="ball" id="ball-15" src="{{ url_for('/general/ballimagenumber') }}?n=15">
+          <img class="ball" id="ball-white" src="{{ url_for('/general/ballimagenumber') }}?n=16">
 
-        <!--colors = ["#f7d339","#1f419f","#e44c23","#5d1c8f","#f89348","#17953b","#c71517","#20201e","#f7d339","#1f419f","#e44c23","#5d1c8f","#f89348","#17953b","#c71517","#d5d1c5"]-->
-        <!--<img src="http://127.0.0.1:5002/website/video_feed", id="livestream">-->
-        <img src="http://134.28.20.53:5000/website/video_feed" id="livestream">
-        <!--<img src=" {{url_for('static', filename='image-90.png')}} " id="livestream">-->
-        <img class="ball" id="ball-1" src="{{ url_for('/general/ballimagenumber') }}?n=1">
-        <img class="ball" id="ball-2" src="{{ url_for('/general/ballimagenumber') }}?n=2">
-        <img class="ball" id="ball-3" src="{{ url_for('/general/ballimagenumber') }}?n=3">
-        <img class="ball" id="ball-4" src="{{ url_for('/general/ballimagenumber') }}?n=4">
-        <img class="ball" id="ball-5" src="{{ url_for('/general/ballimagenumber') }}?n=5">
-        <img class="ball" id="ball-6" src="{{ url_for('/general/ballimagenumber') }}?n=6">
-        <img class="ball" id="ball-7" src="{{ url_for('/general/ballimagenumber') }}?n=7">
-        <img class="ball" id="ball-eight" src="{{ url_for('/general/ballimagenumber') }}?n=8">
-        <img class="ball" id="ball-9" src="{{ url_for('/general/ballimagenumber') }}?n=9">
-        <img class="ball" id="ball-10" src="{{ url_for('/general/ballimagenumber') }}?n=10">
-        <img class="ball" id="ball-11" src="{{ url_for('/general/ballimagenumber') }}?n=11">
-        <img class="ball" id="ball-12" src="{{ url_for('/general/ballimagenumber') }}?n=12">
-        <img class="ball" id="ball-13" src="{{ url_for('/general/ballimagenumber') }}?n=13">
-        <img class="ball" id="ball-14" src="{{ url_for('/general/ballimagenumber') }}?n=14">
-        <img class="ball" id="ball-15" src="{{ url_for('/general/ballimagenumber') }}?n=15">
-        <img class="ball" id="ball-white" src="{{ url_for('/general/ballimagenumber') }}?n=16">
+          <i class="ball fas fa-flag" id="marker-start"></i>
 
-        <i class="ball fas fa-flag" id="marker-start"></i>
-
-      </div>
-      <div class="button-list">
-        <input type="checkbox" id="manipulation-flag">
-        <label for="manipulation-flag">Manual entries</label>
-      </div>
-      <details>
-        <summary>Place balls</summary>
-        
-        <div id="ball-selector">
-          <label class="active"><input type="radio" name="current_ball" value="ball-1" checked>1: Gelb</label>
-          <label><input type="radio" name="current_ball" value="ball-2">2: Blau</label>
-          <label><input type="radio" name="current_ball" value="ball-3">3: Rot</label>
-          <label><input type="radio" name="current_ball" value="ball-4">4: Lila</label>
-          <label><input type="radio" name="current_ball" value="ball-5">5: Orange</label>
-          <label><input type="radio" name="current_ball" value="ball-6">6:Grün</label>
-          <label><input type="radio" name="current_ball" value="ball-7">7: Karmin</label>
-          <label><input type="radio" name="current_ball" value="ball-eight">8: Schwarz</label>
-          <label><input type="radio" name="current_ball" value="ball-9">9: Halb Gelb</label>
-          <label><input type="radio" name="current_ball" value="ball-10">10: Halb Blau</label>
-          <label><input type="radio" name="current_ball" value="ball-11">11: Halb Rot</label>
-          <label><input type="radio" name="current_ball" value="ball-12">12:Halb Lila</label>
-          <label><input type="radio" name="current_ball" value="ball-13">13: Halb Orange</label>
-          <label><input type="radio" name="current_ball" value="ball-14">14: Halb Grün</label>
-          <label><input type="radio" name="current_ball" value="ball-15">15: Halb Karmin</label>
-          <label><input type="radio" name="current_ball" value="ball-white">Weiß</label>
         </div>
+        <div class="button-list">
+          <input type="checkbox" id="manipulation-flag">
+          <label for="manipulation-flag">Manual entries</label>
+        </div>
+        <details>
+          <summary>Place balls</summary>
+          
+          <div id="ball-selector">
+            <label class="active"><input type="radio" name="current_ball" value="ball-1" checked>1: Gelb</label>
+            <label><input type="radio" name="current_ball" value="ball-2">2: Blau</label>
+            <label><input type="radio" name="current_ball" value="ball-3">3: Rot</label>
+            <label><input type="radio" name="current_ball" value="ball-4">4: Lila</label>
+            <label><input type="radio" name="current_ball" value="ball-5">5: Orange</label>
+            <label><input type="radio" name="current_ball" value="ball-6">6:Grün</label>
+            <label><input type="radio" name="current_ball" value="ball-7">7: Karmin</label>
+            <label><input type="radio" name="current_ball" value="ball-eight">8: Schwarz</label>
+            <label><input type="radio" name="current_ball" value="ball-9">9: Halb Gelb</label>
+            <label><input type="radio" name="current_ball" value="ball-10">10: Halb Blau</label>
+            <label><input type="radio" name="current_ball" value="ball-11">11: Halb Rot</label>
+            <label><input type="radio" name="current_ball" value="ball-12">12:Halb Lila</label>
+            <label><input type="radio" name="current_ball" value="ball-13">13: Halb Orange</label>
+            <label><input type="radio" name="current_ball" value="ball-14">14: Halb Grün</label>
+            <label><input type="radio" name="current_ball" value="ball-15">15: Halb Karmin</label>
+            <label><input type="radio" name="current_ball" value="ball-white">Weiß</label>
+          </div>
 
-        <input type="button" value="Save image for AI training" id="ai-training-button">
-      </details>
-    </section>
+          <!--<input type="button" value="Save image for AI training" id="ai-training-button">-->
+        </details>
+      </section>
 
+      <section id="scoreboard" class="col">
+        <fieldset id="single">
+          <legend>Scoreboard</legend>
+          <!--<div id="podium-single", class="podium-container">
+            <div class="podium-item" id="single-2">
+              <p class="podium-name">Moritz</p>
+              <div class="podium-rank second">
+                ISEM<br/>7500
+              </div>
+            </div>
+            <div class="podium-item" id="single-1">
+              <p class="podium-name">Mathis</p>
+              <div class="podium-rank first">
+                ISEM<br/>9000
+              </div>
+            </div>
+            <div class="podium-item" id="single-3">
+              <p class="podium-name">Felix</p>
+              <div class="podium-rank third">
+                ISEM<br/>7200
+              </div>
+            </div>
+          </div>-->
+          <div id="table-single" class="table-div">
+            Individual
+            <table>
+              <thead>
+                <tr><th></th>
+                  {% for column in single_columns %}
+                  <th>{{ column }}</th>
+                  {% endfor %}
+                </tr>
+              </thead>
+              <tbody>
+                {% for entry in single_table %}
+                <tr>
+                  {% for e in entry %}
+                  <td>{{ e }}</td>
+                  {% endfor %}
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        <!--</fieldset>
+
+        <fieldset id="team">
+          <legend>Teams</legend>
+          <div id="podium-team", class="podium-container">
+            <div class="podium-item" id="team-2">
+              <p class="podium-name">AIW</p>
+              <div class="podium-rank second">
+                Average<br/>7500
+              </div>
+            </div>
+            <div class="podium-item" id="team-1">
+              <p class="podium-name">ISEM</p>
+              <div class="podium-rank first">
+                Average<br/>9000
+              </div>
+            </div>
+            <div class="podium-item" id="team-3">
+              <p class="podium-name">Professoren</p>
+              <div class="podium-rank third">
+                Average<br/>7200
+              </div>
+            </div>
+          </div>-->
+
+          <div id="table-team" class="table-div">
+            Teams
+            <table>
+              <thead>
+                <tr><th></th><th>Team</th><th>Average Score</th></tr>
+              </thead>
+              <tbody>
+                {% for entry in team_table %}
+                <tr><td>{{ entry[1] }}</td><td>{{ entry[0] }}</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </fieldset>
+      </section>
+    </div>
+
+    <div id="right-column">
     {% block content %}
 
     {% endblock %}
+    </div>
 
     <!-- Audio files -->
     <div style="display: none;" id="sounds">
@@ -120,25 +225,14 @@
 
     <!-- JavaScript einbinden -->
     <script src="{{ url_for('static', filename='sound.js') }}"></script> 
-    <script src="{{ url_for('static', filename='coords-handler.js')}}"></script>
+    <script src="{{ url_for('static', filename='coords-handler.js') }}"></script>
+    <script src="{{ url_for('static', filename='history_handler.js') }}"></script>
+    <script src="{{ url_for('static', filename='update_gamemode.js') }}"></script>
+    <script src="{{ url_for('static', filename='gamemode_retro.js') }}"></script>
+    <script src="{{ url_for('static', filename='game_configuration.js') }}"></script>
     <script>
-        // Local script, gets set on rendering the page
-        function tempAlert(msg,duration) {
-            if (msg.length === 0) {
-                console.log("No notification to display")
-                return;
-            }
-
-            var el = document.createElement("div");
-            el.setAttribute("style","position:absolute;top:10px;left:10px;background-color:#00C1D4;padding:5px;border-radius:5px;");
-            el.innerHTML = msg;
-            setTimeout(function(){
-                el.parentNode.removeChild(el);
-            },duration);
-            document.body.appendChild(el);
-        }
-
-        tempAlert("{{ notification }}", 4000)
+      // Local script, gets set on rendering the page
+      tempAlert("{{ notification }}", 4000)
     </script>
   </body>
 </html>

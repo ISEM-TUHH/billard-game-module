@@ -1,9 +1,18 @@
 requirements.txt
 *.env
 utils/
+docs/source/_autosummary/
+docs/_build/doctrees/
+docs/_build/html/
+docs/_build/latex/*
+!docs/_build/latex/*.pdf
+
+
+.venv*
 
 # empty storage files are kept: git update-index --assume-unchanged Game/storage/*
 Game/storage/
+Game/gamemodes/resources/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -76,7 +85,7 @@ instance/
 .scrapy
 
 # Sphinx documentation
-docs/_build/
+aaaadocs/_build/
 
 # PyBuilder
 .pybuilder/
