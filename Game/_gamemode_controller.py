@@ -11,9 +11,9 @@ import datetime
 """ This file provides methods necessary for the implementation of the MVC model for running gamemodes """
 
 def gamemode_controller(self):
-    """ This method receives the posted data to the common gamemode API endpoint
+    """ This method receives the posted data to the common gamemode API endpoint (`/gamemodecontroller`)
     - preprocess: select gamemode
-    - passes it to the selected gamemode object (entrance(...) method)
+    - passes it to the selected gamemode object (entrance(...) method, most of the times inherited from GameMode)
     - postprocess: update gameimage, send to beamer, read signal in output (handle), return output
     
     """

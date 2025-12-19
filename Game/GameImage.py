@@ -17,12 +17,34 @@ class GameImage:
 	"""Class to generate an image from different game modes and other information
 
 	Each image starts with a black background, as this is "neutral" on a beamer.
-	:param size: width x height of the image in pixels
-	:type size: tuple<int>
-	:param phys: how many meters are 1000 pixels? (equivalent to how many mm are 1 pixel)
-	:type phys: float
+
+	The image gets build using a `definition` (list). It consists of `parts` (dicts) which each can look like
+
+	.. code:: python3
+
+		{
+			"type": "text",
+			"text": "This is a text element, that will show up at the top and bottom of the image."
+		}
+
+	The available types and specific fields are listed in the documentation of each `part`. Each `part` gets assigned (if not defined) a reference (field `ref`), under which it can be changed using self.update_definition. 
+	Some `part` types are static and will get reassigned instead of added with a different reference if they are input to GameImage.update_definition, unless a specific reference has been assigned.
+
+
+	Attributes:
+		definition: list of `parts`. The first element in the list will get drawn first, with later parts getting drawn above of it (rudimentary layering)
+	
+	Args:
+		definition (list): `definition` list as specified in the GameImage class documentation
+		size (tuple<int, int>): width, height of the goal image in pixels
+		phys (float): how many meters are 1000 pixels? (equivalent to how many mm are 1 pixel). Not really in use.
+		img_chache (dict): Images that can be used by using in their key as reference, e.g., in a part like `{"type": "text", "text": "Cached Image", "subimg": "key-from-img_cache"}` the `subimg` would be loaded from the file, url (QR-code) or PIL.Image object mapped to the key. Files get loaded upon init and the loaded cache gets copied when the object gets copied (GameImage.copy), minimizing file operations.
+
+	Todo:
+		- Move the GameImage system to its entirely own module/project as an abstraction layer on top of PIL itself.
+		- Add GIF/video features. Maybe this would need the GameImage to be generated on the Beamer module itself.
+		- Add GameImage slots to mimize compute needs
 	"""
-	ballDiameter = 57 # diameter of a billiard ball (snooker) in mm
 
 	def __init__(self, definition=[], size=(2230, 1115), phys=1, img_cache={
 		"isem-logo": "static/images/ISEM-only.png", # small logo without text for subimg display
@@ -30,6 +52,7 @@ class GameImage:
 		"feedback-form-qr": "https://www.youtube.com/watch?v=XfELJU1mRMg" # link to the feedback form
 	}):
 		self.img = Image.new(mode="RGBA", size=size, color="#000000ff")
+		self.ballDiameter = 57 # diameter of a billiard ball (snooker) in mm
 		#self.img = Image.new(mode="RGB", size=size, color="#50b12c")
 		self.draw = ImageDraw.Draw(self.img)
 		self.phys = phys
@@ -40,7 +63,7 @@ class GameImage:
 
 
 		# list of graphical parts that can only exist max once.
-		self.static = ["balls", "text", "team", "break", "central_image"]
+		self.static = ["balls", "text", "team", "break", "central_image"] #: These `part` types are static and will get reassigned instead of added with a different reference if they are input to GameImage.update_definition, unless a specific reference has been assigned.
 
 		# loading of common referenced images (ISEM logo etc), provide directly
 		self.img_cache = {}
@@ -58,12 +81,26 @@ class GameImage:
 			self.draw_from_dict(definition)
 
 	def copy(self):
-		""" Creates a new object with the same definition list. Also copies the loaded img_cache to minimize storage operations. """
+		"""Generate a copy of the image.
 
+		:return: copy of this object
+		:rtype: GameImage
+		"""
 		return GameImage(definition=self.definition.copy(), img_cache=self.img_cache)
 
 	def draw_from_dict(self, definition, draw=True):
-		""" Draw the gameimage from a list<dictionary> specifying the subparts. Execution flow is from top to bottom, so lower parts are on a higher image layer. """
+		"""Draw the image (GameImage.img) from a list<dictionary> specifying the subparts. Execution flow is from top to bottom, so lower (later) parts are on a higher image layer.
+
+		Args:
+			definition (list): `definition` list as specified in the class documentation. If an element of the list is `None`, all `parts` in the passed `definition` list will be treated using GameImage.update_definition.
+			draw (bool, optional): Choose if the image should directly be rendered ore only the definition updated. The improvement over just reassigning GameImage.definition is the creation of references.
+
+		Returns:
+			list: `definition` list with assigned references (field `ref`, only for `parts` that had none before)
+
+		Todo:
+			- Change match-case statement to dict mapping type to methods
+		"""
 		self.img = Image.new(mode="RGBA", size=(self.w, self.h), color="#000000ff")
 		#self.img = Image.new(mode="RGB", size=size, color="#50b12c")
 		self.draw = ImageDraw.Draw(self.img)
@@ -84,8 +121,6 @@ class GameImage:
 			match part["type"]:
 				case "balls":
 					self.placeAllBalls(part["coords"])
-					if "draw_lines" in part.keys():
-						self.drawBallConnectionsOld(part["coords"])
 				case "text":
 					self.instructionText(part["text"], subimg=(part["subimg"] if "subimg" in part.keys() else None))
 				case "team":
@@ -112,10 +147,23 @@ class GameImage:
 		return self.definition
 
 	def redraw(self):
+		"""Draw the GameImage.img again using the definition already available as GameImage.definition
+		"""
 		self.draw_from_dict(self.definition)
 
 	def update_definition(self, val, ref=None, subfield=None, new_instance=False, layer=-1, remove=False):
-		""" Adds a new part to the image definition if ref is None or no current entry has the same ref. If subfield != None, looks for the key in a part with given ref and only updates that. """
+		"""Adds a new part to the image definition or update an existing part.
+		
+		If ref is None or no current entry has the same ref, actually adds a new part. Otherwise it finds a part with the same reference (either passed as argument `ref` or in `val` as field `ref`). If subfield != None, looks for the key in a part with given ref and only updates that.
+
+		Args:
+			val (dict, any): If `subfield is None`, this gets treated as an entire `part`, otherwise it is the new value of the field `subfield` in the part with reference `ref`. If it has the field `"remove": True` and a set `ref` field, the part with that `ref` will be removed, calls GameImage.rm_definition.
+			ref (str, optional): reference of a part to update. Defaults to None.
+			subfield (str, optional): Key of the field in an existing part to update. Defaults to None.
+			new_instance (bool, optional): Unused. Defaults to False.
+			layer (int, optional): At what layer should this be inserted? Defaults to -1 for the last element (highest layer)
+			remove (bool, optional): Remove the element that has the given `ref`, calls GameImage.rm_definition. Defaults to False.
+		"""
 		self.FLAG_MODIFIED = True
 
 		if type(val) is dict and "type" in val.keys() and val["type"] in self.static: # handle static parts
@@ -168,26 +216,67 @@ class GameImage:
 			self.definition.pop(index)
 
 	def update_text(self, text):
+		"""Specific wrapper for GameImage.update_definition to only update the text part"""
 		self.update_definition(text, ref="text", subfield="text")
 
 	def getImageCV2(self):
+		"""Exports the GameImage.img (PIL.Image) as a RGB cv2 compatible np.ndarray
+
+		Returns:
+			np.ndarray: RGB image
+		"""
 		if self.FLAG_MODIFIED:
 			self.redraw()
 		return np.array(self.img)[:,:,[2,1,0]] # shift from rgb to bgr
 
 	def line(self, c1, c2, color="white", width=3): # TODO: add different coordinate formats
+		"""Draws a line between two points.
+
+		Part description: `{"type": "line", "c1": [123, 123], "c2": {"x": 123, "y": 123}, "color": "#123456", "width": 5}`
+
+		Args:
+			c1 (dict, iterable): Coordinates of one end (e.g. as {"x": 12, "y": 34})
+			c2 (dict, iterable): Coordinates of the other end
+			color (str, optional): Color of the line, hexcode (#112233) or keyword. Defaults to "white".
+			width (int, optional): Width of the line in px. Defaults to 3.
+		"""
 		if type(c1) is dict:
 			c1 = (c1["x"], c1["y"])
 			c2 = (c2["x"], c2["y"])
 		self.draw.line([c1, c2], fill=color, width=width)
 
 	def rectangle(self, c1, c2, outline="white", width=5, fill=None):
+		"""Draws a rectangle between two points as opposite corners.
+
+		Part description: `{"type": "rectangle", "c1": [123, 123], "c2": {"x": 123, "y": 123}, "outline": "#123456", "width": 5, "fill": None}`
+
+		Args:
+			c1 (iterable): Coordinates of one end (x, y)
+			c2 (iterable): Coordinates of the other end
+			outline (str, optional): Color of the line, hexcode (#112233) or keyword. Defaults to "white".
+			width (int, optional): Width of the border in px. Defaults to 5.
+			fill (str, optional): Color of the line, hexcode (#112233) or keyword. Defaults to None.
+		"""
 		self.draw.rectangle([c1, c2], outline=outline, width=width, fill=fill)
 
 	def bullseye(self, center=None, r=30):
+		"""Draws a bullseye around the center with 3 rings, with each ring having a width of r
+
+		Part description: `{"type": "bullseye", "center": [123, 123], "r": 30}`
+
+		Args:
+			center (list-like, optional): Center of the bullseye. Defaults to None.
+			r (int, optional): Thickness of each of the three rings. Defaults to 30.
+		
+		Todo:
+			- change r to be the total radius not this weird ring-thickness.
+			- ideally also add a number of rings parameter
+		"""
+
 		if center is None:
 			bullX, bullY = self.w//4, self.h//2
-		bullX, bullY = center[0], center[1]
+		else:
+			bullX, bullY = center[0], center[1]
 		r = 30 # radius of each ring
 		#print(bullX, bullY)
 		for i in [4,2,0]:
@@ -200,7 +289,18 @@ class GameImage:
 		self.draw.ellipse((bullX-r, bullY-r, bullX+r, bullY+r), fill="#000000")
 
 	def arrow_bottom(self, bottom, orientation, length, head_width=50, line_width=10, color="white", **kwargs):
-		""" Draws and arrow by specifying the bottom point. bottom as np.array([x, y]), orientation in degrees relative to +x-axis in mathemtical positive direction"""
+		"""Draws and arrow by specifying the bottom point. bottom as np.array([x, y]), orientation in degrees relative to +x-axis in mathemtical positive direction
+
+		Part description: `{"type": "arrow_bottom", "bottom": [123, 123], "orientation": 3.14159, "length": 50, "head_width": 50, "line_width": 10, "color": "#123456"}`
+
+		Args:
+			bottom (list-like): Starting point of the arrow (not the head)
+			orientation (float): Orientation in radians from the +x axis (pi/2 would be vertical, 0 to the right)
+			length (float): Length of the arrow
+			head_width (int, optional): Width of the arrow head. Defaults to 50.
+			line_width (int, optional): Thickness of the line. Defaults to 10.
+			color (str, optional): Color as keyword or hex. Defaults to "white".
+		"""
 
 		# TODO: add feature to put text on the arrow?
 		bot = np.array([bottom["x"], bottom["y"]])
@@ -223,12 +323,19 @@ class GameImage:
 		arrow = [(int(c[0]), int(c[1])) for c in ((rot @ polygon).T + bot)]
 
 		#print(arrow)
-		self.draw.line(arrow, width=line_width, fill=color)
-		self.draw.circle(arrow[1], radius=line_width//2, fill=color, width=0)
-		#self.draw.polygon(arrow[2:], outline=color, width=line_width, fill=color)
+		self.draw.line(arrow, width=line_width, fill=color, joint="curve")
+		#self.draw.circle(arrow[1], radius=line_width//2, fill=color, width=0)
 
 	def arrow(self, start, end, offset=0, **kwargs):
-		""" Arrow pointing from start to end """
+		"""Arrow pointing from start to end
+
+		Part description: `{"type": "arrow", "start": [123, 123], "end": {"x": 123, "y": 123}, "offset": 35}` + optional fields of GameImage.arrow_bottom
+
+		Args:
+			start (list-like): Starting point (bottom)
+			end (list-like): End point (head)
+			offset (int, optional): Distance from the bottom and head to where the arrow actually start. Useful for pointing arrows between billard balls. Defaults to 0.
+		"""
 		top = np.array([end["x"], end["y"]])
 		bot = np.array([start["x"], start["y"]])
 
@@ -263,8 +370,10 @@ class GameImage:
 		x,y = tuple([int(float(i)/self.phys - d//2) for i in pos])
 		self.img.paste(bImg, (x,y), bImg) # second call for mask, so the corners dont get overwritten
 
-	def placeAllBalls(self, data):
+	def placeAllBalls(self, coords):
 		"""Place all balls mentioned in the data dict on the canvas self.img
+
+		Part description: `{"type": "line", "coords": [coords dict]}`
 
 		:param data: dictionary matching the number of a ball (key) to its position (tuple x,y) from the upper left in mm. Can also just be the output of Camera.get_coords (.../v1/getcoords)
 		:type data: dict<tuple<float>> or list<dict>
@@ -277,6 +386,7 @@ class GameImage:
 			"incorrect": 19
 		}
 
+		data = coords
 		for b in data:			
 			if type(data) == list:
 				rawN = b["name"]
@@ -292,50 +402,10 @@ class GameImage:
 				#print(b)
 				self.placeBall(data[b], int(b))
 
-	def drawBallConnectionsOld(self, data, drawBalls=True):
-		""" Draw a line between the white ball an every other ball. If the white ball is not found on the image, exit.
-
-		:param data: coordinates as passed from the camera
-		:type data: list
-		:param drawBalls: should this also draw the balls on the image
-		:type drawBalls: optional bool
-		"""
-		localData = {}
-		data2 = data if type(data) == list else [data[b] for b in data]
-		for b in data2:
-			#print(b)
-			localData[b["name"]] = b
-		
-		if not "white" in localData:
-			print(f"Trying to draw the connections from the white ball, but white not found.")
-		else:
-			xw, yw = localData["white"]["x"], localData["white"]["y"]
-			ge = GameEngine() # use the GameEngine to get all available shots
-			shots = ge.getShots(localData)
-
-			for b in shots:
-				if b == "white":
-					continue
-
-				x, y = localData[b]["x"], localData[b]["y"]
-				
-				shot = shots[b]
-				hole = shot["hole"]
-				end_white = shot["end-white"]
-				xh, yh = hole["x"], hole["y"]
-				xwe, ywe = end_white["x"], end_white["y"]
-
-				kwargs = {"offset": 20, "color": "grey", "line_width": 5, "head_width": 10}
-				self.arrow(end=hole, start=localData["white"], **kwargs) # ball to hole
-				self.arrow(end=start_white, start=end_white, **kwargs) # white to ball
-				#self.draw.line([(xw,yw),(xwe,ywe)], fill="grey", width=4)
-				#self.draw.line([(x,y),(xh,yh)], fill="grey", width=4)
-
-		if drawBalls:
-			self.placeAllBalls(data2)
-
 	def drawBallConnections(self, shots, offset=35, line_width=6, head_width=12, **kwargs):
 		""" Takes the output of GameEngine.getShots and draws arrows accordingly. Each shot path gets the color of the ball it is supposed to sink (except for the black ball, which would not be visible)
+
+		Part description: `{"type": "possible_shots", "shots": [shots dict]}` + optional fields from GameImage.arrow and GameImage.arrow_bottom
 
 		Args:
 			shots (dict): output of GameEngine.getShots like {"1": {"hole": {"x": 123, "y": 123}, "ball": ..., "end-white": ..., "white": ...}, ...}
@@ -352,6 +422,13 @@ class GameImage:
 
 	def instructionText(self, text, subimg=None):
 		"""Place text on top and flipped on the bottom of the image. Font size is chosen automatically.
+
+		Part description: `{"type": "text", "text": "Hello World", "subimg": "isem-logo"}`
+		
+		Images can be passed as PIL image, path or GameImage.img_cache key. Text can be emphasized by encapsulating in **...**
+
+		Todo:
+			- Finalize emphasised formatting (color blind friendly). Maybe generalize text rendering?
 
 		:param text: Text to be placed
 		:type text: str
@@ -400,6 +477,12 @@ class GameImage:
 
 	def nameTeamText(self, name, team):
 		"""Put the name and team on the right side of the image, oriented outwards.
+
+		Part description: `{"type": "team", "name": "Jon Doe", "team": "ISEM"}
+
+		Args:
+			name (str): Player name
+			team (str): Team name
 		"""
 		fs = int(self.h//25)
 		font = ImageFont.truetype(self.current_dir + "/../Roboto-Black.ttf", fs)
@@ -415,7 +498,17 @@ class GameImage:
 		self.img.paste(timg, (self.w - int(1.5*fs),0), timg)
 
 	def drawBreak(self, ball=True):
-		""" Draw the basic triangle for a break and optionally the white ball for break """
+		""" Draw the basic triangle for a break and optionally the white ball for break
+
+		Part description: `{"type": "break", "ball": True}
+		
+		Args:
+			ball (bool): Should the starting point of the break be drawn?
+
+		Todo:
+			- verify the position of the starting point and break triangle
+
+		"""
 		center = self.h//2
 		offTop = 160
 		offFront = 290
@@ -424,7 +517,16 @@ class GameImage:
 			self.placeBall((4*self.w//5, center), "white")
 
 	def centralImage(self, img):
-		""" Draw an (PIL) image in the center of the image. Scaling is currently done before using img.resize((w, h)) """
+		"""Draw an (PIL) image in the center of the image. Currently the image gets inserted at its original size, so resizing must be done before.
+
+		Part description: `{"type": "central-image", "img": "isem-logo-big"}
+
+		Args:
+			img (path, PIL.Image, GameImage.img_cache key): Image the gets placed in the center
+
+		Todo:
+			- add sizing options
+		"""
 		# TODO: add sizing options
 		if type(img) is str:
 			if img in self.img_cache.keys():
@@ -439,118 +541,6 @@ class GameImage:
 		else:
 			self.img.paste(img, ((self.w - w)//2, (self.h - h)//2), mask=img.split()[3])
 
-	# OLD
-	def addGameMode(self, supermode, game):
-		""" Add an overlay to the image depending on the current game supermode.
-
-		:param supermode: supermode of the game
-		:type supermode: str
-		:param game: Game Object calling this function
-		:type game: Game Object 
-		"""
-		logo1 = Image.open(self.current_dir + "/static/isem_logo.png")
-		logo = logo1.resize((700,350))
-
-		match supermode:
-			case "base":
-				#self.instructionText("Welcome to Billard@ISEM!", subimg="static/images/ECIUxISEM-transparent.png")
-				#self.instructionText("Select a Game Mode", subimg="static/images/ECIUxISEM-transparent.png")
-				self.instructionText("Select a Game Mode", subimg="static/images/ISEM-only.png")
-				#self.img.paste(logo, (self.w//2-350, self.h//2-350//2))
-				self.centralImage(logo)
-			case "trickshots":
-				self.instructionText("Select a Trickshot")
-			case "kp2":
-				kp2mode = game.kp2mode
-				#self.instructionText(" ", subimg="static/images/ECIUxISEM-transparent.png")
-				self.instructionText(" ", subimg="static/images/ISEM-only.png")
-				if kp2mode not in ["base", "trickshot", "precision"]:
-					# draw the outline of the push unit
-					# measurements are roughlty equivalent to the real physical object
-					right, top = self.w, self.h//2
-					self.draw.rectangle([(right-250, top-280//2),(right, top+280//2)], outline="yellow", width=10)
-					self.draw.rectangle([(right-250-90, top-10),(right-250, top+10)], outline="yellow", width=10)
-
-				match kp2mode:
-					case "precision":
-						dif = game.kp2_prec_difficulty
-
-						text = "Challenge: Precision" if game.live_value == "" else game.live_value
-						self.instructionText(text)
-						# draw a bullseye
-						bullX, bullY = self.w//4, self.h//2
-						r = 30 # radius of each ring
-						#print(bullX, bullY)
-						for i in [4,2,0]:
-							white = 2*(i+1)*r
-							black = 2*i*r
-							
-							self.draw.ellipse((bullX-white, bullY-white, bullX+white, bullY+white), fill="#FFFFFF")
-							self.draw.ellipse((bullX-black, bullY-black, bullX+black, bullY+black), fill="#000000")
-						# inner circle:
-						self.draw.ellipse((bullX-r, bullY-r, bullX+r, bullY+r), fill="#000000")
-
-						# process difficulty
-						right, top = self.w, self.h//2
-						lines = [right-250, right-500, right-750]
-						for i in range(3):
-							width = 2 if i != dif else 5
-							color = "grey" if i != dif else "white"
-							self.draw.line([(lines[i], 100), (lines[i], self.h-100)], fill=color, width=width)
-
-						offset = lines[dif]
-						self.draw.rectangle([(offset, top-280//2),(offset+250, top+280//2)], outline="yellow", width=10)
-						self.draw.rectangle([(offset-90, top-10),(offset, top+10)], outline="yellow", width=10)
-
-						return
-					case "results":
-						# show results screen -> podium
-						self.img.paste(logo, (self.w//2-350, self.h//2-350//2))
-						self.instructionText(f"Score: {str(game.kp2_last_score)}")
-						return
-					case "base":
-						self.img.paste(logo, (self.w//2-350, self.h//2-350//2))
-						text = "Select a challenge on the screen" if game.live_value == "" else game.live_value
-						self.instructionText(text)
-						return
-					case "trickshot":
-						trickshot = Trickshot(game.trickshots[str(game.trickshot_current_id)])
-						timg = trickshot.getTrickshotImage()
-						#timg = Image.fromarray(timgNP.astype("uint8"), "RGB")
-						self.img.paste(timg, (0,0))
-						#self.img = timg
-						#self.draw = ImageDraw.Draw(self.img)
-						text = game.live_value
-						self.instructionText(text)
-						return
-					case "break":
-						text = "Challenge: Break" if game.live_value == "" else game.live_value
-						self.instructionText(text)
-						self.drawBreak(ball=False)
-					case "distance":
-						text = "Challenge: Distance" if game.live_value == "" else game.live_value
-						self.instructionText(text)
-			
-			case "game-local":
-				self.instructionText(game.game.message)
-				match game.game.state:
-					case "pre": # before entering names
-						self.img.paste(logo, (self.w//2-350, self.h//2-350//2))
-					case "determine": # when determining who should break
-						self.placeAllBalls(game.game.display_coords)
-						self.instructionText(f"", subimg="static/images/ISEM-only.png")
-					case "break":
-						self.drawBreak()
-						self.instructionText(f"", subimg="static/images/ISEM-only.png")
-					case "game":
-						pass # nothing besides the message should be displayed
-					case "winner":
-						pass # nothing besides the message should be displayed -> one day
-
-
-
-
-
 
 				
 
@@ -558,14 +548,22 @@ class GameImage:
 class BilliardBall:
 	"""Class to store each Billiard Balls graphical attributes
 
-	Each ball is initiated with its number with number 16 being the white ball. Number 1-7 are full, 8 is black, 9-15 are half.
+	Each ball is initiated with its number with number 16 being the white ball. Number 1-7 are full/solid, 8 is black/eight, 9-15 are half/striped.
 
-	Special balls are dummy (17), correct (18) and incorrect (19)
+	Special balls are dummy (17), correct (18) and incorrect (19).
+
+	Attributes:
+		colors (list): list of all colors (hexcodes strings) ordered 
+
+
+	Args:
+		n (int, str): name of the ball
 	"""
 	white = "#d5d1c5"
 	colors = ["#f7d339","#1f419f","#e44c23","#5d1c8f","#f89348","#17953b","#c71517","#20201e","#f7d339","#1f419f","#e44c23","#5d1c8f","#f89348","#17953b","#c71517", white, "#058aff", "#69f902", "#f9021f"]#"#fb48c4"] # the last entry is a dummy ball color (neon pink)
 	unique_map = {
 		"eight": 8,
+		"black": 8,
 		"white": 16,
 		"dummy": 17,
 		"correct": 18,
@@ -592,13 +590,21 @@ class BilliardBall:
 
 	@classmethod
 	def getColor(cls, n):
-		""" Get the hexcode of the color of the ball based on the n value (number or str keys) """
+		""" Get the hexcode of the color of the ball based on the n value (number or str keys) 
+		
+		Args:
+			n (int, str): number or name of the ball
+		"""
 		n = int(n) if n not in cls.unique_map.keys() else cls.unique_map[n]
 		return cls.colors[n-1]
 
 	@classmethod
 	def getGroup(cls, n):
-		""" Get the group of the color of the ball based on the n value (number or str keys). Everything over 16 is dummy."""
+		""" Get the group of the color of the ball based on the n value (number or str keys). Everything over 16 is dummy.
+		
+		Args:
+			n (int, str): number or name of the ball
+		"""
 		n = int(n) if n not in cls.unique_map.keys() else cls.unique_map[n]
 		if n == 8:
 			group = "eight"
@@ -637,7 +643,11 @@ class BilliardBall:
 		return img
 
 class Trickshot: 
-	"""Class to draw a trickshot with all its belongings onto the gameimage based on the json/dict defining the trickshot (see subfolder trickshots)
+	"""Deprecated.
+
+	The trickshot challenge this belongs to has been superseeded by the Longst Break challenge, since that can be played more reliably.
+	
+	Class to draw a trickshot with all its belongings onto the gameimage based on the json/dict defining the trickshot (see subfolder trickshots).
 
 	:param definition: dict describing the trickshot, most likely loaded from a trickshots/*.json
 	:type definition: dict
@@ -668,6 +678,16 @@ class Trickshot:
 		return np.array(self.getTrickshotImage(self))[:,:,[2,1,0]]
 
 	def getHitHints(self, d=100):
+		"""Hit hints are hints on where to hit the ball (shown from the back) to get a desired trajectory like backspin.
+
+		Information on the hit hint gets pulled from Trickshot.d["hit"]["x" and "y"] (d = definition from init).
+
+		Args:
+			d (int, optional): Diameter of the ball that should be displayed. Defaults to 100.
+
+		Returns:
+			_type_: _description_
+		"""
 		height = int(1.05*d)
 
 		img = Image.new(mode="RGBA", size=(d,height))
@@ -687,6 +707,8 @@ class Trickshot:
 
 	def placeHitHints(self):
 		""" Generate and place the cue hints on the main image
+
+		The hit hint (generated by Trickshot.getHitHints) gets placed four times, on each edge once.
 		"""
 		imgbot = self.getHitHints()
 		w, h = imgbot.size
@@ -736,6 +758,13 @@ class Trickshot:
 			self.img.paste(bImg, (xCorner, yCorner), bImg)
 
 	def drawCue(self, linewidth = 20, indicatorDistance = 180, indicatorLength = 200):
+		"""Draws the suggested position for the cueue including an indicator of the power level of the hit.
+
+		Args:
+			linewidth (int, optional): Width of the cue and indicator. Defaults to 20.
+			indicatorDistance (int, optional): Distance from the indicator to the cueue. Defaults to 180.
+			indicatorLength (int, optional): Length of the indicator. Defaults to 200.
+		"""
 		allCue = self.d["cue"]
 		start = tuple([allCue["start"]["x"], allCue["start"]["y"]])
 		end = tuple([allCue["end"]["x"], allCue["end"]["y"]])
@@ -781,3 +810,4 @@ if __name__ == "__main__":
 	cv2.imshow("Trickshot", img)
 	cv2.waitKey(0)
 	cv2.destroyAllWindows()
+

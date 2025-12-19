@@ -31,6 +31,8 @@ class Game:
         self.engine = GameEngine() # GameEngine object provides methods to get (direct) shot suggestions. They are only shown if the active player wants them to
 
     def change_player(self):
+        """Based on who is the current player (player1 or player2), this switches it. The other player will now be the active player (accessible as self.active_player) and the previously active player will now be inactive (self.inactive_player).
+        """
         self.inactive_player = self.player1 if self.active_player == self.player1 else self.player2
         self.active_player = self.player1 if self.active_player == self.player2 else self.player2
 
@@ -42,7 +44,7 @@ class Game:
                 "x": random.randrange(200, 600),
                 "y": random.randrange(100, 1015),
             },
-            "17": { # 17 so it is displayed as a dummy ball (pink)
+            "17": { # 17 so it is displayed as a dummy ball (blue)
                 "name": "17",
                 "x": random.randrange(1500, 2130),
                 "y": random.randrange(100, 1015)
@@ -53,6 +55,17 @@ class Game:
         return {"break_points": self.break_points}
 
     def evaluate_break(self, coordinates1, coordinates2):
+        """Chooses the player that can break based on two precision shots.
+        
+        To decide who of the players should play the break, both players play a precision shot between two semi-random points (in self.break_points). The player that is closer to the blue ball wins and can play the break.
+
+        Args:
+            coordinates1 (dict): Coordinates of the shot of the first player
+            coordinates2 (dict): Coordinates of the shot of the second player
+
+        Returns:
+            dict: report with important messages like `{"winner": self.active_player, "distance1": distance of the first player, "distance2": ...}
+        """
         _, distance1 = metric_distance_closest(coordinates1, self.break_points["17"])
         _, distance2 = metric_distance_closest(coordinates2, self.break_points["17"])
         self.history["break"]["coordinates"] = {
@@ -85,6 +98,17 @@ class Game:
         return {"winner": self.active_player, "distance1": distance1, "distance2": distance2}
 
     def evaluate_play(self, auth, coordinates):
+        """Based on common billard rules, control what should happen next.
+
+        This method receives the coordinates after a hit and evaluates wether the player can play again, has made a foul or won/lost the game.
+
+        Args:
+            auth (str): 32-byte token, must match the current `self.active_player["token"]`, otherwise this is an illegal request (only the active player should be able to hand in a hit)
+            coordinates (dict): Coordinates of the balls of the current position on the billard table.
+
+        Returns:
+            str, list, list: message (like a log), a list matching a new GameImage.definition (mostly used for iterating using GameImage.update_definition) and an action list (which is currently not used, could be used for arbtirary outputs in the future) 
+        """
         if not auth == self.active_player["token"]:
             return False # false player
 

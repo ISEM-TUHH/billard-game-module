@@ -1,8 +1,13 @@
 from .billard_base_module.Module import Module
 from .billard_base_module.RemoteModules import Camera, Beamer
 
-from .GameImage import GameImage, BilliardBall
-from .Elo import Elo
+# imports for sphinx to find
+from . import GameImage, GameEngine, GameRules, Player, billard_base_module
+
+
+
+#from .GameImage import GameImage, BilliardBall
+#from .Elo import Elo
 import numpy as np
 import pandas as pd
 import os
@@ -17,38 +22,57 @@ import time
 import logging
 import dotenv
 
-from .gamemodes import KP2, Precision, Distance, Break, LongestBreak, Dummy, OnlineGame, LocalGame
+from PIL import Image
+
+from .gamemodes import KP2, Precision, Distance, Break, LongestBreak, Dummy, online_game, local_game# OnlineGame, local_game#LocalGame
 
 class Game(Module):
-	""" Implements central game scheduling functions
+	"""Implements central game scheduling functions
 
 	Bundles all modules APIs and provides the central website.
-	"""
-	
-	supermode = "base" # current gamemode. base: on booting up, before selecting mode. play-local: normal game local. play-online: online game with another billiard robot somewhere else. kp2: mode of selecting kp2 testat, with kp2-t1...t3 being the different testate.
-	current_players = [] # will store the player objects
-	winner = {} # player object that last won the game
 
+	In a default environment, this module runs in test mode (specified in parent class billard_base_module.Module). To start in production mode, set the environment variable `PROD_OR_TEST=PROD`.
+
+	Attributes:
+		base_image (list): Supplies the definition for a default GameImage that gets displayed when the game website is opened, but no gamemode is selected.
+		current_dir (str): Absolute path of this file.
+		storage (str): concat of current_dir and storage_folder (absolute path)
+		camera (Camera): interface object to the remote camera module, configured from passed config
+		beamer (Beamer): like camera, but for the beamer module.
+		gameimage (GameImage): the current displayed image. Most of the times this gets pushed to the beamer module.
+		GAMEMODES (dict): mapping gamemode names to GameMode objects. Gets used to pipe input from the client website (posted on `gamemodecontroller` endpoint) to the gamemode specified in the posted data.
+		api (dict): nested dictionary of all API endpoints. 
+	"""
+
+	#supermode = "base" # current gamemode. base: on booting up, before selecting mode. play-local: normal game local. play-online: online game with another billiard robot somewhere else. kp2: mode of selecting kp2 testat, with kp2-t1...t3 being the different testate.
+	#current_players = [] # will store the player objects
+	#winner = {} # player object that last won the game		
+	
 	base_image = [
-			{
-				"type": "text",
-				"text": "Billard@ISEM"
-			},
-			{
-				"type": "central_image",
-				"img": "isem-logo-big"
-			},
-			#{
-			#	"type": "arrow",
-			#	"start": {"x": 100, "y": 100},
-			#	"end": {"x": 460, "y": 400},
-			#	"head_width": 10,
-			#	"line_width": 5,
-			#	"color": "#12FF12" # or "white"/other common color names
-			#}
-		]
+				{
+					"type": "text",
+					"text": "Billard@ISEM"#"Billard@ISEM"
+				},
+				{
+					"type": "central_image",
+					"img": "isem-logo-big"
+				},
+			]
+	
 	
 	def __init__(self, config="config/config.json", test_config="config/test_config.json", storage_folder="storage", template_folder="templates"):
+		"""Initializes the Game object. Provide relative paths (to this file).
+
+		:param config: path to a configuration `.json` to be used in production mode
+		:type config: str, optional
+		:param test_config: path to a configuration `.json` to be used in test mode
+		:type test_config: str, optional
+		:param storage_folder: path to a folder where some storage files are kept. These will be able to be downloaded from endpoint `/download` after authentication
+		:type storage_folder: str, optional
+		:param template_folder: path to the folder containing the jinja2 templates.
+		:type template_folder: str, optional
+		"""
+
 		current_dir = os.path.dirname(__file__)
 		self.current_dir = current_dir
 		self.storage = current_dir + "/" + storage_folder
@@ -58,7 +82,7 @@ class Game(Module):
 		self.camera = Camera(self.getModuleConfig("camera"))
 		self.beamer = Beamer(self.getModuleConfig("beamer"))
 
-		self.gameimage = GameImage(definition=self.base_image.copy())
+		self.gameimage = GameImage.GameImage(definition=self.base_image.copy())
 		self.beamer.push_image(self.gameimage.getImageCV2())
 
 		with open(f"{self.storage}/players.json") as f:
@@ -68,33 +92,18 @@ class Game(Module):
 		
 		self.GAMEMODES = {
 			"kp2": KP2(),
-			"online_game": OnlineGame(api_secrets),
-			"local_game": LocalGame(api_secrets)
-			#"precision": Precision(),
-			#"distance": Distance(),
-			#"break": Break(),
-			#"longest_break": LongestBreak(),
-			#"dummy": Dummy()
+			"online_game": online_game.OnlineGame(api_secrets),
+			"local_game": local_game.LocalGame(api_secrets)
 		}
+
 
 		socket_dict = {
 			"gamemode-socket": self.gamemode_socket_handler
 		}
 		#self.add_all_sockets(socket_dict)
 
-		api_dict = { # sorted by functionality group -> lat, kp2, game-online, game-local, trickshots etc
+		api_dict = { # sorted by functionality group
 			"": self.index,
-			"selector": { # for the selection progress
-				"getlocalplayers": self.get_local_players,
-			},
-			"sites": {
-				"kp2": self.get_site_kp2,
-				"lat": self.get_site_lat,
-				"trickshots": self.get_site_trickshots,
-				"gamelocal": self.get_site_game_local,
-				"gameonline": self.get_site_game_online,
-				"register_new": self.get_site_register_player
-			},
 			"general": {
 				"ballimagenumber": self.get_ball_image,
 				"correctedcoords": self.beamer_correct_coords,
@@ -104,34 +113,6 @@ class Game(Module):
 			},
 			"camera": {
 				"coords": self.forward_coords
-			},
-			"lat": {
-				"enterround": self.enter_round_lat
-			},
-			"kp2": {
-				"enterround": self.enter_round_kp2,
-				"selectmode": self.select_mode_kp2,
-				"cosmetics": {
-					"precdif": self.kp2_set_precision_difficulty,
-					"value": self.kp2_get_live_value
-				},
-				"config": {
-					"updatescores": self.kp2_update_score_data_base
-				}
-			},
-			"game": {
-				"updateelo": self.do_update_elo,
-				"startgame": self.game_local_start_round,
-				"enterround": self.game_local_enter_round,
-				"determinestart": self.game_determine_start
-			},
-			"online": {
-				"startgame": self.online_start_game
-			},
-			"trickshots": {
-				"list": self.list_trickshots,
-				"load": self.load_trickshot,
-				"sitecreate": self.get_site_create_trickshots
 			},
 			"gamemodecontroller": self.gamemode_controller,
 			"gamemode/<mode>": self.get_gamemode_website,
@@ -149,6 +130,8 @@ class Game(Module):
 		return render_template(file, camera_address_video_feed=self.camera.endpoint("/website/video_feed"), **kwargs)
 
 	def index(self):
+		"""Renders and returns the index.html website (gamemode selection)
+		"""
 		print(f"Client connected.")
 		# show all available gamemodes on the website
 		#available = self.list_available_gamemodes()
@@ -158,43 +141,16 @@ class Game(Module):
 		#self.beamer_make_gameimage()
 		return render_template('index.html')
 
-
-	def get_local_players(self):
-		""" Returns all names + team from players.json
-		"""
-		pastestr = [f"{x['name']}, {x['team']}" for x in self.players]
-		#print(pastestr)
-		return jsonify(pastestr)
-
-	def do_update_elo(self):
-		""" Updates the elo rating in the local players dict and return the updated current players
-		"""
-		if len(self.current_players) != 2:
-			em = f"Trying to update elo of no players, current players are: {self.current_players}"
-			print(em)
-			return em
-		elif self.winner == None: # If no one has won yet
-			em = f"Trying to update elo but there is no winner"
-			print(em)
-			return em
-		
-		turnout = 0.5 if self.winner==0.5 else self.current_players.index(self.winner)
-
-		elo = Elo()
-		updatedCurrentPlayers = elo.match(self.current_players, turnout)
-		for p in updatedCurrentPlayers: # update main list of players
-			for o in self.players:
-				if p["id"] == o["id"]:
-					o["elo"] = p["elo"]
-		
-		self.winner = None # reset the winner to prevent double writing to elo from one match
-		self.save_players() # write updated list to players.json
-
 	def get_ball_image(self):
-		""" Get the image of a certain ball by number.
+		"""Get the image of a certain ball by number.
+
+		Send the number/name of the ball as request argument (`/ballimagenumber?n=4`)
+
+		Todo:
+			- change endpoint to template like `/ballimage/<number>` instead of current system with args.
 		"""
 		n = int(request.args.get("n"))
-		ball = BilliardBall(n)
+		ball = GameImage.BilliardBall(n)
 		img = np.array(ball.getImg(60))[:,:,[2,1,0]] # 60x60 pixels, transformed to a cv2 object type
 
 		#print(n)
@@ -202,7 +158,7 @@ class Game(Module):
 		return Response(buffer.tobytes(), mimetype="image/png")
 
 	def view_csv(self, file):
-		""" Renders a single csv file as a html table and shows it. CSV files must not have an index and must be separated by tabs (\t) """
+		""" Renders a single csv file as a html table and shows it. CSV files must not have an index and must be separated by tabs (\t). If the file does not exist or does not end in `.csv`, returns status 404 or 403 """
 		fileStorage = os.path.join(self.storage_dir, file)
 		fileResources = os.path.join(self.current_dir, "gamemodes", "resources", file)
 		if not file.endswith(".csv"):
@@ -234,16 +190,16 @@ class Game(Module):
 	from ._beamer_interface import beamer_push_image, beamer_off, beamer_make_gameimage, beamer_correct_coords, beamer_update_manual_text
 
 	# INTERACTIONS FOR NORMAL GAME ##################################################
-	from ._game_local import get_site_game_local, game_local_enter_round, game_local_start_round, game_determine_start
+	#from ._game_local import get_site_game_local, game_local_enter_round, game_local_start_round, game_determine_start
 	# INTERACTION FOR ONLINE GAME ###################################################
-	from ._game_online import get_site_game_online, online_start_game, get_site_register_player
+	#from ._game_online import get_site_game_online, online_start_game, get_site_register_player
 
 	# INTERACTIONS FOR EXAM MODE ####################################################
-	from ._kp2 import get_site_kp2, enter_round_kp2, select_mode_kp2, kp2_set_precision_difficulty, kp2_get_live_value, kp2_calc_score, kp2_update_score_data_base # import all methods from _kp2.py
-	from ._lat import get_site_lat, enter_round_lat # import all methods from _lat.py
+	#from ._kp2 import get_site_kp2, enter_round_kp2, select_mode_kp2, kp2_set_precision_difficulty, kp2_get_live_value, kp2_calc_score, kp2_update_score_data_base # import all methods from _kp2.py
+	#from ._lat import get_site_lat, enter_round_lat # import all methods from _lat.py
 
 	# INTERACTION FOR TRICKSHOT MODE ################################################
-	from ._trickshots import load_trickshot, list_trickshots, get_site_trickshots, get_site_create_trickshots
+	#from ._trickshots import load_trickshot, list_trickshots, get_site_trickshots, get_site_create_trickshots
 
 
 	# GAMEMODE CONTROLLER ###########################################################

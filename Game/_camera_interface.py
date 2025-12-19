@@ -11,27 +11,19 @@ import time
 from .GameImage import GameImage
 
 def forward_coords(self):
-    """ Collect the coordinates from the camera module and forward it to the calling website
+    """ Collect the coordinates from the camera module and forward it to the client
 
-    This prevents the user from having to directly connect to the camera module. Also updates the beamer with a current game image and overlays depending on the current mode.
+    This prevents the user from having to directly connect to the camera module. Also updates the beamer with the newly received coordinates and overlays them on the current GameImage object (self.gameimage).
+
+    Todo:
+        - Experiment with timings between turning off the beamer and taking the image (especially with playing a sound simultaneously on the beamer)
     """
     self.beamer.play_sound("please_dont_touch_the_balls")
     self.beamer_off() # project a black screen before taking the image so that the proection cant influence the Camera AI.
     time.sleep(0.3)
-    
-    #camera = self.getModuleConfig("camera")
-    #api = f"http://{camera['ip']}:{camera['port']}/v1/coords"
-    #response = requests.get(api)
-    #res = response.json()
 
     res = self.camera.get_coords()
     self.beamer.play_sound("finished")
-
-
-    if self.supermode in ["game-local", "kp2"]:
-        print(f"coords from camera are being saved.")
-        self.game_coords = res
-        self.submode = "round"
 
     # generate an image and place it on the beamer
     self.gameimage.update_definition({"type": "balls", "coords": res})
@@ -40,7 +32,10 @@ def forward_coords(self):
     return jsonify(res)
 
 def camera_save_image(self):
-    """ OUTDATED Save the current image and (if passed) coordinates of the balls for AI training later on """
+    """ Deprecated, will raise AssertionError
+    
+    Save the current image and (if passed) coordinates of the balls for AI training later on 
+    """
     camera = self.getModuleConfig("camera")
     api = f"http://{camera['ip']}:{camera['port']}/v1/savepic"
 
