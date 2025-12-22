@@ -22,6 +22,14 @@ var coordinates = {} /* storing manually placed balls with the structure:
 var altCoordinates = {}; // storage for other objects placed on the image than balls. Same structure.
 var currentRound = {};
 
+// Reload the livestream with a cache buster, in case the camera needed to be rebooted
+original_livestream_source = document.getElementById("livestream").src // store the original value to add the cache buster to
+function reloadStream() {
+  document.getElementById("livestream").src = original_livestream_source + "?t=" + Date.now(); // this forces the browser to reload the 
+}
+document.getElementById("reload-livestream").addEventListener("click", reloadStream)
+
+
 // --------------------- Functions for getting the coordinates
 
 // Get coordinates from the camera-module

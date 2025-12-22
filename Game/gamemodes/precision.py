@@ -39,7 +39,7 @@ class Precision(GameMode):
             #],
             #"strike": [
                 self.determine_precision,
-                {"True": "finished"},
+                {"True": "finished", "reset": "init"},
                 lambda: self.gameimage.definition,
                 ["Measure"]
             ]

@@ -206,14 +206,14 @@ class GameMode:
             if inplace:
                 self.__init__(settings=self.SETTINGS, **kwargs)
                 print("Reset this object. New state:", self.state)
-                return False, {}, {}
+                return "reset", {}, {}
                 
             return self.__init__(settings=self.SETTINGS, **kwargs)
 
         if inplace:
             self.__init__(**kwargs)
             print("Reset this object. New state:", self.state)
-            return False, {}, {}
+            return "reset", {}, {}
         return self.__init__(**kwargs)
 
     def get_history(self):

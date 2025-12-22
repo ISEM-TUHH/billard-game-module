@@ -158,7 +158,7 @@ class KP2(GameMode):
 
                     out = self.hand_in()
                     print(out)
-                    self.gameimage.update_text(f"Score: {out["hist-package"]['score']}")
+                    self.gameimage.update_text(f"Score: {out['hist-package']['score']}")
                 case "settings":
                     out = self.settings(inp)
 

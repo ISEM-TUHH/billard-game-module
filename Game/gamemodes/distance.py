@@ -39,7 +39,7 @@ class Distance(GameMode):
         self.TREE = {
             "init": [
                 self.calculate_score,
-                {"True": "finished"}, # no other outputs possible
+                {"True": "finished", "reset": "init"}, # no other outputs possible
                 lambda: [
                     {
                         "type": "text",

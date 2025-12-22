@@ -62,7 +62,7 @@ class LongestBreak(GameMode):
             #],
             #"strike": [
                 self.determine_hit,
-                {"True": "strike", "False": "finished", "decide_keep": "decide_keep"},
+                {"True": "init", "False": "finished", "decide_keep": "decide_keep", "reset": "init"},
                 lambda: [{
                         "type": "balls",
                         "coords": self.active_challenge["coordinates"],
@@ -72,7 +72,7 @@ class LongestBreak(GameMode):
             ],
             "decide_keep": [
                 self.decide_keep,
-                {"keep": "strike", "discard": "finished"},
+                {"keep": "init", "discard": "finished"},
                 lambda: [{"type": "text", "text": "Keep or go to next round?"}], # keep previous definition
                 [None, {
                     "type": "button",

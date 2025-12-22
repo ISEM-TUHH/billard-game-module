@@ -82,4 +82,4 @@ def beamer_update_manual_text(self):
     #self.beamer_make_gameimage()
     self.gameimage.update_text(res["text"])
     self.beamer.push_image(self.gameimage.getImageCV2())
-    return f"Written text to beamer: '{res["text"]}'"
+    return f"Written text to beamer: '{res['text']}'"
