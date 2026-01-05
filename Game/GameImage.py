@@ -61,6 +61,7 @@ class GameImage:
 
 		self.FLAG_MODIFIED = False # track if the image has been updated since the last redraw
 
+		self.fontpath = os.path.join(self.current_dir, "../Minecraft/Minecraft-Regular.otf") 
 
 		# list of graphical parts that can only exist max once.
 		self.static = ["balls", "text", "team", "break", "central_image"] #: These `part` types are static and will get reassigned instead of added with a different reference if they are input to GameImage.update_definition, unless a specific reference has been assigned.
@@ -366,7 +367,7 @@ class GameImage:
 			d = int(self.ballDiameter/self.phys)
 		
 		b = BilliardBall(n)
-		bImg = b.getImg(d)
+		bImg = b.getImg(d, square=True)
 		x,y = tuple([int(float(i)/self.phys - d//2) for i in pos])
 		self.img.paste(bImg, (x,y), bImg) # second call for mask, so the corners dont get overwritten
 
@@ -436,7 +437,7 @@ class GameImage:
 		:type subimg: optional PIL Image or relative path to image 
 		"""		
 		fs = int(self.h/15)# if self.w/len(text) < # TODO: make it more dynamic 
-		font = ImageFont.truetype(self.current_dir + "/../Roboto-Black.ttf", fs)
+		font = ImageFont.truetype(self.fontpath, fs)
 
 		#img = Image.new(mode="RGBA", size=(self.w, int(1.5*fs)), color="#00000000")
 		img = Image.new(mode="RGBA", size=(self.w, int(3*fs)), color="#00000000")
@@ -485,7 +486,7 @@ class GameImage:
 			team (str): Team name
 		"""
 		fs = int(self.h//25)
-		font = ImageFont.truetype(self.current_dir + "/../Roboto-Black.ttf", fs)
+		font = ImageFont.truetype(self.fontpath, fs)
 		img = Image.new(mode="RGBA", size=(self.h, int(1.5*fs)), color="#00000000")
 		draw = ImageDraw.Draw(img)
 
@@ -574,7 +575,8 @@ class BilliardBall:
 
 
 		current_dir = os.path.dirname(__file__) # finding the Roboto-Black.ttf/navigating the dirs
-		self.fontpath = current_dir + "/../Roboto-Black.ttf"
+		#self.fontpath = current_dir + "/../Roboto-Black.ttf"
+		self.fontpath = current_dir + "/../Minecraft/Minecraft-Regular.otf"
 
 		n = int(n) if n not in self.unique_map.keys() else self.unique_map[n]
 		self.indexNumber = n
@@ -616,11 +618,13 @@ class BilliardBall:
 			group = "half" if (n>8 and n<16) else "full"
 		return group
 
-	def getImg(self, d):
+	def getImg(self, d, square=False):
 		"""Get the image of the ball with its number, half or full and color.
 		
 		:param d: Diameter of the returned image (side of square) in px
 		:type d: int
+		:param square: should the ball image be generated as a square? This is useful when you are simultaneously displaying ball positions on the beamer and infering ball positions using the camera module. Displayed square balls are less likely to get picket up as balls compared to circular balls.
+		:type square: optional, bool
 		:return: PIL.Image object
 		"""
 		self.font = ImageFont.truetype(self.fontpath, d//3)
@@ -628,17 +632,26 @@ class BilliardBall:
 		img = Image.new(mode="RGBA", size=(d+1, d+1))
 		draw = ImageDraw.Draw(img)
 
-		draw.ellipse((0,0,d,d), fill=self.color, outline=self.color) # main color 
+		if square:
+			form = lambda points, fill=None, outline=0, width=None: draw.rectangle(points, fill=fill, outline=outline)
+		else:
+			form = lambda points, fill=None, outline=0, width=0: draw.ellipse(points, fill=fill, outline=outline, width=width)
+
+		#draw.ellipse((0,0,d,d), fill=self.color, outline=self.color) # main color 
+		form((0,0,d,d), fill=self.color, outline=self.color)
 		if self.type == "half":
 			draw.rectangle((0,0,d,d//5), fill=self.white, outline=self.white)
 			draw.rectangle((0,4*d//5,d,d), fill=self.white, outline=self.white)
-			draw.ellipse((-d//2,-d//2,3*d//2,3*d//2), outline="#00000000", width=d//2)
+			form((-d//2,-d//2,3*d//2,3*d//2), outline="#00000000", width=d//2)
+			#draw.ellipse((-d//2,-d//2,3*d//2,3*d//2), outline="#00000000", width=d//2)
 
 		if self.indexNumber < 17: # do not draw a white inner circle for dummy/special balls
-			draw.ellipse((d//4,d//4, 3*d//4, 3*d//4), fill=self.white, outline=self.white) # inner white circle
+			#draw.ellipse((d//4,d//4, 3*d//4, 3*d//4), fill=self.white, outline=self.white) # inner white circle
+			form((d//4,d//4, 3*d//4, 3*d//4), fill=self.white, outline=self.white)
 			_,_, w, h = draw.textbbox((0,d//20), str(self.n), font = self.font)
 			draw.text(((d-w)//2, (d-h)//2), str(self.n), font=self.font, fill="black")
-		draw.ellipse((0,0,d,d), outline=self.white) # draw a white circle around it (good for balls with weak colors)
+		#draw.ellipse((0,0,d,d), outline=self.white) # draw a white circle around it (good for balls with weak colors)
+		form((0,0,d,d), outline=self.white)
 
 		return img
 
@@ -752,7 +765,7 @@ class Trickshot:
 			b = BilliardBall(number)
 
 			offset = diameter // 2
-			bImg = b.getImg(diameter) # currently hardcoded ball diameter
+			bImg = b.getImg(diameter, square=True) # currently hardcoded ball diameter
 			
 			xCorner, yCorner = int(ball["x"])-offset, int(ball["y"])-offset
 			self.img.paste(bImg, (xCorner, yCorner), bImg)

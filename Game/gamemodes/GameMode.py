@@ -202,6 +202,7 @@ class GameMode:
         Returns:
             GameMode or (bool, dict, dict): the reinitialized gamemode OR (False, {}, {}) as "neutral" output for calls in GameMode.entrance (if inplace=True)
         """
+        print("Resetting", self.gamemode_name, "...")
         if hasattr(self, "SETTINGS") and keep_settings:
             if inplace:
                 self.__init__(settings=self.SETTINGS, **kwargs)

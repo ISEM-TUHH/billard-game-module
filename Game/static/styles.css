@@ -386,8 +386,8 @@ tr:nth-child(odd) {
 
 .ball {
   position: absolute;
-  width: 15px; /* Width of the point */
-  height: 15px; /* Height of the point */
+  width: 2%; /* Width of the point */
+  height: auto; /* Height of the point */
   /*background-color: black; /* Color of the point */
   border-radius: 50%; /* Make it circular */
   transform: translate(-50%, -50%); /* Center the point */

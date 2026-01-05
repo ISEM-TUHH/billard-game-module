@@ -6,6 +6,8 @@ The repository provides the game module for the Billard@ISEM system.
 + Clone the repository: `git clone https://github.com/ISEM-TUHH/billard-game-module.git`
 + Modify `config.json` and/or `test_config.json` as well as add a `.env` file as specified later on
 + From inside the repository folder create and install all relevant python dependencies: `python -m venv venv && source venv/bin/activate && pip install -r requirements.txt`
++ Download the font used for generating images for the beamer and paste it into the `fonts` folder. 
+    - We use `Minecraft-Regular.otf` from publicly available Minecraft font collections.
 + For testing the system, run `python main.py`.
     + This starts the server using the configuration from `test_config.json`
     + Open the specified webpage and check that everything works

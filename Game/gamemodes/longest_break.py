@@ -280,7 +280,7 @@ class LongestBreak(GameMode):
         #    return "skip_round", {}, {}
         #else:
         self.reset(inplace=True, can_discard=next_can_discard, can_play_on=next_can_play_on, round_tracker=self.round_tracker, scored=self.scored)
-        return False, {}, {}
+        return "reset", {}, {}
 
 
     def start_geometry(self):
