@@ -127,7 +127,7 @@ class Game(Module):
 
 	def render_template_camera(self, file, **kwargs):
 		""" Oftentimes we need to render a website that contains the camera livestream. We dont want to write it statically nor do we want to pass it everytime """
-		return render_template(file, camera_address_video_feed=self.camera.endpoint("/website/video_feed"), **kwargs)
+		return render_template(file, camera_address_video_feed=self.camera.endpoint("/website/video_feed"), camera_address=self.camera.address, **kwargs)
 
 	def index(self):
 		"""Renders and returns the index.html website (gamemode selection)

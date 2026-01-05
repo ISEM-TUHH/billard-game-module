@@ -260,3 +260,17 @@ function coordinatesBackend() {
   }
   return sendCoords
 }
+
+document.getElementById("toggle-inference").addEventListener("click", (e) => {
+  fetch(camera_address + "/v1/togglequick")
+  elmnt = document.getElementById("toggle-inference");
+  if (elmnt.value === "Activate live inference") {
+    elmnt.value = "Deactivate live inference";
+  } else {
+    elmnt.value = "Activate live inference";
+  }
+})
+
+document.getElementById("stop-livestream").addEventListener("click", (e) => {
+  fetch(camera_address + "/v1/stopgeneration");
+})

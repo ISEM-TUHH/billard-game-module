@@ -265,6 +265,19 @@ input[type="radio"]:checked + .option-box {
   width: 2rem;
 }
 
+.button-list input[type="button"] {
+  background: #e1e1e1;
+  padding: 0.5rem;
+  text-align: center;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+  overflow-wrap: break-word;
+  white-space: normal;
+  margin: 5px;
+}
+
 .button-list input[type="checkbox"],
 #manipulationFlag {
   display: none;

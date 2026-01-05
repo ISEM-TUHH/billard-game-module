@@ -29,6 +29,8 @@
           },duration);
           document.body.appendChild(el);
       }
+
+      let camera_address = "{{ camera_address }}";
   </script>
 
   <body>
@@ -72,10 +74,13 @@
 
         </div>
         <div class="button-list">
-          <input type="checkbox" id="manipulation-flag">
+          <input type="checkbox" id="manipulation-flag" value="off">
           <label for="manipulation-flag">Manual entries</label>
 
+          Camera controls:
           <input type="button" id="reload-livestream" value="Reload livestream">
+          <input type="button" id="stop-livestream" value="Stop live inference">
+          <input type="button" id="toggle-inference" value="Activate live inference">
         </div>
         <details>
           <summary>Place balls</summary>

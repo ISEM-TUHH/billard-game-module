@@ -61,7 +61,7 @@ class GameImage:
 
 		self.FLAG_MODIFIED = False # track if the image has been updated since the last redraw
 
-		self.fontpath = os.path.join(self.current_dir, "../Minecraft/Minecraft-Regular.otf") 
+		self.fontpath = os.path.join(self.current_dir, "../fonts/Minecraft-Regular.otf") 
 
 		# list of graphical parts that can only exist max once.
 		self.static = ["balls", "text", "team", "break", "central_image"] #: These `part` types are static and will get reassigned instead of added with a different reference if they are input to GameImage.update_definition, unless a specific reference has been assigned.
@@ -576,7 +576,7 @@ class BilliardBall:
 
 		current_dir = os.path.dirname(__file__) # finding the Roboto-Black.ttf/navigating the dirs
 		#self.fontpath = current_dir + "/../Roboto-Black.ttf"
-		self.fontpath = current_dir + "/../Minecraft/Minecraft-Regular.otf"
+		self.fontpath = current_dir + "/../fonts/Minecraft-Regular.otf"
 
 		n = int(n) if n not in self.unique_map.keys() else self.unique_map[n]
 		self.indexNumber = n
