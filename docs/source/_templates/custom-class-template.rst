@@ -3,7 +3,7 @@
     # Posted by James Leedham, modified by community. See post 'Timeline' for change history
     # Retrieved 2025-12-09, License - CC BY-SA 4.0
 
-    # in {{ name | escape | underline}} use fullname instead of name for showing parents
+    # in {{ name | escape | underline}}
 
 {{ name | escape | underline}}
 
