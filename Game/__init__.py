@@ -24,7 +24,7 @@ import dotenv
 
 from PIL import Image
 
-from .gamemodes import KP2, Precision, Distance, Break, LongestBreak, Dummy, online_game, local_game# OnlineGame, local_game#LocalGame
+from .gamemodes import KP2, Precision, Distance, Break, LongestBreak, Dummy, online_game, local_game, FinalCompetition # OnlineGame, local_game#LocalGame
 
 class Game(Module):
 	"""Implements central game scheduling functions
@@ -60,24 +60,27 @@ class Game(Module):
 			]
 	
 	
-	def __init__(self, config="config/config.json", test_config="config/test_config.json", storage_folder="storage", template_folder="templates"):
+	def __init__(self, config="config/config.json", test_config="config/test_config.json", storage_folder="storage", download_folder="gamemodes/resources", template_folder="templates"):
 		"""Initializes the Game object. Provide relative paths (to this file).
 
 		:param config: path to a configuration `.json` to be used in production mode
 		:type config: str, optional
 		:param test_config: path to a configuration `.json` to be used in test mode
 		:type test_config: str, optional
-		:param storage_folder: path to a folder where some storage files are kept. These will be able to be downloaded from endpoint `/download` after authentication
+		:param storage_folder: path to a folder where some storage files are kept. Not really relevant, only players.json gets read from there.
 		:type storage_folder: str, optional
+		:param download_folder: relative path to a folder where resources that should be available to download from endpoint `/download` after authentication
+		:type download_folder: str, optional
 		:param template_folder: path to the folder containing the jinja2 templates.
 		:type template_folder: str, optional
 		"""
 
 		current_dir = os.path.dirname(__file__)
 		self.current_dir = current_dir
-		self.storage = current_dir + "/" + storage_folder
+		self.storage = os.path.join(current_dir, storage_folder)
+		self.download_dir = os.path.join(current_dir, download_folder)
 
-		Module.__init__(self, config=f"{current_dir}/{config}", test_config=os.path.join(current_dir, test_config), template_folder=f"{current_dir}/{template_folder}", storage_folder=self.storage, static_folder=f"{current_dir}/static")
+		Module.__init__(self, config=f"{current_dir}/{config}", test_config=os.path.join(current_dir, test_config), template_folder=f"{current_dir}/{template_folder}", storage_folder=self.download_dir, static_folder=f"{current_dir}/static")
 
 		self.camera = Camera(self.getModuleConfig("camera"))
 		self.beamer = Beamer(self.getModuleConfig("beamer"))
@@ -92,6 +95,7 @@ class Game(Module):
 		
 		self.GAMEMODES = {
 			"kp2": KP2(),
+			"final_competition": FinalCompetition(),
 			"online_game": online_game.OnlineGame(api_secrets),
 			"local_game": local_game.LocalGame(api_secrets)
 		}

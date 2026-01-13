@@ -77,10 +77,7 @@
           <input type="checkbox" id="manipulation-flag" value="off">
           <label for="manipulation-flag">Manual entries</label>
 
-          Camera controls:
-          <input type="button" id="reload-livestream" value="Reload livestream">
-          <input type="button" id="stop-livestream" value="Stop livestream">
-          <input type="button" id="toggle-inference" value="Activate live inference">
+
         </div>
         <details>
           <summary>Place balls</summary>
@@ -105,6 +102,20 @@
           </div>
 
           <!--<input type="button" value="Save image for AI training" id="ai-training-button">-->
+        </details>
+        <details>
+          <summary>Debugging</summary>
+
+          Camera controls:
+          <div class="button-list">
+            <input type="button" id="reload-livestream" value="Reload livestream">
+            <input type="button" id="stop-livestream" value="Stop livestream">
+            <input type="button" id="toggle-inference" value="Activate live inference">
+            <input type="button" onclick="fetch(camera_address + '/meta/relaunch')" value="Restart camera (approx. 15s)">
+          </div>
+          <br>
+          After restarting the camera, reload the livestream until it works. The state of "Activate live inference" can be inverted when it is active and the page gets reloaded.
+
         </details>
       </section>
 
@@ -184,6 +195,19 @@
         <audio name="sound-20" data-group="4"><source src="{{ url_for('static', filename='sounds/very bad 2.mp3') }}"></audio>
         <audio name="sound-21" data-group="4"><source src="{{ url_for('static', filename='sounds/very bad (2).mp3') }}"></audio>
     </div>
+
+    <!--<footer>
+      <div class="content-wrapper">
+        <p>
+          <a href="https://www.linkedin.com/company/tuhh-isem" target="_blank">ISEM auf LinkedIn</a> |
+          <a href="https://isem-karriere.de/datenschutz/" target="_blank">Datenschutz</a> |
+          <a href="https://www.tuhh.de/isem/impressum" target="_blank">Impressum</a> |
+          <a href="http://134.28.20.52:5000/debug/restartgui" target="_blank">Restart Beamer</a> |
+          <a href="http://134.28.20.58:5000/meta/relaunch" target="_blank">Restart Camera</a> | 
+          <a href="{{ url_for('download') }}" target="_blank">Downloads</a>
+        </p>
+      </div>
+    </footer>-->
 
     <!-- JavaScript einbinden -->
     <script src="{{ url_for('static', filename='sound.js') }}"></script> 

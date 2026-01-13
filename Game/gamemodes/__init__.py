@@ -91,6 +91,7 @@ from .dummy import Dummy
 
 # Meta gamemodes
 from .kp2 import KP2
+from .final_competition import FinalCompetition
 
 #from .online_game import OnlineGame
 #from .local_game import LocalGame

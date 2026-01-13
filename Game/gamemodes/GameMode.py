@@ -237,12 +237,13 @@ class GameMode:
         return hist
 
     def save_history(self, history):
-        """Writes a passed dataframe to self.history_file (tab-separated, without an index)
+        """Writes a passed dataframe to self.history_file (Path object) as csv (tab-separated, without an index). Also writes a .xlsx file with the same name, just different extension. 
 
         Args:
             history (pd.DataFrame): The dataframe to get saved. Usually contains the history of all rounds of the specific gamemode, with nested data being normalized (see pd.json_normalize)
         """
         history.to_csv(self.history_file, sep="\t", index=False)
+        history.to_excel(self.history_file.with_suffix(".xlsx"))
 
     def save_json_history(self, history):
         """Appends a passed dict to a list of dicts in self.json_history_file.
@@ -274,9 +275,6 @@ class GameMode:
 
         Returns:
             dict: a dictionary with the fields `single_table` (list of lists with `player`, `team`, `score` in each row, if existing also `semester` and `attestation`), `single_columns` (list of the name of the columns in `single_table`), `team_table` (list of lists always containing the `team` and `score`, which is averaged across all members of the team.). All tables are sorted with the highest score on top. If a new entry was added, the field `single_new_index` (int) also exists with the index of the new entry in the sorted `single_table`
-
-        Todo:
-            - Check if the line `assert len(hist) != 0` is really needed? How can we automatically setup new gamemodes histories?
         """
         if history is None:
             if self.history_file.exists():
@@ -300,9 +298,6 @@ class GameMode:
             hist = new_hist.copy()
             #print("HISTORY ADD", pd.DataFrame(add, index=[0]))
             #print("NEW HIST SHAPE", new_hist.shape)
-
-        # by now, hist should not be empty
-        assert len(hist) != 0
 
         #print("get_semester", get_semester)
         if get_semester is not None:

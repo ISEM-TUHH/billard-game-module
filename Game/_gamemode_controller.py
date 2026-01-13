@@ -100,6 +100,8 @@ def get_gamemode_website(self, mode):
     self.gameimage.redraw()
     self.beamer.push_image(self.gameimage.getImageCV2())
 
-
-    file = mode + ".html"
+    if hasattr(self.GAMEMODES[mode], "WEBSITE_TEMPLATE"):
+        file = self.GAMEMODES[mode].WEBSITE_TEMPLATE
+    else:
+        file = mode + ".html"
     return self.render_template_camera(file, **(self.GAMEMODES[mode].index_args() | self.GAMEMODES[mode].history()))

@@ -8,8 +8,9 @@ const funnelQuestions = [
         { icon: "fa-globe", text: "Billard standortverteilt spielen", submitTo: "./gamemode/online_game"}, // eventually follows: "location", when we have more than one other location
         { icon: "fa-location-dot", text: "Billard lokal spielen", submitTo: "./gamemode/local_game"},
         //{ icon: "fa-wand-magic-sparkles", text: "Trickshots üben", submitTo: "./sites/trickshots"},
-        { icon: "fa-robot", text: "KP II", submitTo: "./gamemode/kp2"}
+        { icon: "fa-robot", text: "KP II", submitTo: "./gamemode/kp2"},
         //{ icon: "fa-clipboard", text: "Prüfungsmodus", follows: "exam-selection"}
+        { icon: "fa-people-group", text: "KP II Final Competition", submitTo: "./gamemode/final_competition"}
       ]
     },
     {

@@ -13,19 +13,29 @@ from .single_break import Break
 
 class KP2(GameMode):
     """ This class builds upon lower level gamemodes to deliver the entire user experience for the KP2 events. The teaching unit is also known as MPD2. """
+        
+    __file__ = __file__
 
-    def __init__(self, starting_mode="precision"):
-        self.__file__ = __file__
+    def __init__(self,
+            occurences={ # how many scores are determined for each
+                "precision": 5,
+                "distance": 5,
+                "break": 1,
+                "longest_break": 5 # 5 starts and 2 fully to the end -> only two scores
+            }, 
+            gm_name="KP2"
+        ):
+        
 
-        self.gamemode_name = "KP2"
+        self.gamemode_name = gm_name # "KP2"
         self.message = "Hello there :)" # this just needs to exist
         
-        self.occurences = { # how many scores are determined for each
-            "precision": 5,
-            "distance": 5,
-            "break": 1,
-            "longest_break": 5 # 5 starts and 2 fully to the end -> only two scores
-        }
+        self.occurences = occurences# { # how many scores are determined for each
+            #"precision": 5,
+            #"distance": 5,
+            #"break": 1,
+            #"longest_break": 5 # 5 starts and 2 fully to the end -> only two scores
+        #}
 
         self.GAMEMODES = {
             "distance": Distance(),
