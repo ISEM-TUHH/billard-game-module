@@ -42,6 +42,33 @@
         </fieldset>
       </section>
 
+      <section id="break" class="col mode">
+        <button type="button" class="collapsible">Break</button>
+        <div class="collapsible-content">
+          <fieldset>
+            <legend>Break</legend>
+            Sink as many balls as possible with one single hit from the base triangle formation. You have one try as this is solely a bonus task.
+            <hr>
+              <div class="results">
+                {% for n in break_results %}
+                <div class="open-game">Try {{ n }}</div>
+                {% endfor %}
+              </div>          
+            <hr>
+              {{ break_flow|safe }}
+            <hr>
+            <!--<div class="button-list step">
+              <input type="checkbox" id="break-button">
+              <label for="break-button" id="break-button-label" data-og="Count sunk balls">Count sunk balls</label>
+            </div>-->      
+            <div style="display: none;">
+              <!-- Results get pasted here (invisible) -->
+            </div>
+          </fieldset>
+        </div>
+        <!--<script src="{{ url_for('static', filename='gamemodes/break.js') }}"></script>-->
+      </section>
+
       <section id="precision" class="col mode">
         <button type="button" class="collapsible">Precision</button>
         <div class="collapsible-content">
@@ -100,34 +127,6 @@
         </div>
         <!--<script src="{{ url_for('static', filename='gamemodes/distance.js') }}"></script>-->
       </section>
-
-      <section id="break" class="col mode">
-        <button type="button" class="collapsible">Break</button>
-        <div class="collapsible-content">
-          <fieldset>
-            <legend>Break</legend>
-            Sink as many balls as possible with one single hit from the base triangle formation. You have one try as this is solely a bonus task.
-            <hr>
-              <div class="results">
-                {% for n in break_results %}
-                <div class="open-game">Try {{ n }}</div>
-                {% endfor %}
-              </div>          
-            <hr>
-              {{ break_flow|safe }}
-            <hr>
-            <!--<div class="button-list step">
-              <input type="checkbox" id="break-button">
-              <label for="break-button" id="break-button-label" data-og="Count sunk balls">Count sunk balls</label>
-            </div>-->      
-            <div style="display: none;">
-              <!-- Results get pasted here (invisible) -->
-            </div>
-          </fieldset>
-        </div>
-        <!--<script src="{{ url_for('static', filename='gamemodes/break.js') }}"></script>-->
-      </section>
-
 
       <section id="longest_break" class="col mode">
         <button type="button" class="collapsible">Longest Break</button>

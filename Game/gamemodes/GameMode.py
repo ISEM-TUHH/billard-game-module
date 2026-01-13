@@ -140,6 +140,10 @@ class GameMode:
         elif self.state != new_state: # when there is a new state, signal progress
             sound = "finished"
 
+        # enabled updating the gameimage even if changing state
+        # for debugging: if there is a not a new_state but updates, log it
+        #if self.state != new_state and ("gameimage_updates" in local_returns.keys() or "reset-gameimage" in local_returns.keys()):
+        #    print("DEBUG FROM CHANGED GAMEIMAGE UPDATE BEHAVIOUR (GameMode.py:146): Updated gameimage but also changed state: ")
         if self.state == new_state:
             if "reset-gameimage" in local_returns.keys() and local_returns["reset-gameimage"]:
                 self.gameimage.definition = [] # completely reset the gameimage, draw the new stuff from zero
@@ -149,6 +153,9 @@ class GameMode:
                 for element in local_returns["gameimage-updates"]:
                     ref = element["ref"] if "ref" in element.keys() else None
                     self.gameimage.update_definition(element, ref=ref)
+
+        if new_state == "finished":
+            self.HISTORY["finished_time"] = pd.Timestamp.now()
 
             
         

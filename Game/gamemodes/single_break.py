@@ -2,6 +2,8 @@ from .common_utils import *
 from ..GameImage import GameImage
 from .GameMode import GameMode
 
+import pandas as pd
+
 class Break(GameMode):
     """ The goal is to sink as many balls as possible with a single hit """
     
@@ -52,7 +54,10 @@ class Break(GameMode):
         report = coords_report(coords, coords_old)
 
         self.score = report["n_sunk_legal"] # dont just shoot the white ball into a hole
-        self.HISTORY = {"sunk_legal": self.score}
+        self.HISTORY = {
+            "sunk_legal": self.score,
+            "start_time": pd.Timestamp.now()
+        }
         #self.state = "finished"
         out = {"signal": "finished", "score": self.score}
 

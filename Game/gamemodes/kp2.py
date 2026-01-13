@@ -126,7 +126,7 @@ class KP2(GameMode):
 
                     self.scores[activity][index] = new_score
                     out["was_round"] = index
-                    print(self.scores)
+                    #print(self.scores)
                 case "interrupt": # UNUSED!!!
                     # reset the gamemode
                     self.GAMEMODES[activity].reset() # setting friendly reset
@@ -216,6 +216,7 @@ class KP2(GameMode):
 
         self.HISTORY = pd.json_normalize(self.history_base | self.history_addons | self.history_collection)
         out["hist-package"] = {k: v[0] for k,v in self.HISTORY.to_dict().items()}
+        #print("KP2 OUT HIST-PACKAGE:", out["hist-package"])
 
         return out
         
@@ -242,7 +243,8 @@ class KP2(GameMode):
         distance_distance = np.array([x["distance"] for x in distance.values()])
         self.history_addons["distance.longest"] = np.max(distance_distance)
         # closest500 is used in the mystery challenge "And I would walk 500 miles..."
-        self.history_addons["distance.closest500"] = distance_distance[np.argmin(np.abs(distance_distance - 5000))]
+        # save the minimal distance from 500cm in mm.
+        self.history_addons["distance.closest500"] = np.abs(distance_distance[np.argmin(np.abs(distance_distance - 5000))] - 5000)
         
         # Precision: +150p if all 5 hits are <180mm (on target)
         # Distance: +150p if at least two wall collisions on every attempt
@@ -270,8 +272,13 @@ class KP2(GameMode):
         if len(session_hist) + 1 == int(self.history_base["number_teams"]):
             # if this is the final team
             updated_table = False
-            max_saved_index = session_hist["distance.longest"].idxmax()
-            max_saved = session_hist["distance.longest"][max_saved_index]
+            
+            if len(session_hist) == 0:
+                # if there is only one team in the attestation (mainly when testing aahhh)
+                max_saved = -1000000
+            else:
+                max_saved_index = session_hist["distance.longest"].idxmax()
+                max_saved = session_hist["distance.longest"][max_saved_index]
             if max_saved < self.history_addons["distance.longest"]:
                 overview["Longest Distance"] = 250
             else:
@@ -281,9 +288,14 @@ class KP2(GameMode):
 
             # if the mystery challenge is the 500 thing
             if self.active_mystery == "And I would walk 500 miles...":
-                max_saved_index = session_hist["distance.closest500"].idxmax()
-                max_saved = session_hist["distance.closest500"][max_saved_index]
-                if max_saved < self.history_addons["distance.closest500"]:
+                if len(session_hist) == 0:
+                    # if there is only one team in the attestation (mainly when testing aahhh)
+                    max_saved = 100000000
+                else:
+                    max_saved_index = session_hist["distance.closest500"].idxmax()
+                    max_saved = session_hist["distance.closest500"][max_saved_index]
+
+                if max_saved > self.history_addons["distance.closest500"]:
                     overview["Mystery Challenge"] = 350
                 else:
                     hist.at[max_saved_index, "overview.Mystery Challenge"] = 250

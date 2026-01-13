@@ -64,6 +64,9 @@ class Precision(GameMode):
 
     def determine_precision(self, inp):
         """ Determines if a finished hit is valid: if a ball was sunk, stay in this state and add to score tracker, if no ball was sunk, progress to stafte finished """
+        if len(inp["coordinates"].values()) == 0:
+            return False, {"gameimage-updates": [{"type": "text", "text": "No ball found, try again!"}]}, {"message": "No ball found."}
+            
         coords = inp["coordinates"]
         #ball = [v for v in coords.items()][0]
 

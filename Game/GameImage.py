@@ -210,11 +210,14 @@ class GameImage:
 					layer += 1
 				self.definition.insert(layer, val)
 
+		return self.definition
+
 	def rm_definition(self, ref):
 		""" Remove an element from the definition by ref """
 		index = next((index for (index, d) in enumerate(self.definition) if d["ref"] == ref), None)
 		if index is not None:
 			self.definition.pop(index)
+		return self.definition
 
 	def update_text(self, text):
 		"""Specific wrapper for GameImage.update_definition to only update the text part"""

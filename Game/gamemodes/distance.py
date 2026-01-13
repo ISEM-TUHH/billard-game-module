@@ -39,7 +39,7 @@ class Distance(GameMode):
         self.TREE = {
             "init": [
                 self.calculate_score,
-                {"True": "finished", "reset": "init"}, # no other outputs possible
+                {"True": "finished", "reset": "init", "False": "init"}, # no other outputs possible
                 lambda: [
                     {
                         "type": "text",
@@ -133,11 +133,15 @@ class Distance(GameMode):
 
     def calculate_score(self, inp):
         """ Horizontal distance in mm is the score """
+        if len(inp["coordinates"].values()) == 0:
+            return False, {"gameimage-updates": [{"type": "text", "text": "No ball found, try again!"}]}, {"message": "No ball found."}
+
         collisions = int(inp["collisions"])
         
         # ugly formula, if you want to understand it, draw the distance covered for 0 to 3 collisions on a piece of paper
         border_distance = int(collisions/2)*2*self.w
         start_bias = self.starting_point_raw["x"]
+        
         final_distance = list(inp["coordinates"].values())[0]["x"] * (-1+2*(collisions%2))
 
         distance = border_distance + final_distance + start_bias

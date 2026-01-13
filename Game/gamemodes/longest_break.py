@@ -42,6 +42,11 @@ class LongestBreak(GameMode):
         self.HISTORY = {"challenge": self.active_challenge["name"], "decision": "unset", "progress": "[]", "end_reason": "logic_skip", "sunk_legal": 0} # progress as str due to it being able to be unset (when skipping), which would otherwise cause issues in the GameMode.history pd.concat calls (all other entries are scalar)
 
         self.start_geometry() # provides self.img_definition
+        self.img_definition += [{
+                        "type": "balls",
+                        "coords": self.active_challenge["coordinates"],
+                        "ref": "balls-start"
+                    }]
 
         self.gameimage = GameImage()
         self.gameimage.draw_from_dict(self.img_definition, draw=False) # register img_definition into the GameImage object -> track and update accordingly
@@ -63,11 +68,7 @@ class LongestBreak(GameMode):
             #"strike": [
                 self.determine_hit,
                 {"True": "init", "False": "finished", "decide_keep": "decide_keep", "reset": "init"},
-                lambda: [{
-                        "type": "balls",
-                        "coords": self.active_challenge["coordinates"],
-                        "ref": "balls-start"
-                    }] + self.img_definition,
+                lambda: self.img_definition,
                 ["Measure"]
             ],
             "decide_keep": [
@@ -141,7 +142,7 @@ class LongestBreak(GameMode):
     def determine_hit(self, inp):
         """ Determines if a finished hit is valid: if a ball was sunk, stay in this state and add to score tracker, if no ball was sunk, progress to state finished """
         coords = inp["coordinates"]
-        white = coords["white"]
+        white = coords["white"] if "white" in coords.keys() else {"name": "white", "x": 1000, "y": 500} # if the white ball does not exist, define it as a central point. The white ball not existing should trigger an end of round anyway.
 
         penalty_half = 300
         score_full = 150
@@ -233,11 +234,18 @@ class LongestBreak(GameMode):
                 self.round_tracker[index] = "x"
                 forward_returns["discarded"] = True
 
+        # display the balls
+        gi_update += [{"type": "balls", "coords": coords}]
         local_returns = {"gameimage-updates": gi_update}
-        for g in gi_update:
+        for g in gi_update:            
             self.gameimage.update_definition(g)
         if can_hit_again == True:
             local_returns["sound"] = "hell-yeah"
+        if can_hit_again == "decide_keep":
+            # when keeping the round, this will enable the drawing of the white position-correction line 
+            # even though the state moves as init -> decide_keep -> init instead of init -> init
+            self.gameimage.rm_definition("balls-start") # remove the 
+            self.img_definition = self.gameimage.definition
 
         return can_hit_again, local_returns, forward_returns
             
@@ -266,14 +274,12 @@ class LongestBreak(GameMode):
             #next_can_play = True
             next_can_play_on = True
 
-        print("NEXT ROUND SETUP DEBUG")
-        print("next_can_discard", next_can_discard)
-        print("next_can_play_on", next_can_play_on)
-        print("round_tracker", self.round_tracker)
-        print("finished", finished)
-        print("self.scored", self.scored)
-
-
+        #print("NEXT ROUND SETUP DEBUG")
+        #print("next_can_discard", next_can_discard)
+        #print("next_can_play_on", next_can_play_on)
+        #print("round_tracker", self.round_tracker)
+        #print("finished", finished)
+        #print("self.scored", self.scored)
         #if not next_can_play:
         #    self.reset(inplace=True, can_discard=next_can_discard, round_tracker=self.round_tracker, scored=self.scored)
         #    self.score = -1 # already specify as discarded round
