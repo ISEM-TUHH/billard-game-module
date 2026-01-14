@@ -21,6 +21,9 @@ The repository provides the game module for the Billard@ISEM system.
     + If succesfully started, the server should now be accessible under the address/port provided in `config.json`.
 + A lot of functionalities require the other modules to also be up and running (mostly Game, Camera and Beamer modules). See https://github.com/ISEM-TUHH for the respective modules.
 
+![The website of the KP2 gamemode with the Longest Break challenge selected](https://github.com/ISEM-TUHH/billard-game-module/blob/main/docs/source/images/website.png?raw=true)
+*The website of the KP2 gamemode with the Longest Break challenge selected*
+
 ### .env fields
 The following fields are needed to be set in a `.env` file in the root directory:
 ```bash

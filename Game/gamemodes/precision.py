@@ -7,7 +7,13 @@ from .common_utils import *
 from .GameMode import GameMode
 
 class Precision(GameMode):
-    """ The goal is to get as close as possible to the projected bullseye. """
+    """ The goal is to get as close as possible to the projected bullseye. 
+    
+
+    .. figure:: ../images/camera-precision.png
+
+        The image projected when the Precision gamemode is active.
+    """
 
     def __init__(self, data_storage="", bullseye=[2230//4, 1115//2], settings={"difficulty": 0}):
         self.__file__ = __file__

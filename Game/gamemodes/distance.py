@@ -5,7 +5,12 @@ from .common_utils import *
 from .GameMode import GameMode
 
 class Distance(GameMode):
-    """ The goal is to cover the highest possible distance (including bounces of the walls) on the playing field along the horizontal axis """
+    """ The goal is to cover the highest possible distance (including bounces of the walls) on the playing field along the horizontal axis 
+    
+    .. figure:: ../images/camera-distance.png
+
+        The image projected when the Distance gamemode is active.
+    """
     
     def __init__(self, w=2230, h=1115):
         self.__file__ = __file__

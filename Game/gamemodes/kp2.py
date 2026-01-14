@@ -12,7 +12,12 @@ from .longest_break import LongestBreak
 from .single_break import Break
 
 class KP2(GameMode):
-    """ This class builds upon lower level gamemodes to deliver the entire user experience for the KP2 events. The teaching unit is also known as MPD2. """
+    """ This class builds upon lower level gamemodes to deliver the entire user experience for the KP2 events. The teaching unit is also known as MPD2. 
+    
+    .. figure:: ../images/kp2-splash.png
+
+        The image projected when the KP2 gamemode is active, seen through the calibrated Camera Module.
+    """
         
     __file__ = __file__
 

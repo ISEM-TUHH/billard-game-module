@@ -275,6 +275,7 @@ class GameImage:
 		Todo:
 			- change r to be the total radius not this weird ring-thickness.
 			- ideally also add a number of rings parameter
+			- this may get detected as a ball. Maybe change innermost circle to a square?
 		"""
 
 		if center is None:

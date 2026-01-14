@@ -8,7 +8,12 @@ from .common_utils import *
 from .GameMode import GameMode
 
 class LongestBreak(GameMode):
-    """ The goal is to get the longest possible streak of sinking balls with each hit. """
+    """ The goal is to get the longest possible streak of sinking balls with each hit. 
+    
+    .. figure:: ../images/camera-longest-break.png
+
+        The image projected when the Longest Break gamemode is active.
+    """
 
     def __init__(self, data_storage=None, can_discard=True, scored=2, tries=5, round_tracker=None, can_play_on=True):
         self.__file__ = __file__
