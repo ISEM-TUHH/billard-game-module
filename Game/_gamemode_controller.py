@@ -104,4 +104,4 @@ def get_gamemode_website(self, mode):
         file = self.GAMEMODES[mode].WEBSITE_TEMPLATE
     else:
         file = mode + ".html"
-    return self.render_template_camera(file, **(self.GAMEMODES[mode].index_args() | self.GAMEMODES[mode].history()))
+    return self.render_template_camera(file, **(self.GAMEMODES[mode].index_args() | self.GAMEMODES[mode].history()), gamemode=mode)

@@ -5,7 +5,7 @@
 */
 
 function kp2Controller(jsonData, set_activity=true) {
-    jsonData["gmode"] = "kp2";
+    jsonData["gmode"] = global_gamemode; //this gets set in the base.html when it gets rendered from _gamemode_controller.py.
     if (set_activity) {
         jsonData["kp2_activity"] = current_gamemode;
     }

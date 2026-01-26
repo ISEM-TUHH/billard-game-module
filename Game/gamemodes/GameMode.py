@@ -288,7 +288,7 @@ class GameMode:
         if add is not None:
             add["timestamp"] = pd.Timestamp.now()
             if len(hist) == 0:
-                new_hist = pd.DataFrame(add)
+                new_hist = pd.DataFrame(add, index=[0])
             elif type(add) is not dict:
                 # assumes its already a dataframe (like from pd.json_normalize())
                 new_hist = pd.concat((hist, add), ignore_index=True)

@@ -154,6 +154,7 @@ document.querySelectorAll(".mode").forEach((gamemode) => { // for all gamemodes:
                 // console.log("TRYING TO SEND:", jsonData)
                 // since all inputs must be set (otherwise the submit button wouldn't be available): now fetch the current coordinates, show them to the user to be able to correct them. On the next click, they are submitted and processed.
                 // after backend processing, updated the step
+                console.log("Now fetch from", e, jsonData);
                 fetchFun(e, jsonData)
                     .then((res) => {
                         //DOEVENTS = false;

@@ -30,7 +30,7 @@ class Break(GameMode):
         self.TREE = {
             "init": [
                 self.count,
-                {"finished": "finished", "False": "init"}, # the last must be a loop due to reset dynamics
+                {"finished": "finished", "False": "init", "reset": "init"}, # the last must be a loop due to reset dynamics
                 lambda: [
                     {
                         "type": "text",

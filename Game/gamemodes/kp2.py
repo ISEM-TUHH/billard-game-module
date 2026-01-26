@@ -244,7 +244,10 @@ class KP2(GameMode):
         hist = self.get_history() 
         #session_hist = hist[hist["semester"].astype(str) == self.history_base["semester"] & hist["attestation"].astype(str) == self.history_base["attestation"]]
         #session_hist = hist.query(f'semester == {self.history_base["semester"]} & attestation == {self.history_base["attestation"]}')
-        session_hist = hist.loc[(hist["semester"].astype(str) == self.history_base["semester"]) & (hist["attestation"].astype(str) == self.history_base["attestation"])]
+        if len(hist) != 0:
+            session_hist = hist.loc[(hist["semester"].astype(str) == self.history_base["semester"]) & (hist["attestation"].astype(str) == self.history_base["attestation"])]
+        else:
+            session_hist = hist
 
         scores = self.history_collection
         #print(self.history_collection)
