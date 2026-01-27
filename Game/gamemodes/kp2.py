@@ -284,7 +284,7 @@ class KP2(GameMode):
         overview["Zone 1"] = int(np.sum([50 for x in precision.values() if x["distance"] < 22]))
         overview["Two Walls"] = 150 if np.all([x["collisions"] >= 2 for x in distance.values()]) else 0
         overview["Break"] = int(np.sum([200 for x in single_break.values() if x["sunk_legal"] >= 1]))
-        overview["Longest Break"] = int(np.sum([x["sunk_legal"] for x in longest_break.values() if x["decision"] == "kept"])) # calculation done in gamemode
+        overview["Longest Break"] = int(np.sum([x["sunk_legal"] for x in longest_break.values()]))# if x["decision"] == "kept"])) # calculation done in gamemode
 
         # Longest Distance: check if the current entry will be the final entry of the session. If true, check if it is the longest distance of all entries of the session and change the value. Otherwise, assign the 250p to the entry with the longest distance among the saved entries
         if len(session_hist) + 1 == int(self.history_base["number_teams"]):
