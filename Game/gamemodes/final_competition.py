@@ -1,4 +1,5 @@
 from .kp2 import KP2
+import numpy as np
 
 class FinalCompetition(KP2):
     """ This is an abstraction of the KP2 mode. It essentially is the same, only using a different number of challenges and allows for the input of previously collected bonus points. It is used in the final competition of the KP2/MDP2 project.

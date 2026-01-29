@@ -22,6 +22,11 @@ class Distance(GameMode):
         self.w = w
         self.h = h
 
+        self.HISTORY = {
+            "distance": 0, 
+            "collisions": 0
+        }
+
         self.starting_point_raw = {
                     "x": int(0.8*w),
                     "y": h//2

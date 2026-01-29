@@ -71,6 +71,8 @@ class KP2(GameMode):
         for k,v in self.occurences.items():
             self.scores[k] = [None]*v
             self.history_collection[k] = {str(i): None for i in range(v)} # this direct indexing makes the pd.json_normalize easier/possible.
+            
+
 
         self.history_base = {} # basic history items: player, team, score, semester, attestation, mystery_challenge
 
@@ -224,6 +226,13 @@ class KP2(GameMode):
         out = {"signal": "finished"}
         self.history_addons = {}
 
+        # check if every history is available, otherwise reset with empty specific history
+        for name, gm in self.history_collection.items():
+            for i, hist in gm.items():
+                if hist is None:
+                    self.GAMEMODES[name].reset()
+                    gm[i] = self.GAMEMODES[name].HISTORY # reset the object and get the default history
+
         score, overview = self.get_score()
         self.history_addons["score"] = score
         self.history_addons["overview"] = overview
@@ -262,7 +271,8 @@ class KP2(GameMode):
         self.history_addons["distance.longest"] = np.max(distance_distance)
         # closest500 is used in the mystery challenge "And I would walk 500 miles..."
         # save the minimal distance from 500cm in mm.
-        self.history_addons["distance.closest500"] = np.abs(distance_distance[np.argmin(np.abs(distance_distance - 5000))] - 5000)
+        self.history_addons["distance.closest500"] = np.min(np.abs(distance_distance - 5000))
+        #np.abs(distance_distance[np.argmin(np.abs(distance_distance - 5000))] - 5000)
         
         # Precision: +150p if all 5 hits are <180mm (on target)
         # Distance: +150p if at least two wall collisions on every attempt

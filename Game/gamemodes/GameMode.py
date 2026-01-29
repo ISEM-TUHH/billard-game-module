@@ -79,6 +79,7 @@ class GameMode:
         #self.gameimage = GameImage()
         if not hasattr(self, "HISTORY"):
             self.HISTORY = {} # history objects of this current round/instance
+        self.HISTORY |= {"finished_time": None}
         
         # the "finished" action is always the same. If not defined, this is the default.
         # the previous method must set self.message and the child class must have an attribute self.gamemode_name

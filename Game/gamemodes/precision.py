@@ -36,6 +36,11 @@ class Precision(GameMode):
         self.gameimage = GameImage()
         self.gameimage.draw_from_dict(self.start_geometry(default_difficulty=self.difficulty), draw=False)
 
+        self.HISTORY = {
+            "distance": 10000, # dummy large value, needed by the kp2 scoring 
+            "difficulty": None
+        }
+
         self.TREE = {
             "init": [
             #    lambda inp: self.check_starting_positions(inp, starting_positions=lambda: [self.start_points[int(self.difficulty)]], update_gameimage=self.gameimage),

@@ -44,7 +44,13 @@ class LongestBreak(GameMode):
         self.last_coords = self.active_challenge["coordinates"]
         print(f"Longest Break: Challenges found = ({', '.join([x['name'] for x in self.challenges])}), active challenge = {self.active_challenge['name']}")
 
-        self.HISTORY = {"challenge": self.active_challenge["name"], "decision": "unset", "progress": "[]", "end_reason": "logic_skip", "sunk_legal": 0} # progress as str due to it being able to be unset (when skipping), which would otherwise cause issues in the GameMode.history pd.concat calls (all other entries are scalar)
+        self.HISTORY = {
+            "challenge": self.active_challenge["name"], 
+            "decision": "unset", 
+            "progress": "[]", 
+            "end_reason": "logic_skip", 
+            "sunk_legal": 0
+        } # progress as str due to it being able to be unset (when skipping), which would otherwise cause issues in the GameMode.history pd.concat calls (all other entries are scalar)
 
         self.start_geometry() # provides self.img_definition
         self.img_definition += [{
