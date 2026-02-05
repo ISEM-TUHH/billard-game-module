@@ -36,6 +36,7 @@ function checkAllSet(values) {
 }
 
 function activate_step(gamemode, new_step, index=NaN) {
+    // gamemode is the DOM container (~html object) that contains the relevant steps.
     console.log("ACTIVATE STEP", new_step, gamemode)
     gamemode.querySelectorAll(".step").forEach((step, i) => {
         if (!isNaN(index)) {
@@ -190,7 +191,7 @@ document.querySelectorAll(".mode").forEach((gamemode) => { // for all gamemodes:
                         } else {
                             if (res.hasOwnProperty("message")) {
                                 if (res.hasOwnProperty("log_to")) { // if the logging location is specified, write to that object (must have innerText property, so e.g. a button is not possible yet. Should be easy to add.). Logging location must be inside step container.
-                                    step.querySelector(res.log_to).innerText = res.message;
+                                    gamemode.querySelector(res.log_to).innerText = res.message;
                                 } else if (e.target.labels.length > 0) {
                                     e.target.labels[0].innerText = res.message;
                                 }

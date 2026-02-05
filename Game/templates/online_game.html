@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="mode">
+        <section id="init" class="col step">
+          <button type="button" class="collapsible">Player selection</button>
+          <div class="collapsible-content">
+            <fieldset>
+              Enter your details!
+              <hr>
+              <div class="button-list single-player-details">
+                <input type="text" name="team" placeholder="Team" list="existing-teams">
+                <input type="text" name="name" placeholder="Name">
+                <input type="password" name="password" placeholder="Password">
+                <input type="checkbox" name="tooltips" id="tooltips"><label for="tooltips">Show tooltips</label>
+              </div>
+              <hr>
+              <div class="button-list single-player-details">
+                Select your opponent table
+                <select id="opponent_table" name="opponent_table">
+                  {% for table in table_list %}
+                  <option value="{{ table[0] }}">{{ table[1] }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <datalist id="existing-teams">
+                {% for team in team_list %}
+                <option value="{{ team[1] }}">{{ team[1] }}</option>
+                {% endfor %}
+              </datalist>
+              <hr>
+              <div class="button-list">
+                <input type="button" name="online-game-player" class="submit-step" value="Request game">
+              </div>
+            </fieldset>
+          </div>
+          <!--<script src="{{ url_for('static', filename='gamemodes/precision.js') }}"></script>-->
+        </section>
+
+        <section id="wait" class="col step">
+          <button type="button" class="collapsible">Wait</button>
+          <div class="collapsible-content">
+            <fieldset>
+              You are currently waiting for your opponent. You can abort by clicking on the button below.
+              <div class="results"></div>
+              <hr>
+              <div class="button-list">
+                <input type="button" id="online-game-wait" name="online-game-wait" class="submit-step" value="Cancel">
+              </div>
+            </fieldset>
+          </div>
+        </section>
+
+        <section id="play" class="col step">
+          <button type="button" class="collapsible">Play</button>
+          <div class="collapsible-content">
+            <fieldset>
+              Play a normal game of billiards. After every hit, collect the coordinates of all balls.
+              <hr>
+              <div class="results">Play the break</div>
+              <hr>
+              <div class="button-list">
+                <input type="checkbox" id="local-game-play" name="local-game-play" class="submit-step"><label for="local-game-play">Measure Coordinates</label>
+              </div>
+            </fieldset>
+          </div>
+        </section>
+
+        <section id="finished" class="col step">
+          <button type="button" class="collapsible">Result</button>
+          <div class="collapsible-content">
+            <fieldset>
+              The game is over!
+              <hr>
+              <div class="results">Uncover the result</div>
+              <hr>
+              <div class="button-list">
+                <input type="button" id="online-game-finished" name="online-game-finished" class="submit-step" value="New game">
+              </div>
+            </fieldset>
+          </div>
+
+        </section>
+
+      </div>
+
+    </form>
+    <script src="{{ url_for('static', filename='vanillaController.js') }}"></script>
+    <script src="{{ url_for('static', filename='long_poll_online.js') }}"></script>
+    <!--<script src="{{ url_for('static', filename='local_game.js') }}"></script>-->
+
+{% endblock %}

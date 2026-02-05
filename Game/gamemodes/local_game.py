@@ -119,7 +119,7 @@ class LocalGame(GameMode):
 
     def index_args(self):
         out = {
-            "title": "Local Billiard@ISEM",
+            "title": "Local Billard@ISEM",
             "teams": ["ISEM", "ITPE"]
         }
         return out

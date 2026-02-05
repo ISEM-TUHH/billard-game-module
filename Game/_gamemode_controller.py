@@ -94,6 +94,10 @@ def get_gamemode_website(self, mode):
         return jsonify({"error": f"gamemode {mode} does not exist or does not supply a website."}), 404
 
     self.GAMEMODES[mode].reset(inplace=True) # reload the gamemode to sync states with website
+    index_args = self.GAMEMODES[mode].index_args()
+
+    if "error" in index_args.keys():
+        return index_args["error"], index_args["error_status"]
     
     # show the current gamemodes gameimage 
     self.gameimage = self.GAMEMODES[mode].show()
@@ -104,4 +108,4 @@ def get_gamemode_website(self, mode):
         file = self.GAMEMODES[mode].WEBSITE_TEMPLATE
     else:
         file = mode + ".html"
-    return self.render_template_camera(file, **(self.GAMEMODES[mode].index_args() | self.GAMEMODES[mode].history()), gamemode=mode)
+    return self.render_template_camera(file, **(index_args | self.GAMEMODES[mode].history()), gamemode=mode)

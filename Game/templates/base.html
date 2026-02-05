@@ -133,7 +133,7 @@
                   {% endfor %}
                 </tr>
               </thead>
-              <tbody>
+              <tbody><!-- List of lists -->
                 {% for entry in single_table %}
                 <tr>
                   {% for e in entry %}
@@ -150,7 +150,7 @@
               <thead>
                 <tr><th></th><th>Team</th><th>Average Score</th></tr>
               </thead>
-              <tbody>
+              <tbody><!-- teamname, score -->
                 {% for entry in team_table %}
                 <tr><td>{{ entry[1] }}</td><td>{{ entry[0] }}</td></tr>
                 {% endfor %}

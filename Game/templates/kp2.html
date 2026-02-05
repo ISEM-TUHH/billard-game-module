@@ -90,19 +90,6 @@
             <hr>
             {{ precision_flow|safe }}
             <hr>
-            <!--<div class="button-list step">
-              <input type="checkbox" value="1st try" id="prec1" class="prec-checkbox">
-              <label for="prec1" data-og="1">1</label>
-              <input type="checkbox" value="2nd try" id="prec2" class="prec-checkbox">
-              <label for="prec2" data-og="2">2</label>
-              <input type="checkbox" value="3rd try" id="prec3" class="prec-checkbox">
-              <label for="prec3" data-og="3">3</label>
-              <input type="checkbox" value="4th try" id="prec4" class="prec-checkbox">
-              <label for="prec4" data-og="4">4</label>
-              <input type="checkbox" value="5th try" id="prec5" class="prec-checkbox">
-              <label for="prec5" data-og="5">5</label>
-            </div>-->
-
 
           </fieldset>
         </div>
@@ -161,59 +148,6 @@
     </section>
     <script src="{{ url_for('static', filename='kp2_submit.js') }}"></script>
 
-    <!--<section id="scoreboard" class="col-left">
-      <fieldset id="single">
-        <legend>Individual</legend>
-        <div id="podium-single", class="podium-container">
-					<div class="podium-item" id="single-2">
-						<p class="podium-name">Moritz</p>
-						<div class="podium-rank second">
-							ISEM<br/>7500
-						</div>
-					</div>
-					<div class="podium-item" id="single-1">
-						<p class="podium-name">Mathis</p>
-						<div class="podium-rank first">
-							ISEM<br/>9000
-						</div>
-					</div>
-					<div class="podium-item" id="single-3">
-						<p class="podium-name">Felix</p>
-						<div class="podium-rank third">
-							ISEM<br/>7200
-						</div>
-					</div>
-				</div>
-        <div id="table-single" class="table-div">Table gets put here...</div>
-      </fieldset>
-
-      <fieldset id="team">
-        <legend>Teams</legend>
-        <div id="podium-team", class="podium-container">
-					<div class="podium-item" id="team-2">
-						<p class="podium-name">AIW</p>
-						<div class="podium-rank second">
-							Average<br/>7500
-						</div>
-					</div>
-					<div class="podium-item" id="team-1">
-						<p class="podium-name">ISEM</p>
-						<div class="podium-rank first">
-							Average<br/>9000
-						</div>
-					</div>
-					<div class="podium-item" id="team-3">
-						<p class="podium-name">Professoren</p>
-						<div class="podium-rank third">
-							Average<br/>7200
-						</div>
-					</div>
-        </div>
-        <div id="table-team" class="table-div">Table gets put here...</div>
-      </fieldset>
-    </section>-->
-
-    <!--<script src="{{ url_for('static', filename='kp2.js') }}"></script>-->
     <script src="{{ url_for('static', filename='kp2Controller.js') }}"></script>
 
 {% endblock %}
