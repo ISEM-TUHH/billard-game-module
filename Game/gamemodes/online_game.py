@@ -108,12 +108,15 @@ class OnlineGame(GameMode):
             status = self.API.abort_game()["http"]
             print("GAME HAS BEEN ABORTED BY THIS CLIENT WITH STATUS CODE", status)
             self.message = "Game aborted"
-            return "finished", {}, {"message": self.message}
+            return "finished", {}, {"message": self.message, "emit": {"stop_long_poll": {}}}
 
         is_new, res = self.API.check_state()
         if not is_new:
             return "wait", {}, {"resume": False}
         else:
+            if len(res.keys()) == 0:
+                # when the game is missing in the cache
+                return "finished", {}, {"message": "The game was aborted.", "resume": True}
             self.gameimage.definition = res["imgd"]
             self.game_state = res["state"]
             if res["state"] == "finished":
@@ -160,8 +163,8 @@ class OnlineGame(GameMode):
             print("TEAMS", teams)
             team_list = teams.values.tolist()
         except Exception as e:
-            print("EXCEPTION ENCOUNTERED IN OnlineGame.index_args:")
-            raise e
+            #print("EXCEPTION ENCOUNTERED IN OnlineGame.index_args:")
+            #raise e
             return {"error": "Can't get data from the API. Has this server internet access and is the API running? 503 Service Unavailable", "error_status": 503}
 
         return {
@@ -176,8 +179,21 @@ class OnlineGame(GameMode):
     def history(self, add=None):
         # overwriting GameMode.history
         # just show the website
+        leaderboard = self.API.get_leaderboard()
+        teams = leaderboard[["Team", "Elo"]].groupby("Team").mean()
+        teams["Team"] = teams.index
+
         out = {
-            "single_table": self.API.get_leaderboard(),
-            "single_columns": ["Name", "Elo", "Team", "Home"]
+            "single_table": leaderboard.values.tolist(),
+            "single_columns": ["Name", "Elo", "Team", "Home"],
+            "team_table": teams.values.tolist()
         }
         return out
+
+    def reset(self, keep_settings=True, inplace=False, **kwargs):
+        if inplace:
+            self.__init__(settings=self.SETTINGS, **kwargs)
+            print("Reset this object. New state:", self.state)
+            return "reset", {}, {"click": "#init button.collapsible"}
+            
+        return self.__init__(settings=self.SETTINGS, **kwargs)

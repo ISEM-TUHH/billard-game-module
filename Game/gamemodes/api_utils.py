@@ -60,7 +60,7 @@ class API:
             print(f"Cant establish connection or refused. Tried posting to {url}")
             raise ConnectionError(f"Cant establish connection or refused. Tried posting to {url}")
 
-        print("API UTILS POST RESPONSE:", res)
+        #print("API UTILS POST RESPONSE:", res)
         data = {}
         if res.headers.get('content-type') == 'application/json':
             data = res.json()
@@ -82,7 +82,7 @@ class API:
         """
         url = f"{self.address}:{self.port}" + os.path.join("", endpoint)
         try:
-            print("API UTILS GET", url, self.address, self.port)
+            #print("API UTILS GET", url, self.address, self.port)
             res = requests.get(url, auth=self.AUTH.auth())
         except Exception as e:
             print(e)
@@ -129,7 +129,7 @@ class API:
         print(table)
         del table["http"]
         df = pd.DataFrame(table)[["Name", "Elo", "Team", "Home"]]
-        return df.values.tolist()
+        return df#.values.tolist()
 
     def add_player(self, name, team):
         """ Add a player of a certain team. Automatically adds id, origin_table """
@@ -146,6 +146,8 @@ class API:
             self.last_state = res["state"]
             res["play"] = (self.pid == res["apid"])
             return True, res
+        if res.status_code == 410: # not existing in cache
+            return True, {}
         return False, None
 
     def abort_game(self):

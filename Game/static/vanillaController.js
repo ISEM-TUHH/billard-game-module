@@ -60,9 +60,11 @@ function vanillaController(jsonData, set_activity=false) {
             }
 
             if (res.hasOwnProperty("log_to")) {
-                document.querySelector(res.log_to).innerText = res.message;
+                document.querySelectorAll(res.log_to).forEach((e) => { // should be only one, but this prevents a not found error.
+                    e.innerText = res.message;
+                });
+                delete res["message"]; // remove so it doesnt get in the way of gamemode_retro.js
             }
-            delete res["message"]; // remove so it doesnt get in the way of gamemode_retro.js
 
             
             return res
