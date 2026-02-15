@@ -116,6 +116,39 @@ def coords_report(coordsNew, coordsOld):
 
     return report
 
+def split_by_type(coords):
+
+    iterator = None
+    #print(iterator, type(coords), str(type(coords)) == "dict")
+    match str(type(coords)):
+        case "<class 'list'>":
+            iterator = coords
+        case "<class 'dict'>":
+            iterator = coords.values()
+
+    striped = []
+    solids = []
+    eight = None
+    white = None
+    misc = []
+
+    for ball in iterator:
+        name = ball["name"]
+        if name == "white":
+            white = ball
+        elif name == "eight":
+            eight = ball
+        else:
+            if int(name) < 8:
+                solids.append(ball)
+            elif int(name) < 16:
+                striped.append(ball)
+            else:
+                # unknown
+                misc.append(ball)
+
+    return white, eight, solids, striped, misc
+
 def is_close_enough(c1, c2, tolerance=50):
     """ Are the two coordinates close enough too each other? tolerance is given in mm (as are coordinates) """
     u1 = coord_to_vec(c1)

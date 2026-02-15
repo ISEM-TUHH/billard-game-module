@@ -88,6 +88,7 @@ from .single_break import Break
 from .longest_break import LongestBreak
 
 from .dummy import Dummy
+from .curling import Curling
 
 # Meta gamemodes
 from .kp2 import KP2

@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="mode">
+        <section id="init" class="col step">
+          <button type="button" class="collapsible">Player selection</button>
+          <div class="collapsible-content">
+            <fieldset>
+              Enter your details!
+              <hr>
+              <div class="button-list single-player-details">
+                <input type="text" name="p1team" placeholder="Team">
+                <input type="text" name="p1name" placeholder="Name">
+              </div>
+              <br>Player 1 has the solid balls.
+              <hr>              
+              <div class="button-list single-player-details">
+                <input type="text" name="p2team" placeholder="Team">
+                <input type="text" name="p2name" placeholder="Name">
+              </div>
+              <br>Player 2 has the striped balls.
+              <hr>
+              <div class="button-list">
+                <input type="button" name="curling-player" class="submit-step" value="Start curling!">
+              </div>
+            </fieldset>
+          </div>
+          <!--<script src="{{ url_for('static', filename='gamemodes/precision.js') }}"></script>-->
+        </section>
+
+        <section id="play_rounds" class="col step">
+          <button type="button" class="collapsible">Play Rounds</button>
+          <div class="collapsible-content">
+            <fieldset>
+              Try to get as close as possible to the white ball. Each player has 5 shots. After each shot, the players change.<br>
+              <hr>
+              <div class="results">Play the first shot</div>
+              <hr>
+              <div class="button-list">
+                <input type="checkbox" id="curling-play_round" name="curling-play_round" class="submit-step"><label for="curling-play_round">Measure Coordinates</label>
+              </div>
+            </fieldset>
+          </div>
+        </section>
+
+        <section id="finished" class="col step">
+          <button type="button" class="collapsible">Result</button>
+          <div class="collapsible-content">
+            <fieldset>
+              The game is over!
+              <hr>
+              <div class="results">Uncover the result</div>
+              <hr>
+              <div class="button-list">
+                <input type="button" id="online-game-finished" name="online-game-finished" class="submit-step" value="New game">
+              </div>
+            </fieldset>
+          </div>
+
+        </section>
+
+      </div>
+
+    </form>
+    <script src="{{ url_for('static', filename='vanillaController.js') }}"></script>
+
+{% endblock %}

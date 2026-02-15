@@ -49,7 +49,7 @@ class GameImage:
 	def __init__(self, definition=[], size=(2230, 1115), phys=1, img_cache={
 		"isem-logo": "static/images/ISEM-only.png", # small logo without text for subimg display
 		"isem-logo-big": "static/images/isem_logo_big.png", # big logo with text for central display
-		"feedback-form-qr": "Example QR Code" # link to the feedback form
+		"feedback-form-qr": "https://Example QR Code" # link to the feedback form
 	}):
 		self.img = Image.new(mode="RGBA", size=size, color="#000000ff")
 		self.ballDiameter = 57 # diameter of a billiard ball (snooker) in mm
@@ -377,13 +377,15 @@ class GameImage:
 		x,y = tuple([int(float(i)/self.phys - d//2) for i in pos])
 		self.img.paste(bImg, (x,y), bImg) # second call for mask, so the corners dont get overwritten
 
-	def placeAllBalls(self, coords):
+	def placeAllBalls(self, coords, group=False):
 		"""Place all balls mentioned in the data dict on the canvas self.img
 
-		Part description: `{"type": "line", "coords": [coords dict]}`
+		Part description: `{"type": "balls", "coords": [coords dict]}`
 
-		:param data: dictionary matching the number of a ball (key) to its position (tuple x,y) from the upper left in mm. Can also just be the output of Camera.get_coords (.../v1/getcoords)
-		:type data: dict<tuple<float>> or list<dict>
+		:param coords: dictionary matching the number of a ball (key) to its position (tuple x,y) from the upper left in mm. Can also just be the output of Camera.get_coords (.../v1/getcoords)
+		:type coords: dict<tuple<float>> or list<dict>
+		:param group: If the balls should be grouped by solid, striped, white, black
+		:type group: bool
 		"""
 		unique_map = {
 			"eight": 8,
@@ -397,7 +399,7 @@ class GameImage:
 		for b in data:			
 			if type(data) == list:
 				rawN = b["name"]
-				#number = rawN if type(rawN) is int else unique_map[rawN]
+				number = rawN if type(rawN) is int else unique_map[rawN]
 				#number = 8 if rawN=="eight" else (16 if rawN=="white" else int(rawN))
 				x,y = b["x"],b["y"]
 				self.placeBall((x,y),number)
@@ -578,8 +580,6 @@ class BilliardBall:
 	}
 
 	def __init__(self, n):
-
-
 		current_dir = os.path.dirname(__file__) # finding the Roboto-Black.ttf/navigating the dirs
 		#self.fontpath = current_dir + "/../Roboto-Black.ttf"
 		self.fontpath = current_dir + "/../fonts/Minecraft-Regular.otf"
