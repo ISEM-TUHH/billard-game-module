@@ -29,7 +29,7 @@ class LocalGame(GameMode):
         self.TREE = {
             "init": [
                 self.setup_shootout,
-                {"start_shootout": "shootout"},
+                {"start_shootout": "shootout", "reset": "init"},
                 lambda: [
                     {
                         "type": "text",
@@ -119,7 +119,7 @@ class LocalGame(GameMode):
 
     def index_args(self):
         out = {
-            "title": "Local Billiard@ISEM",
+            "title": "Local Billard@ISEM",
             "teams": ["ISEM", "ITPE"]
         }
         return out

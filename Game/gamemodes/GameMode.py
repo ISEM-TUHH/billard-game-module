@@ -154,11 +154,19 @@ class GameMode:
                 for element in local_returns["gameimage-updates"]:
                     ref = element["ref"] if "ref" in element.keys() else None
                     self.gameimage.update_definition(element, ref=ref)
+        else:
+            # when transitioning to a new state
+            # if this has no subgamemodes, automatically click onto the next state's context menu
+            # this is only relevant when the call is made with vanillaController (vanillaController.js)
+            out["click"] = [f"#{new_state} button.collapsible"]
+        
+        # EXPERIMENTAL
+        out["log_to"] = f"#{new_state} div.results"
+
 
         if new_state == "finished":
             self.HISTORY["finished_time"] = pd.Timestamp.now()
 
-            
         
         print("GAMEMODE", self.name, self.state, "->", new_state)
         self.state = new_state
@@ -277,6 +285,9 @@ class GameMode:
         Returns:
             dict: a dictionary with the fields `single_table` (list of lists with `player`, `team`, `score` in each row, if existing also `semester` and `attestation`), `single_columns` (list of the name of the columns in `single_table`), `team_table` (list of lists always containing the `team` and `score`, which is averaged across all members of the team.). All tables are sorted with the highest score on top. If a new entry was added, the field `single_new_index` (int) also exists with the index of the new entry in the sorted `single_table`
         """
+        #if not hasattr(self, "history_file"):
+        #    return {}
+
         if history is None:
             if self.history_file.exists():
                 hist = pd.read_csv(self.history_file, sep="\t", index_col=False)

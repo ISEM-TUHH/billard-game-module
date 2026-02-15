@@ -1,0 +1,54 @@
+@startjson Client-to-Server
+
+#highlight gmode
+#highlight action
+{
+    "gmode": "Name of the main gamemode this should get fed to (str)",
+    "action": "(str) game | settings | show ",
+    "coordinates": {
+        "1 (str)": {
+            "name": "1 (str)",
+            "x": "123 (num)",
+            "y": "123 (num)"
+        },
+        "eight": "[The eight is the only one spelled out]",
+        "white": "..."
+    },
+    "kp2_activity": "Name of contained gamemode",
+    "clicked_on": "Value of a button if this was triggered by a button click",
+    "optional inputs": "Just gets forwarded to the handling function"
+}
+@endjson
+
+@startjson Server-to-Client
+<style>
+    .h1 {
+        BackgroundColor orange
+    }
+</style>
+#highlight signal
+#highlight message
+#highlight disable <<h1>>
+#highlight enable <<h1>>
+#highlight emit <<h1>>
+#highlight click <<h1>>
+#highlight log_to <<h1>>
+{
+    "signal": "state of the gamemode",
+    "message": "some message to display",
+    "disable": ["css selector 1", "css selector 2", "..."],
+    "enable": ["css selector 1", "css selector 2", "..."],
+    "emit": {
+        "event-name-1": {"optional data": "to emit with the event"},
+        "event-name-2": {}
+    },
+    "click": ["css selector 1", "css selector 2", "..."],
+    "log_to": "css selector to write the message to",
+    "score": "(num) current score of the gamemode, not important",
+    "was_round": "(num) Important in contained gamemodes, see gamemode_retro.js",
+    "history": {
+        "single_table": [["name 1", "score 1", "..."], ["name 2", "score 2", "..."]],
+        "team_table": [["name 1", "score 1"], ["name 2", "score 2"]]
+    }
+}
+@endjson

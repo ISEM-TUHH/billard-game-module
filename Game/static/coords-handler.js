@@ -33,7 +33,7 @@ document.getElementById("reload-livestream").addEventListener("click", reloadStr
 // --------------------- Functions for getting the coordinates
 
 // Get coordinates from the camera-module
-async function getCameraCoordinates() {
+/*async function getCameraCoordinates() {
   var data = [];
   if (!manipulatedFlag) { //only if we want new coordinates
     const response = await fetch("/camera/coords");
@@ -60,7 +60,7 @@ async function getCameraCoordinates() {
   }
 
   return;// data; // Gibt die Koordinaten zurück
-}
+}*/
 
 // returns coordinates as promise -> handle using .then((res) => {...})
 function getCameraCoordinatesAsync() {
@@ -68,24 +68,7 @@ function getCameraCoordinatesAsync() {
   if (!manipulatedFlag) { //only if we want new coordinates
     return fetch("/camera/coords").then((res) => res.json())
       .then((res) => {
-        coordinates = {}; // reset coordinates
-        // remove all old positions
-        for (let b of balls) {
-          b.style.display = "none";
-        }
-
-        // add new balls
-        var keys = Object.keys(res);
-        for (let i of keys) {
-          b = res[i]
-          //console.log(b);
-          var x = b.x; // these are in real dimensions (mm)
-          var y = b.y;
-          var id = "ball-" + b.name;
-          if (!manipulatedFlag) {
-            placePointFromRealDim(x,y,id);
-          }
-        }
+        placeAllBalls(res);
         return res;
       });
   } else {
@@ -98,6 +81,34 @@ function getCameraCoordinatesAsync() {
 }
 
 // --------------------- Functions for placing/deleting balls ----------------------------
+// place all balls from a backend provided json object (typical backend format)
+// when manually calling this, it will not updated the beamer. This is done either before (in the Game Module side) or when manually adding single balls (see click event listener on livestream below).
+function placeAllBalls(coords) {
+  coordinates = {}; // reset global coordinate storage
+  
+  // remove all highlights from previously existing ball selector button labels
+  document.querySelectorAll("#ball-selector .ball-exists").forEach((e) => {
+    e.classList.remove("ball-exists")
+  })
+
+  // remove all old positions
+  for (let b of balls) {
+    b.style.display = "none";
+  }
+
+  // add new balls
+  var keys = Object.keys(coords);
+  for (let i of keys) {
+    b = coords[i]
+    //console.log(b);
+    var x = b.x; // these are in real dimensions (mm)
+    var y = b.y;
+    var id = "ball-" + b.name;
+    if (!manipulatedFlag) {
+      placePointFromRealDim(x,y,id);
+    }
+  }
+}
 
 // Function to place the point at specific pixel coordinates
 function placePoint(x, y, id, realBall = true) {
@@ -113,6 +124,9 @@ function placePoint(x, y, id, realBall = true) {
     altCoordinates[id] = {name: id, x: x, y: y, xr: pxToReal(x), yr: pxToReal(y)};
   }
   //console.log(x,y)
+
+  // highlight the corresponding label/input
+  document.querySelector("#ball-selector input[value=" + id + "]").classList.add("ball-exists")
 }
 
 function placePointFromRealDim(xr, yr, id) {
@@ -144,6 +158,8 @@ for (let element of balls) {
       setManipulatedFlag(true); // deleting the marker-start (for distance) does not count as manipulating the real coordinates 
     }
 
+    document.querySelector("#ball-selector input[value=" + element.id + "]").classList.remove("ball-exists")
+    console.log()
     sendCorrectedCoords();
   })
 }; 
@@ -175,15 +191,16 @@ document.getElementById("livestream").addEventListener("click", function(e) {
 
 function sendCorrectedCoords() {
     //console.log(coordinates);
-    var sendCoords = {}; 
+    /*var sendCoords = {}; 
     for (let c of Object.keys(coordinates)) {
         //console.log(c)
         var newName = c.replace("ball-","");
         var coord = coordinates[c];
         sendCoords[newName] = {"name": newName, "x": pxToReal(coord.x), "y": pxToReal(coord.y)};
         //console.log(newName, coord);
-    }
+    }*/
     //console.log(sendCoords)
+    var sendCoords = coordinatesBackend()
     sender("/general/correctedcoords", sendCoords);
 }
 
@@ -212,7 +229,7 @@ saveImageButton.addEventListener("click", () => {
 // setInterval(() => {fetch("http://134.28.20.53:5000/website/liveline");}, 55000) 
 
 // select all radios and sort into names -> add event listener for each
-const radios = document.querySelectorAll('input[type="radio"]');
+const radios = document.querySelectorAll('#ball-selector input[type="radio"]');
 radios.forEach(radio => {
     //console.log(radio.value)
     radio.addEventListener('click', () => {
@@ -225,25 +242,14 @@ radios.forEach(radio => {
         radios.forEach(r => {
             if (r.name === name) {
                 const label = r.parentElement; // Das übergeordnete Label des Radio-Buttons
-                label.style.backgroundColor = "#f1f1f1";
-                label.style.border = "2px solid transparent";
                 label.classList.remove('active');
             }
         });
         // Aktives Label hinzufügen
         const activeLabel = radio.parentElement; // Das übergeordnete Label des ausgewählten Radio-Buttons
-        activeLabel.style.backgroundColor = "#e0f7fa";
-        activeLabel.style.border = "2px solid #00C1D4";
         activeLabel.classList.add('active');
 
-        // handling depending on the type of the button (name):
-        if (name === "current_ball") {
-          current_ball = radio.value;
-          //console.log(current_ball)
-        } else if (name === "mode") {
-          // call a function from kp2.js -> this is only relevant for kp2 mode
-          updateKP2mode(radio);
-        }
+        current_ball = radio.value;
 
     });
 });

@@ -49,7 +49,7 @@ class GameImage:
 	def __init__(self, definition=[], size=(2230, 1115), phys=1, img_cache={
 		"isem-logo": "static/images/ISEM-only.png", # small logo without text for subimg display
 		"isem-logo-big": "static/images/isem_logo_big.png", # big logo with text for central display
-		"feedback-form-qr": "https://www.youtube.com/watch?v=XfELJU1mRMg" # link to the feedback form
+		"feedback-form-qr": "Example QR Code" # link to the feedback form
 	}):
 		self.img = Image.new(mode="RGBA", size=size, color="#000000ff")
 		self.ballDiameter = 57 # diameter of a billiard ball (snooker) in mm
@@ -83,6 +83,8 @@ class GameImage:
 
 	def copy(self):
 		"""Generate a copy of the image.
+
+		The loaded cache will get transfered, there are no new file loads for the cache.
 
 		:return: copy of this object
 		:rtype: GameImage

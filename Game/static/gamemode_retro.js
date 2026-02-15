@@ -5,6 +5,9 @@
 */
 
 function getAllInputValues(container) {
+    // Collect all values from input (and select) elements
+    // inside of the container (DOM element) where the name is set.
+    // Returns a json with the name of the input elements as keys.
     values = {}
     container.querySelectorAll("input").forEach((input, index) => {
         if (input.name != "") {
@@ -25,17 +28,21 @@ function getAllInputValues(container) {
 
 // check if all values are set
 function checkAllSet(values) {
-    var values_available = true;
+    // returns True if all values are not empty strings
+    // empty is the default for unset inputs apparently.
+    //var values_available = true;
     for (var k in values) {
         if (values[k] === "") {
-            values_available = false;
-            break;
+            return false
+            //values_available = false;
+            //break;
         }
     }
-    return values_available
+    return true;//values_available
 }
 
 function activate_step(gamemode, new_step, index=NaN) {
+    // gamemode is the DOM container (~html object) that contains the relevant steps.
     console.log("ACTIVATE STEP", new_step, gamemode)
     gamemode.querySelectorAll(".step").forEach((step, i) => {
         if (!isNaN(index)) {
@@ -57,6 +64,9 @@ function activate_step(gamemode, new_step, index=NaN) {
 }
 
 function send_setting(setting_container, print=false, meta=false) {
+    // A setting container is a DOM object that contains inputs.
+    // Inputs need to have a name property to be included.
+    // see getAllInpuatValues for handling of selects, checkboxes, ...
     var values = getAllInputValues(setting_container);
     jsonData = {};
     if (meta) {
@@ -78,9 +88,6 @@ function send_setting(setting_container, print=false, meta=false) {
         return res
     })
 }
-
-// if this is true, events like sending the requests to the game module are used. If false, nothing get send.
-var DOEVENTS = true;
 
 //console.log("all gamemodes:", document.querySelectorAll(".mode"))
 document.querySelectorAll(".mode").forEach((gamemode) => { // for all gamemodes:
@@ -140,10 +147,6 @@ document.querySelectorAll(".mode").forEach((gamemode) => { // for all gamemodes:
         //step.querySelector("input").addEventListener("change", (e) => {
         submit_inputs.forEach((submit_input) => {
             submit_input.addEventListener(event_to_listen, (e) => {
-                if (!DOEVENTS) {
-                    console.log("Event blocked due to DOEVENTS = false:", e)
-                    return;
-                }
 
                 var jsonData = getAllInputValues(step);
                 jsonData.action = "game";
@@ -154,10 +157,10 @@ document.querySelectorAll(".mode").forEach((gamemode) => { // for all gamemodes:
                 // console.log("TRYING TO SEND:", jsonData)
                 // since all inputs must be set (otherwise the submit button wouldn't be available): now fetch the current coordinates, show them to the user to be able to correct them. On the next click, they are submitted and processed.
                 // after backend processing, updated the step
-                console.log("Now fetch from", e, jsonData);
+                //console.log("Now fetch from", e, jsonData);
+                //console.log(fetchFun)
                 fetchFun(e, jsonData)
                     .then((res) => {
-                        //DOEVENTS = false;
                         activate_step(gamemode, res.signal); // show the next step, disable the previous /////////////////////////////////////////////////////// HERE THE KP2 signal is chosen, TODO: unify with normal games?
                         if (step.id.split("-").slice(-1)[0] === "finished") {
                             // if this gamemode round is finished: reset all labels to their data-og value
@@ -190,9 +193,13 @@ document.querySelectorAll(".mode").forEach((gamemode) => { // for all gamemodes:
                         } else {
                             if (res.hasOwnProperty("message")) {
                                 if (res.hasOwnProperty("log_to")) { // if the logging location is specified, write to that object (must have innerText property, so e.g. a button is not possible yet. Should be easy to add.). Logging location must be inside step container.
-                                    step.querySelector(res.log_to).innerText = res.message;
+                                    gamemode.querySelector(res.log_to).innerText = res.message;
                                 } else if (e.target.labels.length > 0) {
                                     e.target.labels[0].innerText = res.message;
+                                }
+                            } else {
+                                if (e.target.dataset.hasOwnProperty("data-og")) {
+                                    e.target.innerText = e.target.dataset["data-og"];
                                 }
                             }
                             e.target.disabled = false;
@@ -204,7 +211,6 @@ document.querySelectorAll(".mode").forEach((gamemode) => { // for all gamemodes:
                             window.dispatchEvent(ev);
                         }
 
-                        DOEVENTS = true;
                     })
             })
         })

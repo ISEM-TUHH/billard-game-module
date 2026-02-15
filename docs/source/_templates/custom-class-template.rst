@@ -3,7 +3,9 @@
     # Posted by James Leedham, modified by community. See post 'Timeline' for change history
     # Retrieved 2025-12-09, License - CC BY-SA 4.0
 
-    # in {{ name | escape | underline}}
+    # in {{ name | escape }}
+
+.. _{{ objname }}:
 
 {{ name | escape | underline}}
 

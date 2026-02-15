@@ -1,0 +1,66 @@
+@startuml game_step
+start
+
+':click on button;
+:click on button;
+
+:gather all input data from the game step;
+
+if (Is the button a checkbox?) then (yes)
+    :disable the button;
+
+    if (Is the manipulatedFlag not raised, the property 
+    "step_coordinates_processing" unset and the
+    checkbox checked?) then (yes)
+
+        :set DOM property of button step_coordinate_processing = "check_coordinates";
+
+        :request /camera/coords to get 
+        the coordinates from the camera module.
+        They get displayed on the beamer and the
+        client livestream window;
+
+        :Change button text to "Commit coordinates";
+
+        :enable the clicked button;
+
+        while (Match the loaded to the real coordinates?) is (no)
+            :select ball type to correct;
+            :click on the livestream to place/delete ball;
+            :set the manipulatedFlag to True;
+            :send updated coordinates to 
+            /general/correctedcoords to
+            display them on the beamer;
+        endwhile (yes)
+            :start the process again;
+            stop
+    elseif ("step_coordinate_processing" set or manipulatedFlag raised?)
+        :remove "step_coordinate_processing" property;
+        
+    else
+        stop
+    endif
+endif
+
+:pass the coordinates to the controller function.
+This submits the data to the server/gamemode object
+and returns the StC-JSON;
+
+:activate the next gamemode step based on the response signal;
+
+if (response signal is "finished") then (yes)
+    :output the response message 
+    into the matching result box;
+else (no)
+    :output the response message
+    to an appropriate box
+    (checkbox label) or reset label
+    if message not existing;
+endif
+
+if (response has property "history") then (yes)
+    :Dispatch DOM event "update_scoreboard" with history data;
+endif
+
+stop
+@enduml

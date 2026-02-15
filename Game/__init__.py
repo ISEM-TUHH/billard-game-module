@@ -2,7 +2,7 @@ from .billard_base_module.Module import Module
 from .billard_base_module.RemoteModules import Camera, Beamer
 
 # imports for sphinx to find
-from . import GameImage, GameEngine, GameRules, Player, billard_base_module
+from . import GameImage#, GameEngine, GameRules, Player, billard_base_module
 
 
 
@@ -143,7 +143,7 @@ class Game(Module):
 		# TODO: dynamically generate the funnel?
 		#self.supermode = "base"
 		#self.beamer_make_gameimage()
-		return render_template('index.html')
+		return render_template('index.html', camera=self.camera.address, beamer=self.beamer.address)
 
 	def get_ball_image(self):
 		"""Get the image of a certain ball by number.

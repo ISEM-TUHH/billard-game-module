@@ -438,9 +438,9 @@ for ball selection
   font-size: smaller;
 }
 label.active {
-  background-color: #e0f7fa;
+  background-color: #e0f7fa !important;
   /*border-color: #00C1D4;*/
-  border: 2px solid #00C1D4;
+  border: 2px solid #00C1D4 !important;
 }
 input[type="radio"] {
   display: none;
@@ -556,4 +556,8 @@ fieldset input[type="button"]:hover {
   padding: 10px;
   margin: 0 12px;
   opacity: 1;
+}
+
+label:has(> input.ball-exists) {
+  font-weight: bold;
 }
