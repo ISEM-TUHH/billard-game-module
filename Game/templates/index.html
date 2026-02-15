@@ -14,17 +14,6 @@
   </head>
 
   <body>
-    <!-- Success Modal -->
-    <!--<div id="successModal"
-      style="display: none; position: fixed; z-index: 9999; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
-      <div
-        style="background: white; padding: 2rem; max-width: 500px; margin: 10% auto; border-radius: 10px; text-align: center;">
-        <h2 style="color: #4CAF50;">Vielen Dank!</h2>
-        <p>Deine Bewerbung wurde erfolgreich versendet.</p>
-        <button onclick="document.getElementById('successModal').style.display='none'"
-          style="margin-top: 1rem; padding: 0.5rem 1rem; background-color: #00C1D4; color: white; border: none; border-radius: 4px; cursor: pointer;">Schließen</button>
-      </div>
-    </div>-->
     
     <header>
       <div class="logo">
@@ -45,7 +34,39 @@
         <form id="funnel-form" action="./sendgrid_email.php" method="post">
           <div id="collected-answers"><!-- Bisherige Antworten werden hier drin abgelegt --></div>
           <!-- Container für den aktuell sichtbaren Step -->
-          <div id="funnel-steps"></div>
+          <div id="funnel-steps">
+            <fieldset style="max-width: 2000px; margin: 0px auto;">
+              <legend style="font-size: 1.5rem; color: rgb(0, 106, 129); margin-bottom: 1rem;">
+                Choose a gamemode
+              </legend>
+              <div class="option-boxes" style="grid-template-columns: repeat(2, 1fr);">
+
+
+                <a href="{{ url_for('/gamemode/<mode>', mode='online_game') }}" class="gamemode-link">
+                  <i class="fa-solid fa-globe"></i>
+                  Play billiards online
+                </a>
+                <a href="{{ url_for('/gamemode/<mode>', mode='local_game') }}" class="gamemode-link">
+                  <i class="fa-solid fa-location-dot"></i>
+                  Play billiards locally
+                </a>
+                <a href="{{ url_for('/gamemode/<mode>', mode='kp2') }}" class="gamemode-link">
+                  <i class="fa-solid fa-robot"></i>
+                  KP2 attestation mode
+                </a>
+                <a href="{{ url_for('/gamemode/<mode>', mode='final_competition') }}" class="gamemode-link">
+                  <i class="fa-solid fa-people-group"></i>
+                  KP2 final competition
+                </a>
+                <a href="{{ url_for('/gamemode/<mode>', mode='curling') }}" class="gamemode-link">
+                  <i class="fa-solid fa-hockey-puck"></i>
+                  Curling
+                </a>
+
+
+              </div>
+            </fieldset>
+          </div>
           <div class="btn-wrapper">
             <button type="button" id="prev-btn" class="btn-apply" style="display:none;">Zurück</button>
             <!--<button type="button" id="next-btn" class="btn-apply">Weiter</button>-->
@@ -54,37 +75,6 @@
         </form>
       </div>
     </section>
-
-    <!--
-    <section id="kontakt">
-      <div class="content-wrapper" style="max-width: 1200px; margin: 0 auto;">
-        <div class="section-heading">
-          <h2>WIR FREUEN UNS AUF DICH!</h2>
-        </div>
-        <div class="contact-container">
-          <div class="contact-text" style="flex: 1 1 400px;">
-            <h3>Unsere Garantie</h3>
-            <p>
-              Jede:r erhält eine Chance! Trägst Du dich heute noch ein, garantieren wir, dass wir dich
-              innerhalb der nächsten vier Tage anrufen. In einem kurzen Gespräch prüfen wir gemeinsam, ob es
-              Schnittmengen zwischen Deinen Interessen und unserem Angebot gibt – und umgekehrt.
-            </p>
-            <p class="contact-info-title">Ansonsten erreichst du uns unter:</p>
-            <address class="contact-info">
-              <p><i class="fa-solid fa-location-dot"></i> Technische Universität Hamburg, ISEM – Institut für Smarte
-                Entwicklung und Maschinenelemente, Denickestr. 17, 21075 Hamburg</p>
-              <p><i class="fa-solid fa-envelope"></i> <a
-                  href="mailto:Nikola.Bursac@ISEM-TUHH.de">Nikola.Bursac@ISEM-TUHH.de</a></p>
-              <p><i class="fa-solid fa-phone"></i> <a href="tel:+4940428784002">+49 40 42878 4002</a></p>
-            </address>
-          </div>
-          <div class="contact-image" style="flex: 1 1 300px;">
-            <img src="../img/kontakt.jpg" alt="Kontakt"
-              style="width: 250px; height: 250px; object-fit: cover; border-radius: 8px;" />
-          </div>
-        </div>
-      </div>
-    </section>-->
 
     <footer>
       <div class="content-wrapper">
@@ -103,6 +93,6 @@
     </footer>
 
     <!-- JavaScript einbinden -->
-    <script src="{{ url_for('static', filename='funnel.js') }}"></script>
+    <!--<script src="{{ url_for('static', filename='funnel.js') }}"></script>-->
   </body>
 </html>

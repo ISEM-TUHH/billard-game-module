@@ -73,7 +73,7 @@ header .logo img {
   gap: 1rem;
 }
 
-.option-box {
+.option-boxes a {
   background: #e1e1e1;
   padding: 1.5rem;
   text-align: center;
@@ -83,39 +83,20 @@ header .logo img {
   transition: all 0.3s ease;
   overflow-wrap: break-word;
   white-space: normal;
+  text-decoration: none;
+  color: black;
 }
 
-.option-box:hover,
-.option-box:checked,
-.option-box.active {
+.option-boxes a:hover {
   background-color: #e0f7fa;
   border-color: #00C1D4;
 }
 
-.option-box i {
+.option-boxes i {
   font-size: 2.5rem;
   color: #00C1D4;
   display: block;
   margin-bottom: 0.75rem;
-}
-
-.option-box input {
-  display: none;
-}
-
-#progress-bar {
-  height: 10px;
-  background-color: #eee;
-  border-radius: 5px;
-  margin-bottom: 2rem;
-  overflow: hidden;
-}
-
-#progress-bar .progress {
-  height: 100%;
-  background-color: #00C1D4;
-  width: 0%;
-  transition: width 0.3s ease;
 }
 
 /* Optional: Kontakt- und Footer-Bereich */
