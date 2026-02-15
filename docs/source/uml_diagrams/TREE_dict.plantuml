@@ -1,0 +1,38 @@
+@startjson TREE_dict
+{
+    "init": [
+        "self.setup_step",
+        {"success": "continue", "failed": "init", "reset": "init"},
+        "self.setup_image_definition",
+        ["None",{
+                "type": "text",
+                "name": "name",
+                "placeholder": "Player's name"
+            }, {
+                "type": "number",
+                "name": "age",
+                "placeholder": "Player's age"
+            }
+        ]
+    ],
+    "continue": [
+        "self.measure_plays",
+        {"play": "continue", "lost": "finished"},
+        "self.game_image_definition",
+        ["Measure shot"]
+    ],
+    "finished": [
+        "self.reset_game",
+        {"False": "init"},
+        "self.endscreen_definition",
+        ["None", {
+            "type": "button",
+            "name": "next_try",
+            "id": "next_try",
+            "value": "Next Try",
+            "class": "submit-step"
+        }]
+    ]
+}
+
+@endjson

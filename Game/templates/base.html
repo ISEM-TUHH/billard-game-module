@@ -35,7 +35,7 @@
   </script>
 
   <body>
-    <script src="{{ url_for('static', filename='sender.js')}}"></script>
+    <!--<script src="{{ url_for('static', filename='sender.js')}}"></script>-->
     <script src="{{ url_for('static', filename='gamemode_controller.js') }}"></script>
 
     <header>
@@ -89,16 +89,16 @@
             <label><input type="radio" name="current_ball" value="ball-3">3: Rot</label>
             <label><input type="radio" name="current_ball" value="ball-4">4: Lila</label>
             <label><input type="radio" name="current_ball" value="ball-5">5: Orange</label>
-            <label><input type="radio" name="current_ball" value="ball-6">6:Grün</label>
-            <label><input type="radio" name="current_ball" value="ball-7">7: Karmin</label>
+            <label><input type="radio" name="current_ball" value="ball-6">6: Grün</label>
+            <label><input type="radio" name="current_ball" value="ball-7">7: Karmesin</label>
             <label><input type="radio" name="current_ball" value="ball-eight">8: Schwarz</label>
             <label><input type="radio" name="current_ball" value="ball-9">9: Halb Gelb</label>
             <label><input type="radio" name="current_ball" value="ball-10">10: Halb Blau</label>
             <label><input type="radio" name="current_ball" value="ball-11">11: Halb Rot</label>
-            <label><input type="radio" name="current_ball" value="ball-12">12:Halb Lila</label>
+            <label><input type="radio" name="current_ball" value="ball-12">12: Halb Lila</label>
             <label><input type="radio" name="current_ball" value="ball-13">13: Halb Orange</label>
             <label><input type="radio" name="current_ball" value="ball-14">14: Halb Grün</label>
-            <label><input type="radio" name="current_ball" value="ball-15">15: Halb Karmin</label>
+            <label><input type="radio" name="current_ball" value="ball-15">15: Halb Karmesin</label>
             <label><input type="radio" name="current_ball" value="ball-white">Weiß</label>
           </div>
 
@@ -167,7 +167,7 @@
     {% endblock %}
     </div>
 
-    <!-- Audio files -->
+    <!-- Audio files --
     <div style="display: none;" id="sounds">
         <audio name="sound-0" data-group="0"><source src="{{ url_for('static', filename='sounds/perfect1.mp3') }}"></audio>
         <audio name="sound-1" data-group="0"><source src="{{ url_for('static', filename='sounds/very good.mp3') }}"></audio>
@@ -195,7 +195,7 @@
         <audio name="sound-19" data-group="4"><source src="{{ url_for('static', filename='sounds/very bad.mp3') }}"></audio>
         <audio name="sound-20" data-group="4"><source src="{{ url_for('static', filename='sounds/very bad 2.mp3') }}"></audio>
         <audio name="sound-21" data-group="4"><source src="{{ url_for('static', filename='sounds/very bad (2).mp3') }}"></audio>
-    </div>
+    </div>-->
 
     <!--<footer>
       <div class="content-wrapper">

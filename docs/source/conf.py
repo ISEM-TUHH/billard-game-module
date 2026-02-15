@@ -69,7 +69,8 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx.ext.viewcode',
     'sphinx_mdinclude',
-    'sphinx.ext.todo'
+    'sphinx.ext.todo',
+    'sphinx_pyreverse'
 ]
 
 templates_path = ['_templates']

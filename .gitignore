@@ -6,6 +6,7 @@ docs/_build/html/
 docs/_build/latex/*
 !docs/_build/latex/*.pdf
 OLD_*
+exampleeeeeee.png
 
 # font folder from https://www.1001freefonts.com/minecraft.font
 fonts/* 

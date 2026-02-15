@@ -191,15 +191,16 @@ document.getElementById("livestream").addEventListener("click", function(e) {
 
 function sendCorrectedCoords() {
     //console.log(coordinates);
-    var sendCoords = {}; 
+    /*var sendCoords = {}; 
     for (let c of Object.keys(coordinates)) {
         //console.log(c)
         var newName = c.replace("ball-","");
         var coord = coordinates[c];
         sendCoords[newName] = {"name": newName, "x": pxToReal(coord.x), "y": pxToReal(coord.y)};
         //console.log(newName, coord);
-    }
+    }*/
     //console.log(sendCoords)
+    var sendCoords = coordinatesBackend()
     sender("/general/correctedcoords", sendCoords);
 }
 
@@ -228,7 +229,7 @@ saveImageButton.addEventListener("click", () => {
 // setInterval(() => {fetch("http://134.28.20.53:5000/website/liveline");}, 55000) 
 
 // select all radios and sort into names -> add event listener for each
-const radios = document.querySelectorAll('input[type="radio"]');
+const radios = document.querySelectorAll('#ball-selector input[type="radio"]');
 radios.forEach(radio => {
     //console.log(radio.value)
     radio.addEventListener('click', () => {
@@ -248,14 +249,7 @@ radios.forEach(radio => {
         const activeLabel = radio.parentElement; // Das übergeordnete Label des ausgewählten Radio-Buttons
         activeLabel.classList.add('active');
 
-        // handling depending on the type of the button (name):
-        if (name === "current_ball") {
-          current_ball = radio.value;
-          //console.log(current_ball)
-        } else if (name === "mode") {
-          // call a function from kp2.js -> this is only relevant for kp2 mode
-          updateKP2mode(radio);
-        }
+        current_ball = radio.value;
 
     });
 });

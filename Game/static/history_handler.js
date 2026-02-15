@@ -8,6 +8,7 @@ These methods are included in the base.html
 
 function update_scoreboard(histdata) {
     // updating the single table
+    // This does not update the table column names, they are set when rendering the website. They may also be included in the histdata.
     var singles = document.getElementById("table-single");
     var sd = histdata["single_table"];
     var text = "" //"Individual<table><thead><tr><th></th><th>Player</th><th>Team</th><th>Score</th></tr></thead><tbody></tbody>";

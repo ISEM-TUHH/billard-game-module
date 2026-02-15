@@ -44,7 +44,7 @@ To be able to communicate with the global API to play online games you need to b
 Important: The API is not publicly available yet, we are working on it.
 
 ## Documentation
-Documentation is generated using sphinx. A prebuild PDF can be found in `docs/latex`.
+Documentation is generated using sphinx. A prebuilt PDF can be found in `docs/latex`.
 To generate the documentation, use 
 ```bash
 make html

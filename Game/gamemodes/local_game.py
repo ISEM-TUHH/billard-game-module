@@ -29,7 +29,7 @@ class LocalGame(GameMode):
         self.TREE = {
             "init": [
                 self.setup_shootout,
-                {"start_shootout": "shootout"},
+                {"start_shootout": "shootout", "reset": "init"},
                 lambda: [
                     {
                         "type": "text",

@@ -1,0 +1,135 @@
+@startuml online_game
+group Serve website of gamemode
+    Client -> Server : request website on /gamemodes/online_game
+    rnote over Server
+        Call get_gamemode_website("online_game")
+        Looks up if "online_game" is in Game.GAMEMODES
+        If not: returns 404
+    endrnote
+
+    Server -> gamemode : call online_game.reset(inplace=True)
+
+    Server -> gamemode : call online_game.index_args() 
+    rnote over gamemode
+        Get special arguments that should get rendered into the 
+        website template (templates/online_game.html).
+        Templates commonly extend the base.html template.
+        Also defines what extra JavaScript files to load.
+    endrnote
+    gamemode -> Server : dict of variable names and values
+    rnote over Server
+        If the key "error" is defined, show an error 
+        message and status as supplied by the gamemode 
+        (e.g. if the global API is not accessible)
+    endrnote
+
+    Server -> gamemode : call online_game.history()
+    rnote over gamemode
+        Supply a history of some kind. Most use GameMode.history
+        except for the online_game, getting the history from the
+        global API.
+    endrnote
+    gamemode -> Server : dict containing "single_table", "single_columns", "team_table"
+
+    rnote over Server
+        Use the dicts, the address of the camera, 
+        gamemode="online_game" to render the template 
+    endrnote
+    Server -> Client : return the rendered website
+
+    'Client -> CameraModule : request /website/videofeed
+end
+
+/'
+rnote over Client
+    The base.html now includes the .js files:
+    sender.js, gamemode_controller.js, sound.js,
+    coords-handler.js, history_handler.js,
+    update_gamemode.js, gamemode_retro.js,
+    game_configuration.js
+    and has defined the global variables
+    camera_address, global_gamemode="online_game"
+endrnote
+'/
+rnote over Client
+    The client now loads the camera livestream
+    and builds the JS event listener structure.
+endrnote
+
+group Input a step
+    rnote across
+        As a gamemode can consist of multiple smaller gamemodes, a gamemodes website defines a global_gamemode
+        (the one that served the website) and a current_gamemode.
+        A mode consists of steps, which are are displayed in a sequential manner, but don't need to be
+        "played" in this sequence. This structure is resembled in the HTML source of a gamemode website by having
+        a DOM object with the class "mode" contain DOM objects with the class "step". The id of the mode
+        corresponds with the current_gamemode variable.
+    endrnote
+
+    rnote over Client        
+        A step is send to the server either by clicking on a button 
+        (like "Next Try" in KP2 submodes),
+        commiting coordinates, or opening a new mode (like expanding 
+        a menu in KP2 website).
+        This is mostly done by controller functions (kp2Controller.js
+        or vanillaController.js), as they also can interpret the
+        results.
+    endrnote
+
+    Client -> Server : POST /gamemodecontroller (json data)
+
+    rnote over Server
+        Call gamemode_controller():
+        # Check if the key "gmode" exists and is a valid gamemode in
+        Game.GAMEMODES
+        # Check if key "action" exists. If it is "show", only display
+        the current image of the selected gamemode (see GameImage)
+        and then return
+        # Any other action calls the gamemode.entrance(inp) with the
+        sent json data as inp (dict) 
+    endrnote
+
+    Server -> gamemode : call gamemode.entrance(inp)
+    rnote over gamemode
+        This method is mostly inherited from GameMode except for KP2.
+        If the action is "settings", call gamemode.settings(inp),
+        otherwise lookup the method that should get called upon
+        a submitted step from gamemode.TREE and call it with the 
+        passed input.
+
+        The method returns a progress decider (gets mapped to new
+        state), local_returns (dict) and forward_returns (dict).
+
+        Local returns (like updates to the GameImage, sounds to play)
+        mostly end up at other modules like the Beamer, while forward
+        returns get send to the client.
+
+        The progress decider selects a new state based on the dict in
+        entry of the current state in the TREE. New state gets
+        included as key "signal" in the forwarded dict.
+    endrnote
+    gamemode -> Server : dict to forward, new gameimage, sound (str)
+
+    rnote over Server
+        If the "signal" is "finished", extract the history from the 
+        gamemode object (either gamemode.HISTORY or key "hist-package")
+        by calling gamemode.history(...) and adding the history as key
+        "history" to the forwarded json.
+
+        If the sound is not None, send the str to the Beamer Module
+        to play.
+
+        The gameimage also gets drawn and send to the Beamer Module 
+        to display.
+    endrnote
+
+    Server -> Client : json data
+    rnote over Client
+        See the individually loaded controller (kp2Controller.js or 
+        vanillaController.js) for how this is handled.
+    endrnote
+
+end
+
+@enduml
+

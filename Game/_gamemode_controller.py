@@ -60,6 +60,7 @@ def gamemode_controller(self):
         case "forward":
             # The gamemode is still running: forward to client, do nothing else
             pass
+        # every other signal is also just forwarded
 
 
     # play the sound if specified

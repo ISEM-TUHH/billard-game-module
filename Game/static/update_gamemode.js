@@ -18,6 +18,7 @@ function update_gamemode(button) {
 
     var new_gamemode = button.parentElement.id;
     if (current_gamemode === new_gamemode) {
+        // this handles closing the current gamemode
         new_gamemode = "base";
     }    
     

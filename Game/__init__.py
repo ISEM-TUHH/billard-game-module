@@ -2,7 +2,7 @@ from .billard_base_module.Module import Module
 from .billard_base_module.RemoteModules import Camera, Beamer
 
 # imports for sphinx to find
-from . import GameImage, GameEngine, GameRules, Player, billard_base_module
+from . import GameImage#, GameEngine, GameRules, Player, billard_base_module
 
 
 

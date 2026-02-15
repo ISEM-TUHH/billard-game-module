@@ -1,0 +1,66 @@
+@startuml TREE_states_example
+hide empty description
+
+[*] --> init
+init : The initial state of
+init : every gamemode
+
+init --> continue : success
+init --> init : failed, reset
+
+continue --> continue : play
+continue --> finished : lost
+
+finished --> init : reset ("False")
+
+@enduml
+
+@startuml TREE_local_game
+hide empty description
+
+[*] --> init
+init -> shootout : start_shootout
+shootout -> shootout : again
+shootout --> play : break
+
+play --> play : continue
+play --> finished : finished
+
+finished --> init : reset
+
+@enduml
+
+@startuml TREE_online_game
+hide empty description
+
+[*] --> init
+init --> wait : wait
+init --> play : play
+init -> init : init
+
+wait --> play : continue
+wait --> wait : wait
+wait --> finished : finished
+
+play --> finished : finished
+play --> play : continue
+play --> wait : wait
+
+finished --> init : reset
+
+@enduml
+
+@startuml TREE_longest_break
+hide empty description
+
+[*] --> init
+init -> init : True, reset
+init --> finished : False
+init --> decide_keep : decide_keep
+
+decide_keep --> init : keep
+decide_keep --> finished : discard
+
+finished --> init : False (special reset function)
+
+@enduml
