@@ -233,6 +233,10 @@ class Game:
             group = self.active_player["group"] if self.active_player["left"] != 0 else "eight"
             shots = self.engine.getShots(coordinates, group=group)
             img_definition.append({"type": "possible_shots", "shots": shots})
+            
+            #img_definition.append({
+            #    "type": "balls", "coords": coordinates
+            #})
             self.history["outcome"] = {
                 "winner": self.active_player["name"], # maybe id?
                 "elo_exchange": 0 # dummy at the moment. TODO: add ELO system
@@ -243,7 +247,8 @@ class Game:
         },{
             "ref": "balls", "remove": True # do not display the balls
         }]
-        
+        #img_definition.append({"type": "text", "text": text})
+
         print("GAME MODEL message:", message)
         self.history["rounds"].append({
             "timestamp": str(datetime.datetime.now()),
