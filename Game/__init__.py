@@ -93,8 +93,10 @@ class Game(Module):
 
 		api_secrets = {k: v for k,v in self.secrets.items() if k in ["TID", "TAUTH", "ADDRESS", "PORT"]} 
 		
+		kp2_settings = self.config["kp2-details"]
+
 		self.GAMEMODES = {
-			"kp2": KP2(),
+			"kp2": KP2(settings=kp2_settings),
 			"final_competition": FinalCompetition(),
 			"online_game": online_game.OnlineGame(api_secrets),
 			"local_game": local_game.LocalGame(api_secrets),
@@ -193,19 +195,6 @@ class Game(Module):
 
 	# INTERACTIONS WITH BEAMER MODULE ###############################################
 	from ._beamer_interface import beamer_push_image, beamer_off, beamer_make_gameimage, beamer_correct_coords, beamer_update_manual_text
-
-	# INTERACTIONS FOR NORMAL GAME ##################################################
-	#from ._game_local import get_site_game_local, game_local_enter_round, game_local_start_round, game_determine_start
-	# INTERACTION FOR ONLINE GAME ###################################################
-	#from ._game_online import get_site_game_online, online_start_game, get_site_register_player
-
-	# INTERACTIONS FOR EXAM MODE ####################################################
-	#from ._kp2 import get_site_kp2, enter_round_kp2, select_mode_kp2, kp2_set_precision_difficulty, kp2_get_live_value, kp2_calc_score, kp2_update_score_data_base # import all methods from _kp2.py
-	#from ._lat import get_site_lat, enter_round_lat # import all methods from _lat.py
-
-	# INTERACTION FOR TRICKSHOT MODE ################################################
-	#from ._trickshots import load_trickshot, list_trickshots, get_site_trickshots, get_site_create_trickshots
-
 
 	# GAMEMODE CONTROLLER ###########################################################
 	from ._gamemode_controller import gamemode_controller, get_gamemode_website, list_available_gamemodes, gamemode_socket_handler

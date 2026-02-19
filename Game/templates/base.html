@@ -30,6 +30,11 @@
           document.body.appendChild(el);
       }
 
+      // jinja code. gets marked as errors in template because its inside JS :/
+      {% for k, v in js_vars.items() %}
+      var {{ k }} = {{ v }}
+      {% endfor %}
+
       let camera_address = "{{ camera_address }}";
       let global_gamemode = "{{ gamemode }}";
   </script>

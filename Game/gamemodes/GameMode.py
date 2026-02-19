@@ -80,6 +80,11 @@ class GameMode:
         if not hasattr(self, "HISTORY"):
             self.HISTORY = {} # history objects of this current round/instance
         self.HISTORY |= {"finished_time": None}
+
+        if hasattr(self, "SETTINGS"):
+            # load everything in the settings as an object attribute
+            # assumes that all setting keys are valid variable names and strings
+            self.unpack_settings() 
         
         if not hasattr(self, "gameimage"):
             self.gameimage = GameImage()
@@ -234,6 +239,10 @@ class GameMode:
             print("Reset this object. New state:", self.state)
             return "reset", {}, {}
         return self.__init__(**kwargs)
+
+    def unpack_settings(self):
+        for k, v in self.SETTINGS.items():
+            self.__dict__[k] = v
 
     def get_history(self):
         """Gets the history table from self.history_file. If the file does not exist, returns an empty dataframe

@@ -22,25 +22,27 @@ class KP2(GameMode):
     __file__ = __file__
 
     def __init__(self,
-            occurences={ # how many scores are determined for each
+            occurences={ # THIS IS MAINLY CONTROLLED FROM config.json
                 "precision": 5,
                 "distance": 5,
                 "break": 1,
                 "longest_break": 5 # 5 starts and 2 fully to the end -> only two scores
             }, 
-            gm_name="KP2"
+            gm_name="KP2",
+            time=1800, # how much time students have for an attestation
+            settings=None
         ):
         
 
         self.gamemode_name = gm_name # "KP2"
         self.message = "Hello there :)" # this just needs to exist
         
-        self.occurences = occurences# { # how many scores are determined for each
-            #"precision": 5,
-            #"distance": 5,
-            #"break": 1,
-            #"longest_break": 5 # 5 starts and 2 fully to the end -> only two scores
-        #}
+        self.occurences = occurences
+        
+        if settings is None:
+            self.SETTINGS = {"occurences": occurences, "time": time} # settings get unzipped in GameMode init -> time gets set to self.time
+        else:
+            self.SETTINGS = settings
 
         self.GAMEMODES = {
             "distance": Distance(),
@@ -95,7 +97,10 @@ class KP2(GameMode):
         """ Generate a dictionary of keyword arguments that get supplied to a jinja html template of a gamemode with the same name (e.g. precision -> precision.html) in the template directory """
         out = {
             "title": "Beat the ISEM!",
-            "teams": ["ISEM", "Professoren", "Dekanat M"]
+            "teams": ["ISEM", "Professoren", "Dekanat M"],
+            "js_vars": { # stuff that gets set as JS global variables (var declaration)
+                "countdown_original_time": self.time
+            }
         }
         out["mystery_challenges"] = list(self.mystery_challenges.keys())
         for gm, gamemode in self.GAMEMODES.items():

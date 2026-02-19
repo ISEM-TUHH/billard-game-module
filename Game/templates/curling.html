@@ -1,3 +1,4 @@
+{% set title = "Curling" %}
 {% extends "base.html" %}
 {% block content %}
     <div class="mode">
@@ -5,19 +6,19 @@
           <button type="button" class="collapsible">Player selection</button>
           <div class="collapsible-content">
             <fieldset>
-              Enter your details!
+              Enter your details and place the white ball on the marking.
               <hr>
+              Player 1 has the solid balls.
               <div class="button-list single-player-details">
                 <input type="text" name="p1team" placeholder="Team">
                 <input type="text" name="p1name" placeholder="Name">
               </div>
-              <br>Player 1 has the solid balls.
-              <hr>              
+              <hr>
+              Player 2 has the striped balls.
               <div class="button-list single-player-details">
                 <input type="text" name="p2team" placeholder="Team">
                 <input type="text" name="p2name" placeholder="Name">
               </div>
-              <br>Player 2 has the striped balls.
               <hr>
               <div class="button-list">
                 <input type="button" name="curling-player" class="submit-step" value="Start curling!">
@@ -31,7 +32,7 @@
           <button type="button" class="collapsible">Play Rounds</button>
           <div class="collapsible-content">
             <fieldset>
-              Try to get as close as possible to the white ball. Each player has 5 shots. After each shot, the players change.<br>
+              Try to get as close as possible to the white ball, starting from the blue point. Each player has 5 shots. After each shot, the players change.
               <hr>
               <div class="results">Play the first shot</div>
               <hr>

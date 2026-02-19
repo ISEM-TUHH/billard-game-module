@@ -1,0 +1,102 @@
+<!-- 
+This module provides a simple countdown timer that can be started, paused, reset 
+either through GUI or JS events
+
+Emits a "countdown-ended" event when finishing
+Emits a "countdown-paused" event when pausing
+Emits a "countdown-resumed" event when resuming
+Emits a "countdown-reset" event when resetting
+Emits a "countdown-started" event when starting
+-->
+<section id="session-countdown" class="col">
+    <fieldset>
+        <legend>Timer</legend>
+        <style>
+            .countdown {
+                font-weight: bold;
+                font-size: large;
+                text-align: center;
+                margin: 0px;
+            }
+        </style>
+        <p class="countdown"></p>
+        <script>
+            if (typeof countdown_original_time === "undefined") {
+                var countdown_original_time = 30*60; // seconds
+
+            }
+
+            var time_left = countdown_original_time;
+            var countdown_running = false;
+            var countdown_interval;
+
+            function display_time(time) {
+                // time in seconds int
+                var minutes = Math.floor((time_left / 60));
+                var seconds = Math.floor((time_left % 60));
+
+                if (seconds < 10) {
+                    seconds = "0" + seconds
+                }
+
+                document.querySelector(".countdown").innerText = minutes + ":" + seconds
+
+                if (time_left === 0) {
+                    clearInterval(countdown_interval)
+                    countdown_running = false;
+                }
+            }
+
+            display_time(time_left)
+
+
+            // this interval actually updates the display
+            function start_countdown(emit=true) {
+                if (emit) {
+                    var ev = new CustomEvent("countdown-started");
+                    window.dispatchEvent(ev);
+                }
+                
+                countdown_interval = setInterval(function() {
+                    countdown_running = true;
+                    time_left = time_left - 1;
+
+                    display_time(time_left);
+
+                }, 1000)
+            }
+
+            function pause_countdown() {
+                countdown_running = false;
+                clearInterval(countdown_interval);
+                var ev = new CustomEvent("countdown-paused");
+                window.dispatchEvent(ev);
+            }
+
+            function resume_countdown() {
+                start_countdown(emit=false);
+                var ev = new CustomEvent("countdown-resumed");
+                window.dispatchEvent(ev);
+            }
+
+            function reset_countdown() {
+                time_left = countdown_original_time;
+                display_time(time_left);
+            }
+
+
+            document.querySelector(".countdown").addEventListener("click", () => {
+                console.log("Clicked on timer");
+                if (countdown_running) {
+                    pause_countdown();
+                } else if (time_left === 0) {
+                    reset_countdown();
+                } else if (time_left === countdown_original_time) {
+                    start_countdown();
+                } else {
+                    resume_countdown();
+                }
+            })
+        </script>
+    </fieldset>
+</section>

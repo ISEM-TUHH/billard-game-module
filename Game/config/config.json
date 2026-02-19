@@ -6,11 +6,20 @@
     "port": "5000",
 
     "size": 8,
-    "apriltag-id-beamer": ["4", "5", "6", "7"],
 
     "table-dimensions": {
         "height": 1171,
         "width": 2150
+    },
+
+    "kp2-details": {
+        "time": 2800,
+        "occurences": {
+            "precision": 5,
+            "distance": 2,
+            "break": 1,
+            "longest_break": 5
+        }
     },
     
     "modules": [

@@ -48,6 +48,10 @@ class Curling(GameMode):
                     {
                         "type": "central_image",
                         "img": "isem-logo-big"
+                    },
+                    {
+                        "type": "balls",
+                        "coords": {"white": self.last_white}
                     }
                 ],
                 [None]
@@ -55,7 +59,15 @@ class Curling(GameMode):
             "play_rounds": [
                 self.display_positions,
                 {"again": "play_rounds", "finished": "finished"},
-                lambda: self.img_definition,
+                lambda: self.img_definition + [{
+                        "type": "balls",
+                        "coords": {"dummy": {            
+                            "y": 1115//2,
+                            "x": 5*2230//6,
+                            "name": "dummy"
+                        }},
+                        "ref": "starting_point"
+                }],
                 [None]
             ],
             "finished": [

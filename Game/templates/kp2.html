@@ -1,7 +1,12 @@
 {% extends "base.html" %}
 {% block content %}
+
+
     <form name="round" id="roundForm" action="" method="POST" class="contains-columns">
       <!-- Begin collecting information on the rounds to post in the end -->
+
+      {% include "modules/countdown.html" %}
+
       <section id="session-info" class="col global-config">
         <fieldset>
           <legend>Game configurations</legend>
