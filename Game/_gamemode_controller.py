@@ -109,4 +109,8 @@ def get_gamemode_website(self, mode):
         file = self.GAMEMODES[mode].WEBSITE_TEMPLATE
     else:
         file = mode + ".html"
+
+    # handle non existing js_vars field
+    if "js_vars" not in index_args.keys():
+        index_args["js_vars"] = {}
     return self.render_template_camera(file, **(index_args | self.GAMEMODES[mode].history()), gamemode=mode)

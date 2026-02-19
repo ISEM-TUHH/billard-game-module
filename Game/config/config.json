@@ -13,10 +13,10 @@
     },
 
     "kp2-details": {
-        "time": 2800,
+        "time": 1800,
         "occurences": {
             "precision": 5,
-            "distance": 2,
+            "distance": 5,
             "break": 1,
             "longest_break": 5
         }

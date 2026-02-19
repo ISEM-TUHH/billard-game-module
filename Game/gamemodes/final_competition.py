@@ -5,7 +5,7 @@ class FinalCompetition(KP2):
     """ This is an abstraction of the KP2 mode. It essentially is the same, only using a different number of challenges and allows for the input of previously collected bonus points. It is used in the final competition of the KP2/MDP2 project.
 
     """
-    def __init__(self):
+    def __init__(self, settings=None):
         self.__file__ = __file__
 
         occurences = {

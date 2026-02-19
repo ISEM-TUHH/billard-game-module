@@ -81,7 +81,8 @@ class GameMode:
             self.HISTORY = {} # history objects of this current round/instance
         self.HISTORY |= {"finished_time": None}
 
-        if hasattr(self, "SETTINGS"):
+        if hasattr(self, "SETTINGS") and "settings" in self.__init__.__code__.co_varnames:
+            # if it has a SETTINGS attribute and the init expects settings as an argument:
             # load everything in the settings as an object attribute
             # assumes that all setting keys are valid variable names and strings
             self.unpack_settings() 
