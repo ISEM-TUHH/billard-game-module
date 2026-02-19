@@ -22,7 +22,7 @@
           }
 
           var el = document.createElement("div");
-          el.setAttribute("style","position:absolute;top:10px;left:10px;background-color:#00C1D4;padding:5px;border-radius:5px;font-size:2vw;");
+          el.setAttribute("style","position:fixed;top:10px;left:10px;background-color:#00C1D4;padding:5px;border-radius:5px;font-size:2vw;");
           el.innerHTML = msg;
           setTimeout(function(){
               el.parentNode.removeChild(el);
@@ -172,51 +172,6 @@
     {% endblock %}
     </div>
 
-    <!-- Audio files --
-    <div style="display: none;" id="sounds">
-        <audio name="sound-0" data-group="0"><source src="{{ url_for('static', filename='sounds/perfect1.mp3') }}"></audio>
-        <audio name="sound-1" data-group="0"><source src="{{ url_for('static', filename='sounds/very good.mp3') }}"></audio>
-        <audio name="sound-2" data-group="0"><source src="{{ url_for('static', filename='sounds/very good (2).mp3') }}"></audio>
-
-        <audio name="sound-3" data-group="1"><source src="{{ url_for('static', filename='sounds/good2.mp3') }}"></audio>
-
-        <audio name="sound-4" data-group="2"><source src="{{ url_for('static', filename='sounds/medium.mp3') }}"></audio>
-        <audio name="sound-5" data-group="2"><source src="{{ url_for('static', filename='sounds/medium (6).mp3') }}"></audio>
-        <audio name="sound-6" data-group="2"><source src="{{ url_for('static', filename='sounds/medium (5).mp3') }}"></audio>
-        <audio name="sound-7" data-group="2"><source src="{{ url_for('static', filename='sounds/medium (4).mp3') }}"></audio>
-        <audio name="sound-8" data-group="2"><source src="{{ url_for('static', filename='sounds/medium (2).mp3') }}"></audio>
-
-        <audio name="sound-9" data-group="3"><source src="{{ url_for('static', filename='sounds/bad1.mp3') }}"></audio>
-        <audio name="sound-10" data-group="3"><source src="{{ url_for('static', filename='sounds/bad2.mp3') }}"></audio>
-        <audio name="sound-11" data-group="3"><source src="{{ url_for('static', filename='sounds/bad3.mp3') }}"></audio>
-        <audio name="sound-12" data-group="3"><source src="{{ url_for('static', filename='sounds/bad4.mp3') }}"></audio>
-        <audio name="sound-13" data-group="3"><source src="{{ url_for('static', filename='sounds/bad5.mp3') }}"></audio>
-        <audio name="sound-14" data-group="3"><source src="{{ url_for('static', filename='sounds/bad6.mp3') }}"></audio>
-        <audio name="sound-15" data-group="3"><source src="{{ url_for('static', filename='sounds/bad.mp3') }}"></audio>
-        <audio name="sound-16" data-group="3"><source src="{{ url_for('static', filename='sounds/bad 2.mp3') }}"></audio>
-        <audio name="sound-17" data-group="3"><source src="{{ url_for('static', filename='sounds/bad (2).mp3') }}"></audio>
-        <audio name="sound-18" data-group="3"><source src="{{ url_for('static', filename='sounds/bad (3).mp3') }}"></audio>
-
-        <audio name="sound-19" data-group="4"><source src="{{ url_for('static', filename='sounds/very bad.mp3') }}"></audio>
-        <audio name="sound-20" data-group="4"><source src="{{ url_for('static', filename='sounds/very bad 2.mp3') }}"></audio>
-        <audio name="sound-21" data-group="4"><source src="{{ url_for('static', filename='sounds/very bad (2).mp3') }}"></audio>
-    </div>-->
-
-    <!--<footer>
-      <div class="content-wrapper">
-        <p>
-          <a href="https://www.linkedin.com/company/tuhh-isem" target="_blank">ISEM auf LinkedIn</a> |
-          <a href="https://isem-karriere.de/datenschutz/" target="_blank">Datenschutz</a> |
-          <a href="https://www.tuhh.de/isem/impressum" target="_blank">Impressum</a> |
-          <a href="http://134.28.20.52:5000/debug/restartgui" target="_blank">Restart Beamer</a> |
-          <a href="http://134.28.20.58:5000/meta/relaunch" target="_blank">Restart Camera</a> | 
-          <a href="{{ url_for('download') }}" target="_blank">Downloads</a>
-        </p>
-      </div>
-    </footer>-->
-
-    <!-- JavaScript einbinden -->
-    <script src="{{ url_for('static', filename='sound.js') }}"></script> 
     <script src="{{ url_for('static', filename='coords-handler.js') }}"></script>
     <script src="{{ url_for('static', filename='history_handler.js') }}"></script>
     <script src="{{ url_for('static', filename='update_gamemode.js') }}"></script>
