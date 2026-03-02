@@ -389,6 +389,10 @@ tr:nth-child(odd) {
   display: none;
 }
 
+body:has(#highlight-balls:hover) .ball {
+  border: 10px solid red;
+}
+
 .image-container {
   position: relative;
   width: 100%;
