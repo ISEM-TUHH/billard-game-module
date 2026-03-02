@@ -1,12 +1,13 @@
 import numpy as numpy
 import pandas as pd
 import os
-from flask import Flask, jsonify, render_template, request, redirect, session
+from flask import Flask, jsonify, render_template, request, redirect, session, send_file
 import socket
 #import urllib.request
 import requests
 import json
 import datetime
+from io import BytesIO
 
 """ This file provides methods necessary for the implementation of the MVC model for running gamemodes """
 
@@ -114,3 +115,57 @@ def get_gamemode_website(self, mode):
     if "js_vars" not in index_args.keys():
         index_args["js_vars"] = {}
     return self.render_template_camera(file, **(index_args | self.GAMEMODES[mode].history()), gamemode=mode)
+
+def get_gamemode_report(self, mode, timestamp):
+    assert mode in self.GAMEMODES
+    #print(mode, timestamp)
+    history = self.GAMEMODES[mode].get_history()
+
+    # timestamp serves as ID
+    #print("Available timestamps:", history["timestamp"], history["timestamp"].dtype)
+    t = history.loc[history["timestamp"] == timestamp].reset_index()
+    if t.shape[0] == 0:
+        return "History not found.", 404
+    t = df_to_formatted_json(t)
+    hist = t[0]#.loc[0,:].to_dict()
+    #print(t)
+    pdf = self.GAMEMODES[mode].build_PDF_report(hist)
+    #return jsonify(hist)
+    return send_file(BytesIO(pdf), download_name=f"history-{timestamp.replace(" ", "_")}.pdf", as_attachment=True)
+
+# util for reverse pd.json_normalize
+# Source - https://stackoverflow.com/a/63366556
+# Posted by Yaakov Bressler, modified by community. See post 'Timeline' for change history
+# Retrieved 2026-03-02, License - CC BY-SA 4.0
+
+# with slight altercations
+
+def df_to_formatted_json(df, sep="."):
+    """
+    The opposite of json_normalize
+    """
+    result = []
+    for idx, row in df.iterrows():
+        parsed_row = {}
+        for col_label,v in row.items():
+
+            # assuming your dict has keys that aren't strings
+            # otherwise, simplify with just: keys = col_label.split(sep)
+            if not isinstance(col_label, str):
+                keys = [col_label]
+            else:
+                keys = col_label.split(sep)
+
+            current = parsed_row
+            for i, k in enumerate(keys):
+                k = k.replace("-", "_")
+                if i==len(keys)-1:
+                    current[k] = v
+                else:
+                    if k not in current.keys():
+                        current[k] = {}
+                    current = current[k]
+        # save
+        result.append(parsed_row)
+    print("DNNN", result)
+    return result

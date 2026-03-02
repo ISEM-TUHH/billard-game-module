@@ -1,6 +1,9 @@
 from pathlib import Path
 import pandas as pd
 import json
+from jinja2 import Environment, FileSystemLoader
+from weasyprint import HTML
+
 from ..GameImage import GameImage
 from .common_utils import *
 
@@ -362,8 +365,24 @@ class GameMode:
         if add is not None: # provide the index of the added history item 
             index = singles.index[(singles["player"] == add["player"]) & (singles["team"] == add["team"]) & (singles["score"] == add["score"])]
             out["single_new_index"] = index.tolist()[0]
+            out["timestamp"] = str(add["timestamp"])
 
         return out
+
+    def build_PDF_report(self, history):
+        # returns binary file object of a pdf report based on the history
+        self.report_template = self.name + "_report.html"#Path(self.__file__).parent.absolute().joinpath(Path("resources"), self.name + "_report.html")
+        self.resource_folder = Path(self.__file__).parent.absolute().joinpath(Path("resources"))
+
+        if not Path(self.__file__).parent.absolute().joinpath(Path("resources"), self.report_template).exists():
+            raise ValueError(f"This gamemode does not supply a report template file. Not found: {self.report_template}")
+
+        env = Environment(loader=FileSystemLoader(self.resource_folder))
+        template = env.get_template(str(self.report_template))
+        rendered_html = template.render(history, debug=str(history))
+
+        return HTML(string=rendered_html).write_pdf()
+
 
     def build_HTML(self):
         """ Based on self.TREE, build the input fields for this gamemode flow. Returns the HTML content inside of the fieldset container as well as the name of the gamemode 
