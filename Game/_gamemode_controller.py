@@ -141,8 +141,14 @@ def get_gamemode_report(self, mode, timestamp):
 # with slight altercations
 
 def df_to_formatted_json(df, sep="."):
-    """
-    The opposite of json_normalize
+    """Re-nest a previously normalized dictionary from a pd.DataFrame.
+
+    Args:
+        df (pd.DataFrame): Dateframe which will get parsed
+        sep (str, optional): Separator in column names to indicate nesting. Defaults to ".".
+
+    Returns:
+        list: list of dicts with each row of the df as an entry.
     """
     result = []
     for idx, row in df.iterrows():

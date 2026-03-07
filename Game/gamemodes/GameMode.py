@@ -370,6 +370,20 @@ class GameMode:
         return out
 
     def build_PDF_report(self, history):
+        """Based on the passed history, generates a PDF report.
+
+        The gamemode must have a [name]_report.html jinja2 template in the resources directory, which gets used to create the report. See the KP2 example.
+        This template can have styling information, see weasyprint package documentation for more.
+
+        Args:
+            history (dict): History dictionary of this gamemode. Can be nested, see _gamemode_controller.py df_to_formatted_json function if previously normalized with pandas package (pd.json_normalize).
+
+        Raises:
+            ValueError: If the template file does not exist.
+
+        Returns:
+            bytes: Binary rendered PDF file.
+        """
         # returns binary file object of a pdf report based on the history
         self.report_template = self.name + "_report.html"#Path(self.__file__).parent.absolute().joinpath(Path("resources"), self.name + "_report.html")
         self.resource_folder = Path(self.__file__).parent.absolute().joinpath(Path("resources"))
