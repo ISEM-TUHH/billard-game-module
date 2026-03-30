@@ -176,6 +176,7 @@ class GameMode:
 
 
         if new_state == "finished":
+            print("SELF HISTORY:", self.HISTORY)
             self.HISTORY["finished_time"] = pd.Timestamp.now()
 
         
@@ -275,6 +276,10 @@ class GameMode:
         Args:
             history (dict): arbitrary dictionary, usually a dump of all information of the current round. 
         """
+        history |= {
+            "saved_at": str(pd.Timestamp.now())
+        }
+
         entire_history = []
         with open(self.json_history_file, "r") as file:
             entire_history = json.load(file)

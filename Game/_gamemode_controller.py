@@ -131,7 +131,7 @@ def get_gamemode_report(self, mode, timestamp):
     #print(t)
     pdf = self.GAMEMODES[mode].build_PDF_report(hist)
     #return jsonify(hist)
-    return send_file(BytesIO(pdf), download_name=f"history-{timestamp.replace(" ", "_")}.pdf", as_attachment=True)
+    return send_file(BytesIO(pdf), download_name=f"history-{timestamp.replace(' ', '_')}.pdf", as_attachment=True)
 
 # util for reverse pd.json_normalize
 # Source - https://stackoverflow.com/a/63366556

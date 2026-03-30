@@ -109,7 +109,7 @@ class LocalGame(GameMode):
             history = self.game.history
             self.save_json_history(history)
             
-            self.HISTORY = None # history is handled differently -> not always a new row is added
+            #self.HISTORY = None # history is handled differently -> not always a new row is added
             self.update_elo() # this also adds previously unregistered players
 
             return "end", {"gameimage-updates": img_definition, "reset-gameimage": True}, {"message": self.game.active_player["name"] + " won the game", "notification": message}
