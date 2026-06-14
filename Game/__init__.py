@@ -25,7 +25,7 @@ import re
 
 from PIL import Image
 
-from .gamemodes import KP2, Precision, Distance, Break, LongestBreak, Dummy, online_game, local_game, FinalCompetition, Curling # OnlineGame, local_game#LocalGame
+from .gamemodes import KP2, Precision, Distance, Break, LongestBreak, Dummy, online_game, local_game, FinalCompetition, Curling, Curling2 # OnlineGame, local_game#LocalGame
 
 class Game(Module):
 	"""Implements central game scheduling functions
@@ -101,7 +101,8 @@ class Game(Module):
 			"final_competition": FinalCompetition(),
 			"online_game": online_game.OnlineGame(api_secrets),
 			"local_game": local_game.LocalGame(api_secrets),
-			"curling": Curling()
+			"curling": Curling(),
+			"curling2": Curling2()
 		}
 
 

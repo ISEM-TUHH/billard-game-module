@@ -1,0 +1,91 @@
+{% set title = "Curling 1vs1" %}
+{% extends "base.html" %}
+{% block content %}
+    <form name="round" id="roundForm" action="" method="POST" class="contains-columns">
+        <div class="mode">
+            <section id="init" class="col step">
+                <button type="button" class="collapsible">Game Setup</button>
+                <div class="collapsible-content">
+                    <fieldset>
+                        Enter player names and select game mode
+                        <hr>
+                        Player 1 (solid balls)
+                        <div class="button-list single-player-details">
+                            <input type="text" name="player1" placeholder="Player 1" required>
+                        </div>
+                        <hr>
+                        Player 2 (striped balls)
+                        <div class="button-list single-player-details">
+                            <input type="text" name="player2" placeholder="Player 2" required>
+                        </div>
+                        <hr>
+                        <div class="single-player-details">
+                            <label for="game_mode">Gamemode</label>
+                            <select name="game_mode" id="game_mode">
+                                <option value="classic">Classic (Target on the left, all players shoot from the right line)</option>
+                                <option value="center">Dual End (Target in the middle, players shoot from both sides)</option>
+                            </select>
+                            <br>
+                            <label for="rounds">Number of rounds</label>
+                            <input type="number" name="rounds" id="rounds" min="1" max="10" placeholder="1-10" value="3" required>
+                            <br>
+                            <label for="turns per round">Shots per round</label>
+                            <input type="number" name="plays_per_round" id="plays_per_round" min="1" max="7" placeholder="1-7" value="3" required>
+                            <br>
+                            <label for="negative points">Negative points for sunk / missing balls</label>
+                            <input type="checkbox" name="negative_points" id="negative_points">
+                        </div>
+                        <hr>
+                        <div class="button-list">
+                            <input type="button" name="start" class="submit-step" value="Start game">
+                        </div>
+                    </fieldset>
+                </div>
+            </section>
+            <section id="play" class="col step">
+                <button type="button" class="collapsible">Play Turn</button>
+                <div class="collapsible-content">
+                    <fieldset>
+                        <div class="results">
+                            Waiting for game status...
+                        </div>
+                        <hr>
+                        <p> Aim for the bullseye! Once the ball has stopped moving, submit the the play</p>
+                        <hr>
+                        <div class="button-list">
+                            <input type="button" id="curling-play" name="next_turn" class="submit-step" value="Submit Turn">
+                        </div>
+                    </fieldset>
+                </div>
+            </section>
+            <section id="round_finished" class="col step">
+                <button type="button" class="collapsible">Round finished</button>
+                <div class="collapsible-content">
+                    <fieldset>
+                        <div class="results"></div>
+                        <hr>
+                        <div class="button-list">
+                            <input type="button" name="next_round" class="submit-step" value="Next Round">
+                            <input type="button" name="end_game" class="submit-step" value="End Game">
+                        </div>
+                    </fieldset>
+                </div>
+            </section>
+            <section id="finished" class="col step">
+                <button type="button" class="collapsible">Game finished</button>
+                <div class="collapsible-content">
+                    <fieldset>
+                        <div class="results"></div>
+                        <hr>
+                        <div class="button-list">
+                            <input type="button" name="reset" class="submit-step" value="New Game">
+                        </div>
+                    </fieldset>
+                </div>
+            </section>
+        </div>
+    </form>
+
+    <script src="{{ url_for('static', filename='vanillaController.js') }}"></script>
+
+{% endblock %}
