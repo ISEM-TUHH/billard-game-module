@@ -5,8 +5,9 @@ from .common_utils import *
 from .GameMode import GameMode
 
 class Curling2(GameMode):
-
-    """ The goal is to play the own team balls closest to the target for maximum points (similar to curling)
+    """ 
+    A 1vs1 curling gamemode where players score points by placing their respective balls
+    closest to the target bullseye.
     """
     # Constants
     Table_Width = 2230
@@ -37,8 +38,6 @@ class Curling2(GameMode):
         self.current_player = None
         self.player1 = None
         self.player2 = None
-        
-        self.round_ball_distances = {"player1": [], "player2": []}
         
         self.gameimage = GameImage()
         
@@ -82,10 +81,16 @@ class Curling2(GameMode):
         
         
     def get_play_image_definition(self):
+        
+        if self.submit_only_last_turn:
+            round_text = f"Round: {self.current_round}/{self.rounds} | Starting player: {self.current_player['name']} | Play all turns and hit 'Submit' to finish round"
+        else:
+            round_text = f"Round {self.current_round}/{self.rounds} | play {self.current_play_in_round + 1}/{self.plays_per_round*2} | Turn: {self.current_player['name']}"
+        
         base = [
             {
                 "type": "text", 
-                "text": f"Round {self.current_round}/{self.rounds} | play {self.current_play_in_round + 1}/{self.plays_per_round*2} | Turn: {self.current_player['name']}"
+                "text": round_text
             },
             {
                 "type": "bullseye", 
@@ -99,9 +104,9 @@ class Curling2(GameMode):
                 {
                     "type": "line",
                     "ref": "start_line_left",
-                    "c1": {"x": 300, "y": 0},
-                    "c2": {"x": 300, "y": 1115},
-                    "color": "white" if self.current_player == self.player1 else "black",
+                    "c1": {"x": self.Line_Left_X, "y": 0},
+                    "c2": {"x": self.Line_Left_X, "y": self.Table_Height},
+                    "color": "white" if self.current_player == self.player1 or self.submit_only_last_turn else "black",
                     "width": 5
                 })
             
@@ -109,9 +114,9 @@ class Curling2(GameMode):
                 {
                     "type": "line",
                     "ref": "start_line_right",
-                    "c1": {"x": 1930, "y": 0},
-                    "c2": {"x": 1930, "y": 1115},
-                    "color": "white" if self.current_player == self.player2 else "black",
+                    "c1": {"x": self.Line_Right_X, "y": 0},
+                    "c2": {"x": self.Line_Right_X, "y": self.Table_Height},
+                    "color": "white" if self.current_player == self.player2 or self.submit_only_last_turn else "black",
                     "width": 5
                 }
             )
@@ -119,8 +124,8 @@ class Curling2(GameMode):
             base.append({
                 "type": "line",
                 "ref": "start_line_right",
-                "c1": {"x": 1930, "y": 0},
-                "c2": {"x": 1930, "y": 1115},
+                "c1": {"x": self.Line_Right_X, "y": 0},
+                "c2": {"x": self.Line_Right_X, "y": self.Table_Height},
                 "color": "white",
                 "width": 5
             })
@@ -131,26 +136,23 @@ class Curling2(GameMode):
         if self.mode == "center":
             return [self.Table_Width//2, self.Table_Height//2]
         return [self.Table_Width//4, self.Table_Height//2]
+    
+    def calc_distances(self, balls, bullseye_vec):
+        distances = []
+        for ball in balls:
+            ball_vec = coord_to_vec(ball)
+            dist = np.linalg.norm(ball_vec - bullseye_vec)
+            distances.append(dist)
+        distances.sort()
+        return distances
         
     def get_round_results(self, coords):
         _, _, solids, striped, _ = split_by_type(coords)
         
         bullseye_vec = np.array(self.bullseye_center)
-        
-        p1_distances = []
-        for ball in solids:
-            ball_vec = coord_to_vec(ball)
-            dist = np.linalg.norm(ball_vec - bullseye_vec)
-            p1_distances.append(dist)
             
-        p2_distances = []
-        for ball in striped:
-            ball_vec = coord_to_vec(ball)
-            dist = np.linalg.norm(ball_vec - bullseye_vec)
-            p2_distances.append(dist)
-            
-        p1_distances.sort()
-        p2_distances.sort()
+        p1_distances = self.calc_distances(solids, bullseye_vec)
+        p2_distances = self.calc_distances(striped, bullseye_vec)
         
         p1_best = p1_distances[0] if p1_distances else float('inf')
         p2_best = p2_distances[0] if p2_distances else float('inf')
@@ -184,7 +186,7 @@ class Curling2(GameMode):
             p2_penalty = max(0, self.plays_per_round - len(striped))
             self.score['player1'] -= p1_penalty
             self.score['player2'] -= p2_penalty
-            summary_parts.append(f"\nPenalty points: {self.player1['name']}: {p1_penalty} - {self.player2['name']}: {p2_penalty}")
+            summary_parts.append(f"\nPenalty points: {self.player1['name']}: {p1_penalty}, {self.player2['name']}: {p2_penalty}")
             
         return {
             "winner": round_winner,
@@ -202,6 +204,7 @@ class Curling2(GameMode):
         self.mode = inp["game_mode"]
         self.bullseye_center = self.get_bullseye_position()
         self.negative_points = inp['negative_points']
+        self.submit_only_last_turn = inp['submit_only_last_turn']
         self.plays_per_round = int(inp['plays_per_round'])
         self.rounds = int(inp['rounds'])
         p1_name = inp['player1']
@@ -218,13 +221,16 @@ class Curling2(GameMode):
         self.current_play_in_round = 0
         self.current_player = self.player1
         self.score = {"player1": 0, "player2": 0}
-        self.round_ball_distances = {"player1": [], "player2": []}
         
-        return "start", {}, {"message": f"Game startet! {self.current_player['name']}'s turn. (full)"}
+        return "start", {}, {"message": f"Game started! {self.current_player['name']}'s turn. (full)"}
 
  
     def play_turn(self, inp):
         coords = inp.get("coordinates", {})
+        
+        if self.submit_only_last_turn: 
+            self.current_round_score = self.get_round_results(coords)
+            return "finish_round", {}, {"message": f"Round {self.current_round} finished!"}
         
         # if not coords and not self.negative_points: return "next_turn", {}, {"message": "No ball detected. Shoot again!"}         
     
@@ -235,7 +241,7 @@ class Curling2(GameMode):
             self.current_round_score = self.get_round_results(coords)
             return "finish_round", {}, {"message": f"Round {self.current_round} finished!"}
         else:
-            return "next_turn", {}, {"message": f"{self.current_player['name']}'s turn. ({"full" if self.current_player == self.player1 else "striped"})"}
+            return "next_turn", {}, {"message": f"{self.current_player['name']}'s turn. ({'full' if self.current_player == self.player1 else 'striped'})"}
     
     
     def finish_round(self, inp):
@@ -252,7 +258,7 @@ class Curling2(GameMode):
             self.current_player = self.player1 if round_results["winner"] == "player1" else self.player2
         
         if self.current_round > self.rounds or inp['clicked_on'] == "End Game":
-            return "end_game", {}, {"message": msg, "notification": "Match Finished"}
+            return "end_game", {}, {"message": msg + " " + self.get_standings(), "notification": "Match Finished"}
         else:
             return "next_round", {}, {"message": msg}
         
@@ -265,3 +271,4 @@ class Curling2(GameMode):
             "description": "Play Curling2!",
             "js_vars": {}
         }
+        
