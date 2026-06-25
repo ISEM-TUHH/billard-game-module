@@ -1,5 +1,4 @@
-import numpy as np
-
+from collections import Counter
 from ..GameImage import GameImage
 from .common_utils import *
 from .GameMode import GameMode
@@ -10,31 +9,31 @@ class Curling2(GameMode):
     closest to the target bullseye.
     """
     # Constants
-    Table_Width = 2230
-    Table_Height = 1115
-    Line_Left_X = 300
-    Line_Right_X = 1930
-    Bullseye_Radius = 200
+    TABLE_WIDTH = 2230
+    TABLE_HEIGHT = 1115
+    LINE_LEFT_X = 300
+    LINE_RIGHT_X = 1930
+    BULLSEYE_RADIUS = 200
     
     
-    def __init__(self, rounds=2, plays_per_round=2, mode="classic"):
+    def __init__(self):
         self.__file__ = __file__
         self.gamemode_name = "Curling2"
         self.state = "init"
         
-        self.plays_per_round = plays_per_round
-        self.rounds = rounds
-        self.mode = mode
+        self.plays_per_round = 3
+        self.rounds = 3
+        self.mode = "classic"
         
         self.current_round = 1
         self.current_play_in_round = 0
-        self.score = { "player1": 0, "player2": 0}
+        self.player_scores = { "player1": 0, "player2": 0}
         self.current_round_score = {
             "round_summary": "round_summary loading",
             "winner": None,
             "points": 0
         }
- 
+        
         self.current_player = None
         self.player1 = None
         self.player2 = None
@@ -76,9 +75,99 @@ class Curling2(GameMode):
                 [None]
             ]
         }
-        
+
         GameMode.__init__(self)
         
+        self.saved_history = self.get_history()
+        self.player_names = self.get_history_data("player1", "player2")
+        self.team_names = self.get_history_data("team1", "team2")
+
+
+    def setup_game(self, inp):
+        print("INP CURLING GAME:", inp)
+        
+        self.mode = inp["game_mode"]
+        self.bullseye_center = self.get_bullseye_position()
+        self.negative_points = inp['negative_points']
+        self.submit_only_last_turn = inp['submit_only_last_turn']
+        self.plays_per_round = max(1, min(7, int(inp['plays_per_round'])))
+        self.rounds = max(1, min(10, int(inp['rounds'])))
+        p1_name = inp['player1']
+        p2_name = inp['player2']
+        p1_team = inp['team1']
+        p2_team = inp['team2']
+
+        self.player1 = {
+            "name": p1_name if p1_name else "Player 1",
+            "team": p1_team if p1_team else ""
+        }
+        self.player2 = {
+            "name": p2_name if p2_name else "Player 2",
+            "team": p2_team if p2_team else ""
+        }
+        
+        self.HISTORY = {
+            "player1": self.player1["name"],
+            "player2": self.player2["name"],
+            "team1": self.player1["team"],
+            "team2": self.player2["team"],
+            "score1": 0,
+            "score2": 0,
+            "winner": None,
+        }
+        
+        self.current_round = 1
+        self.current_play_in_round = 0
+        self.current_player = self.player1
+        self.player_scores = {"player1": 0, "player2": 0}
+        
+        return "start", {}, {"message": f"Game started! {self.current_player['name']}'s turn. (full)"}
+    
+    
+    def play_turn(self, inp):
+        coords = inp.get("coordinates", {})
+        
+        if self.submit_only_last_turn: 
+            self.current_round_score = self.get_round_results(coords)
+            self.message = "Hello World :)"
+            self.update_history()
+            
+            return "finish_round", {}, {"message": f"Round {self.current_round} finished!"}       
+    
+        self.current_play_in_round += 1
+            
+        self.current_player = self.player2 if self.current_player == self.player1 else self.player1
+        if self.current_play_in_round >= self.plays_per_round*2:
+            self.current_round_score = self.get_round_results(coords)
+            self.message = "Hello World"
+            self.update_history()
+            return "finish_round", {}, {"message": f"Round {self.current_round} finished!"}
+        else:
+            return "next_turn", {}, {"message": f"{self.current_player['name']}'s turn. ({'full' if self.current_player == self.player1 else 'striped'})"}
+    
+    
+    def finish_round(self, inp):
+        round_results = self.current_round_score
+        if round_results["winner"]:
+            msg = round_results["round_summary"]
+        else:
+            msg = f"The round ends in a draw with no points given"
+            
+        self.current_round += 1
+        self.current_play_in_round = 0
+
+        if round_results["winner"]:
+            self.current_player = self.player1 if round_results["winner"] == "player1" else self.player2
+        
+        if self.current_round > self.rounds or inp['clicked_on'] == "End Game":
+            return "end_game", {}, {"message": msg + " " + self.get_standings(), "notification": "Match Finished", "hist-package": self.HISTORY}
+        else:
+            return "next_round", {}, {"message": msg}
+     
+        
+    def finish_game(self, inp):
+        return "init", {}, {"message": f"Game over"}
+    
         
     def get_play_image_definition(self):
         
@@ -104,8 +193,8 @@ class Curling2(GameMode):
                 {
                     "type": "line",
                     "ref": "start_line_left",
-                    "c1": {"x": self.Line_Left_X, "y": 0},
-                    "c2": {"x": self.Line_Left_X, "y": self.Table_Height},
+                    "c1": {"x": self.LINE_LEFT_X, "y": 0},
+                    "c2": {"x": self.LINE_LEFT_X, "y": self.TABLE_HEIGHT},
                     "color": "white" if self.current_player == self.player1 or self.submit_only_last_turn else "black",
                     "width": 5
                 })
@@ -114,8 +203,8 @@ class Curling2(GameMode):
                 {
                     "type": "line",
                     "ref": "start_line_right",
-                    "c1": {"x": self.Line_Right_X, "y": 0},
-                    "c2": {"x": self.Line_Right_X, "y": self.Table_Height},
+                    "c1": {"x": self.LINE_RIGHT_X, "y": 0},
+                    "c2": {"x": self.LINE_RIGHT_X, "y": self.TABLE_HEIGHT},
                     "color": "white" if self.current_player == self.player2 or self.submit_only_last_turn else "black",
                     "width": 5
                 }
@@ -124,18 +213,77 @@ class Curling2(GameMode):
             base.append({
                 "type": "line",
                 "ref": "start_line_right",
-                "c1": {"x": self.Line_Right_X, "y": 0},
-                "c2": {"x": self.Line_Right_X, "y": self.Table_Height},
+                "c1": {"x": self.LINE_RIGHT_X, "y": 0},
+                "c2": {"x": self.LINE_RIGHT_X, "y": self.TABLE_HEIGHT},
                 "color": "white",
                 "width": 5
             })
         
         return base
     
+    
+    def update_history(self):
+        self.HISTORY["score1"] = self.player_scores["player1"]
+        self.HISTORY["score2"] = self.player_scores["player2"]
+        
+        if self.HISTORY["score1"] > self.HISTORY["score2"]:
+            self.HISTORY["winner"] = self.player1["name"]
+        elif self.HISTORY["score2"] > self.HISTORY["score1"]:
+            self.HISTORY["winner"] = self.player2["name"]
+        else:
+            self.HISTORY["winner"] = "draw"
+        
+        
+    def history(self, add=None):
+        history_df = self.saved_history
+        
+        if add is not None:
+            new_entry = pd.DataFrame([add])
+            self.saved_history = pd.concat([history_df, new_entry], ignore_index=True)
+            self.save_history(self.saved_history)
+        history_df = self.saved_history
+        
+        if history_df.empty or "winner" not in history_df.columns:
+            return {
+                "single_table": [],
+                "single_columns": ["Player", "Wins"],
+                "team_table": []
+            }
+        
+        wins = history_df["winner"].value_counts().to_dict()
+        
+        table = [
+            [player, count]
+            for player, count in wins.items()
+            if player != "draw" and pd.notna(player)
+        ]
+        
+        player1_winner = history_df["winner"] == history_df["player1"]
+        player2_winner = history_df["winner"] == history_df["player2"]
+        
+        winning_teams = pd.concat([
+            history_df.loc[player1_winner, "team1"],
+            history_df.loc[player2_winner, "team2"]
+        ])
+        team_wins = winning_teams.value_counts().to_dict()
+        team_table = [
+            [count, team]
+            for team, count in team_wins.items()
+            if team != "draw" and pd.notna(team)
+        ]
+        
+        return {
+            "single_table": table,
+            "single_columns": ["Player", "Wins"],
+            "team_table": team_table
+        }
+    
+    
     def get_bullseye_position(self):
         if self.mode == "center":
-            return [self.Table_Width//2, self.Table_Height//2]
-        return [self.Table_Width//4, self.Table_Height//2]
+            return [self.TABLE_WIDTH//2, self.TABLE_HEIGHT//2]
+        return [self.TABLE_WIDTH//4, self.TABLE_HEIGHT//2]
+    
     
     def calc_distances(self, balls, bullseye_vec):
         distances = []
@@ -145,6 +293,7 @@ class Curling2(GameMode):
             distances.append(dist)
         distances.sort()
         return distances
+     
         
     def get_round_results(self, coords):
         _, _, solids, striped, _ = split_by_type(coords)
@@ -167,14 +316,14 @@ class Curling2(GameMode):
             for d in p1_distances:
                 if d < p2_best: points_won += 1
                 else: break
-            self.score['player1'] += points_won
+            self.player_scores['player1'] += points_won
             summary_parts.append(f"{self.player1['name']} wins round {self.current_round}/{self.rounds} with {points_won} points")
         elif p2_best < p1_best:
             round_winner = "player2"
             for d in p2_distances:
                 if d < p1_best: points_won += 1
                 else: break
-            self.score['player2'] += points_won
+            self.player_scores['player2'] += points_won
             summary_parts.append(f"{self.player2['name']} wins round {self.current_round}/{self.rounds} with {points_won} points")
         else:
             round_winner = "draw"
@@ -184,8 +333,8 @@ class Curling2(GameMode):
         if self.negative_points:
             p1_penalty = max(0, self.plays_per_round - len(solids))
             p2_penalty = max(0, self.plays_per_round - len(striped))
-            self.score['player1'] -= p1_penalty
-            self.score['player2'] -= p2_penalty
+            self.player_scores['player1'] -= p1_penalty
+            self.player_scores['player2'] -= p2_penalty
             summary_parts.append(f"\nPenalty points: {self.player1['name']}: {p1_penalty}, {self.player2['name']}: {p2_penalty}")
             
         return {
@@ -193,82 +342,40 @@ class Curling2(GameMode):
             "points": points_won,
             "round_summary": " ".join(summary_parts)
         }
+     
         
     def get_standings(self):
-        return f"{self.player1['name']}: {self.score['player1']}, {self.player2['name']}: {self.score['player2']}"
+        return f"{self.player1['name']}: {self.player_scores['player1']}, {self.player2['name']}: {self.player_scores['player2']}"
         
-    
-    def setup_game(self, inp):
-        print("INP CURLING GAME:", inp)
-        
-        self.mode = inp["game_mode"]
-        self.bullseye_center = self.get_bullseye_position()
-        self.negative_points = inp['negative_points']
-        self.submit_only_last_turn = inp['submit_only_last_turn']
-        self.plays_per_round = int(inp['plays_per_round'])
-        self.rounds = int(inp['rounds'])
-        p1_name = inp['player1']
-        p2_name = inp['player2']
-                
-        self.player1 = {
-            "name": p1_name if p1_name else "Player 1"
-        }
-        self.player2 = {
-            "name": p2_name if p2_name else "Player 2"
-        }
-        
-        self.current_round = 1
-        self.current_play_in_round = 0
-        self.current_player = self.player1
-        self.score = {"player1": 0, "player2": 0}
-        
-        return "start", {}, {"message": f"Game started! {self.current_player['name']}'s turn. (full)"}
-
- 
-    def play_turn(self, inp):
-        coords = inp.get("coordinates", {})
-        
-        if self.submit_only_last_turn: 
-            self.current_round_score = self.get_round_results(coords)
-            return "finish_round", {}, {"message": f"Round {self.current_round} finished!"}
-        
-        # if not coords and not self.negative_points: return "next_turn", {}, {"message": "No ball detected. Shoot again!"}         
-    
-        self.current_play_in_round += 1
-            
-        self.current_player = self.player2 if self.current_player == self.player1 else self.player1
-        if self.current_play_in_round >= self.plays_per_round*2:
-            self.current_round_score = self.get_round_results(coords)
-            return "finish_round", {}, {"message": f"Round {self.current_round} finished!"}
-        else:
-            return "next_turn", {}, {"message": f"{self.current_player['name']}'s turn. ({'full' if self.current_player == self.player1 else 'striped'})"}
-    
-    
-    def finish_round(self, inp):
-        round_results = self.current_round_score
-        if round_results["winner"]:
-            msg = round_results["round_summary"]
-        else:
-            msg = f"The round ends in a draw with no points given"
-            
-        self.current_round += 1
-        self.current_play_in_round = 0
-
-        if round_results["winner"]:
-            self.current_player = self.player1 if round_results["winner"] == "player1" else self.player2
-        
-        if self.current_round > self.rounds or inp['clicked_on'] == "End Game":
-            return "end_game", {}, {"message": msg + " " + self.get_standings(), "notification": "Match Finished"}
-        else:
-            return "next_round", {}, {"message": msg}
-        
-    def finish_game(self, inp):
-        return "init", {}, {"message": f"Game over"}
     
     def index_args(self):
         return {
             "title": "Curling2",
             "description": "Play Curling2!",
-            "js_vars": {}
+            "player_names": self.player_names,
+            "team_names": self.team_names,
+            "js_vars": {
+                "rounds": self.rounds,
+                "plays_per_round": self.plays_per_round
+            }
         }
+    
+        
+    def get_history_data(self, *args, sort_result = True):
+        df = self.saved_history
+        if df is None or df.empty:
+            return []
+        
+        all_data = []
+        for column_name in args:
+            if column_name in df.columns:
+                values = (df[column_name].dropna().tolist())
+                all_data.extend([str(v) for v in values if str(v).strip()])
+        if not all_data:
+            return []
+        if sort_result:
+            data_counts = Counter(all_data)
+            return [data for data, count in data_counts.most_common()]
+        
+        return all_data
         
