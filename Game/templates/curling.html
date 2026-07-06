@@ -1,67 +1,120 @@
 {% set title = "Curling" %}
 {% extends "base.html" %}
 {% block content %}
-    <div class="mode">
-        <section id="init" class="col step">
-          <button type="button" class="collapsible">Player selection</button>
-          <div class="collapsible-content">
-            <fieldset>
-              Enter your details and place the white ball on the marking.
-              <hr>
-              Player 1 has the solid balls.
-              <div class="button-list single-player-details">
-                <input type="text" name="p1team" placeholder="Team">
-                <input type="text" name="p1name" placeholder="Name">
-              </div>
-              <hr>
-              Player 2 has the striped balls.
-              <div class="button-list single-player-details">
-                <input type="text" name="p2team" placeholder="Team">
-                <input type="text" name="p2name" placeholder="Name">
-              </div>
-              <hr>
-              <div class="button-list">
-                <input type="button" name="curling-player" class="submit-step" value="Start curling!">
-              </div>
-            </fieldset>
-          </div>
-          <!--<script src="{{ url_for('static', filename='gamemodes/precision.js') }}"></script>-->
-        </section>
-
-        <section id="play_rounds" class="col step">
-          <button type="button" class="collapsible">Play Rounds</button>
-          <div class="collapsible-content">
-            <fieldset>
-              Try to get as close as possible to the white ball, starting from the blue point. Each player has 5 shots. After each shot, the players change.
-              <hr>
-              <div class="results">Play the first shot</div>
-              <hr>
-              <div class="button-list">
-                <input type="checkbox" id="curling-play_round" name="curling-play_round" class="submit-step"><label for="curling-play_round">Measure Coordinates</label>
-              </div>
-            </fieldset>
-          </div>
-        </section>
-
-        <section id="finished" class="col step">
-          <button type="button" class="collapsible">Result</button>
-          <div class="collapsible-content">
-            <fieldset>
-              The game is over!
-              <hr>
-              <div class="results">Uncover the result</div>
-              <hr>
-              <div class="button-list">
-                <input type="button" id="online-game-finished" name="online-game-finished" class="submit-step" value="New game">
-              </div>
-            </fieldset>
-          </div>
-
-        </section>
-
-      </div>
-
+    <form name="round" id="roundForm" action="" method="POST" class="contains-columns">
+        <div class="mode">
+            <section id="init" class="col setting step">
+                <button type="button" class="collapsible">Game Setup</button>
+                <div class="collapsible-content">
+                    <fieldset>
+                        Enter player names and select game mode
+                        <hr>
+                        <datalist id="playerNames">
+                            {% for name in player_names %}
+                                <option value="{{ name }}">
+                            {% endfor %}
+                        </datalist>
+                        <datalist id="teamNames">
+                            {% for name in team_names %}
+                                <option value="{{ name }}">
+                            {% endfor %}
+                        </datalist>
+                        Player 1 (solid balls)
+                        <div class="button-list single-player-details">
+                            <p>Name:</p>
+                            <input type="text" id="player1" name="player1" placeholder="Player 1" list="playerNames" value="{{ current_settings.player1 }}" required>
+                            <p>Team:</p>
+                            <input type="text" id="team1" name="team1" placeholder="Team 1" list="teamNames" value="{{ current_settings.team1 }}" required>
+                        </div>
+                        <hr>
+                        Player 2 (striped balls)
+                        <div class="button-list single-player-details">
+                            <p>Name:</p>
+                            <input type="text" name="player2" placeholder="Player 2" list="playerNames" value="{{ current_settings.player2 }}" required>
+                            <br>
+                            <p>Team:</p>
+                            <input type="text" name="team2" placeholder="Team 2" list="teamNames" value="{{ current_settings.team2 }}" required>
+                        </div>
+                        <hr>
+                        <div class="single-player-details">
+                            <label for="game_mode">Gamemode</label>
+                            <select name="game_mode" id="game_mode">
+                                <option value="classic" {% if current_settings.game_mode == "classic" %}selected{% endif %}>Classic (Target on the left, all players shoot from the right line)</option>
+                                <option value="center" {% if current_settings.game_mode == "center" %}selected{% endif %}>Dual End (Target in the middle, players shoot from both sides)</option>
+                            </select>
+                            <br>
+                            <label for="rounds">Number of rounds</label>
+                            <select name="rounds" id="rounds">
+                                {% for n in range(1, 11) %}
+                                <option value="{{ n }}" {% if current_settings.rounds == n %}selected{% endif %}>{{ n }}</option>
+                                {% endfor %}
+                            </select>
+                            <br>
+                            <label for="plays_per_round">Shots per round</label>
+                            <select name="plays_per_round" id="plays_per_round">
+                                {% for n in range(1, 8) %}
+                                <option value="{{ n }}" {% if current_settings.plays_per_round == n %}selected{% endif %}>{{ n }}</option>
+                                {% endfor %}
+                            </select>
+                            <br>
+                            <label for="negative_points">Negative points for sunk / missing balls</label>
+                            <input type="checkbox" class="persistent" name="negative_points" id="negative_points" {% if current_settings.negative_points %}checked{% endif %}>
+                            <br>
+                            <label for="submit_only_last_turn">Submit only the last turn of round</label>
+                            <input type="checkbox" class="persistent" name="submit_only_last_turn" id="submit_only_last_turn" {% if current_settings.submit_only_last_turn %}checked{% endif %}>
+                        </div>
+                        <div class="results"></div>
+                        <hr>
+                        <div class="button-list">
+                            <input type="button" name="start" class="submit-step" value="Start game">
+                        </div>
+                    </fieldset>
+                </div>
+            </section>
+            <section id="play" class="col step">
+                <button type="button" class="collapsible">Play Turn</button>
+                <div class="collapsible-content">
+                    <fieldset>
+                        <div>
+                            <p> Aim for the bullseye! Once the ball has stopped moving, submit the the play</p>
+                        </div>
+                        <div class="results"></div>
+                        <hr>
+                        <div class="button-list">
+                            <input type="checkbox" id="curling-play" name="next_turn" class="submit-step" value="Submit Turn" data-og="Submit Turn">
+                            <label for="curling-play" data-og="Submit Turn">Submit Turn</label>
+                        </div>
+                    </fieldset>
+                </div>
+            </section>
+            <section id="round_finished" class="col step">
+                <button type="button" class="collapsible">Round finished</button>
+                <div class="collapsible-content">
+                    <fieldset>
+                        <div class="results"></div>
+                        <hr>
+                        <div class="button-list">
+                            <input type="button" name="next_round" class="submit-step" value="Next Round">
+                            <input type="button" name="end_game" class="submit-step" value="End Game">
+                        </div>
+                    </fieldset>
+                </div>
+            </section>
+            <section id="finished" class="col step">
+                <button type="button" class="collapsible">Game finished</button>
+                <div class="collapsible-content">
+                    <fieldset>
+                        <div class="results"></div>
+                        <hr>
+                        <div class="button-list">
+                            <input type="button" name="reset" class="submit-step" value="New Game">
+                        </div>
+                    </fieldset>
+                </div>
+            </section>
+        </div>
     </form>
+
     <script src="{{ url_for('static', filename='vanillaController.js') }}"></script>
 
 {% endblock %}

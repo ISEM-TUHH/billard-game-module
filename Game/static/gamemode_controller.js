@@ -74,7 +74,7 @@ modus operandi: set this to a change event listener on checkboxes that signify a
 3. on clicking (unchecking) the checkbox, this fires again. This time, take the current coordinate object and use it as the coordinates to send to the gamemode. On return, display the message in the label. Automatically check the box again, without firing this event again?
 */
 //function getCoordsAndConfirm(event, jsonData, fun=kp2Controller, final=(l, r) => {l.innerText = r.message}) {
-function getCoordsAndConfirm(event, jsonData, fun=controller, final=(l, r) => {l.innerText = r.message}) {
+function getCoordsAndConfirm(event, jsonData, fun=controller, final=(l, r) => {l.innerText = (r.message !== undefined) ? r.message : l.dataset.og}) {
     //console.log(jsonData, event)
     target = event.target;
     label = target.labels[0];
@@ -94,7 +94,7 @@ function getCoordsAndConfirm(event, jsonData, fun=controller, final=(l, r) => {l
         // this is the second step
         if ((target.step_coordinate_processing === "check_coordinates") || manipulatedFlag) {
             //console.log("really entered else")
-            target.checked = true;
+            target.checked = true; // REMOVE THIS FOR DOUBLE CLICK FIX
             delete target.step_coordinate_processing;
             return fun(jsonData).then((res) => {
                 //target.labels[0].innerText = res.message;

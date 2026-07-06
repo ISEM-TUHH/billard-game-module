@@ -159,59 +159,63 @@ document.querySelectorAll(".mode").forEach((gamemode) => { // for all gamemodes:
                 // after backend processing, updated the step
                 //console.log("Now fetch from", e, jsonData);
                 //console.log(fetchFun)
-                fetchFun(e, jsonData)
-                    .then((res) => {
-                        activate_step(gamemode, res.signal); // show the next step, disable the previous /////////////////////////////////////////////////////// HERE THE KP2 signal is chosen, TODO: unify with normal games?
-                        if (step.id.split("-").slice(-1)[0] === "finished") {
-                            // if this gamemode round is finished: reset all labels to their data-og value
+                var fetchPromise = fetchFun(e, jsonData)
+                
+                if (fetchPromise) {
+                    fetchPromise
+                        .then((res) => {
+                            activate_step(gamemode, res.signal); // show the next step, disable the previous /////////////////////////////////////////////////////// HERE THE KP2 signal is chosen, TODO: unify with normal games?
+                            if (step.id.split("-").slice(-1)[0] === "finished") {
+                                // if this gamemode round is finished: reset all labels to their data-og value
 
-                            gamemode.querySelectorAll(".step [data-og]").forEach((element) => {
-                                element.innerText = element.dataset.og;
-                            })
-                            gamemode.querySelectorAll("input[type=number]").forEach((element) => {
-                                element.value = "";
-                            })
-                            gamemode.querySelectorAll("input[type=checkbox]").forEach((element) => {
-                                element.checked = false;
-                            })
-                        } 
-                        if (res.signal === "finished") {
-                            // update the result bar
-                            var element = gamemode.querySelector(".results").querySelectorAll("div")[res.was_round];//.querySelector(".open-game")// automatically selects the first available open game
-                            if (res.hasOwnProperty("was_round")) {
-                                console.log(element, res.was_round, res.score);
-                                if (!res.hasOwnProperty("discarded")) {
-                                    element.innerText = res.message; // 
-                                    element.classList.add("finished-game");
-                                    element.classList.remove("open-game");
-                                } else {
-                                    element.innerText = res.message;
-                                    element.classList.add("failed-game");
-                                    element.classList.remove("open-game")
-                                }
-                            }
-                        } else {
-                            if (res.hasOwnProperty("message")) {
-                                if (res.hasOwnProperty("log_to")) { // if the logging location is specified, write to that object (must have innerText property, so e.g. a button is not possible yet. Should be easy to add.). Logging location must be inside step container.
-                                    gamemode.querySelector(res.log_to).innerText = res.message;
-                                } else if (e.target.labels.length > 0) {
-                                    e.target.labels[0].innerText = res.message;
+                                gamemode.querySelectorAll(".step [data-og]").forEach((element) => {
+                                    element.innerText = element.dataset.og;
+                                })
+                                gamemode.querySelectorAll("input[type=number]:not(.persistent)").forEach((element) => {
+                                    element.value = "";
+                                })
+                                gamemode.querySelectorAll("input[type=checkbox]:not(.persistent)").forEach((element) => {
+                                    element.checked = false;
+                                })
+                            } 
+                            if (res.signal === "finished") {
+                                // update the result bar
+                                var element = gamemode.querySelector(".results").querySelectorAll("div")[res.was_round];//.querySelector(".open-game")// automatically selects the first available open game
+                                if (res.hasOwnProperty("was_round")) {
+                                    console.log(element, res.was_round, res.score);
+                                    if (!res.hasOwnProperty("discarded")) {
+                                        element.innerText = res.message; // 
+                                        element.classList.add("finished-game");
+                                        element.classList.remove("open-game");
+                                    } else {
+                                        element.innerText = res.message;
+                                        element.classList.add("failed-game");
+                                        element.classList.remove("open-game")
+                                    }
                                 }
                             } else {
-                                if (e.target.dataset.hasOwnProperty("data-og")) {
-                                    e.target.innerText = e.target.dataset["data-og"];
+                                if (res.hasOwnProperty("message")) {
+                                    if (res.hasOwnProperty("log_to")) { // if the logging location is specified, write to that object (must have innerText property, so e.g. a button is not possible yet. Should be easy to add.). Logging location must be inside step container.
+                                        gamemode.querySelector(res.log_to).innerText = res.message;
+                                    } else if (e.target.labels.length > 0) {
+                                        e.target.labels[0].innerText = res.message;
+                                    }
+                                } else {
+                                    if (e.target.dataset.hasOwnProperty("data-og")) {
+                                        e.target.innerText = e.target.dataset["data-og"];
+                                    }
                                 }
+                                e.target.disabled = false;
                             }
-                            e.target.disabled = false;
-                        }
 
-                        if (res.hasOwnProperty("history")) {
-                            var ev = new CustomEvent("update_scoreboard", {detail: res.history});
-                            //console.log("HISTORY EVENT", ev, ev.detail);
-                            window.dispatchEvent(ev);
-                        }
+                            if (res.hasOwnProperty("history")) {
+                                var ev = new CustomEvent("update_scoreboard", {detail: res.history});
+                                //console.log("HISTORY EVENT", ev, ev.detail);
+                                window.dispatchEvent(ev);
+                            }
 
-                    })
+                        })
+                    }
             })
         })
     })
@@ -219,6 +223,6 @@ document.querySelectorAll(".mode").forEach((gamemode) => { // for all gamemodes:
 
 
 // upon loading the page, uncheck ALL checkboxes on the page
-document.querySelectorAll("#right-column input[type=checkbox]").forEach((element) => {
+document.querySelectorAll("#right-column input[type=checkbox]:not(.persistent)").forEach((element) => {
     element.checked = false
 })
