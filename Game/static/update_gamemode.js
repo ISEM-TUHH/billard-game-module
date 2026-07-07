@@ -32,9 +32,11 @@ function update_gamemode(button) {
         var content = modeSections[i].nextElementSibling;
         var this_gamemode = modeSections[i].parentElement.id;
         if (this_gamemode === new_gamemode) {
-            content.style.height = (content.children[0].clientHeight + 20) + "px"
+            content.style.display = "block";
+            content.style.height = "fit-content"//(content.children[0].clientHeight + 20) + "px"
         } else {
-            content.style.height = "0px";
+            content.style.display = "none"
+            //content.style.height = "0px";
         }
     }
     //console.log("Updated gamemode from " + current_gamemode + " to " + new_gamemode + ".");

@@ -9,10 +9,10 @@ class FinalCompetition(KP2):
         self.__file__ = __file__
 
         occurences = {
-            "precision": 3,
-            "distance": 3,
-            "break": 1,
-            "longest_break": 3
+            "precision": 2,
+            "distance": 2,
+            "break": 0,
+            "longest_break": 1
         }
 
         KP2.__init__(self, occurences=occurences, gm_name="Final Competition") # super init
@@ -22,7 +22,7 @@ class FinalCompetition(KP2):
         self.img_definition = [ # TODO: outsource to config file?
             {
                 "type": "text",
-                "text": "Welcome to the final competition! Select a gamemode"
+                "text": "Welcome to the Agile Design Lab!"#"Welcome to the final competition! Select a gamemode"
             },
             {
                 "type": "central_image",
@@ -79,7 +79,10 @@ class FinalCompetition(KP2):
         }
         overview["Zone 1"] = int(np.sum([50 for x in precision.values() if x["distance"] < 22]))
         overview["Two Walls"] = 150 if np.all([x["collisions"] >= 2 for x in distance.values()]) else 0
-        overview["Break"] = int(np.sum([200 for x in single_break.values() if x["sunk_legal"] >= 1]))
+
+        # THIS IS COMMENTED FOR THE INAUGURAL LECTURE! As we dont play a single break in the example challenge
+        #overview["Break"] = int(np.sum([200 for x in single_break.values() if x["sunk_legal"] >= 1]))
+        
         overview["Longest Break"] = int(np.sum([x["sunk_legal"] for x in longest_break.values()]))# if x["decision"] == "kept"])) # calculation done in gamemode
 
         # Longest Distance: check if the current entry will be the final entry of the session. If true, check if it is the longest distance of all entries of the session and change the value. Otherwise, assign the 250p to the entry with the longest distance among the saved entries

@@ -47,6 +47,7 @@
         </fieldset>
       </section>
 
+      {% if break_results|length > 0 %}
       <section id="break" class="col mode">
         <button type="button" class="collapsible">Break</button>
         <div class="collapsible-content">
@@ -56,7 +57,7 @@
             <hr>
               <div class="results">
                 {% for n in break_results %}
-                <div class="open-game">Try {{ n }}</div>
+                <div class="open-game">Try {{ n+1 }}</div>
                 {% endfor %}
               </div>          
             <hr>
@@ -73,6 +74,7 @@
         </div>
         <!--<script src="{{ url_for('static', filename='gamemodes/break.js') }}"></script>-->
       </section>
+      {% endif %}
 
       <section id="precision" class="col mode">
         <button type="button" class="collapsible">Precision</button>
@@ -82,7 +84,7 @@
             Get as close as possible to the marking on the field. You have five tries, only the best one influences your score. Decreasing the difficulty increases the penalty for missing!
             <div class="results">
               {% for n in precision_results %}
-              <div class="open-game">Try {{ n }}</div>
+              <div class="open-game">Try {{ n+1 }}</div>
               {% endfor %}
             </div>
             <!--<hr>--> <!-- hidden like the entire setting -->
@@ -109,7 +111,7 @@
             Cover as much distance as possible from one hit. Manually count and enter the number of collisions with the border. You have five tries, the best of all goes into your score.
             <div class="results">
               {% for n in distance_results %}
-              <div class="open-game">Try {{ n }}</div>
+              <div class="open-game">Try {{ n+1 }}</div>
               {% endfor %}
             </div><!--<br><br>-->
             <hr>
@@ -132,7 +134,7 @@
             </div>-->            
             <div class="results">
               {% for n in longest_break_results %}
-              <div class="open-game">Try {{ n }}</div>
+              <div class="open-game">Try {{ n+1 }}</div>
               {% endfor %}
             </div><!--<br><br>-->
             <hr>
@@ -147,7 +149,7 @@
     
   
     <section id="submit-round" class="col">
-      Submit your results: <input type="button" value="submit" id="submit-button"><br>
+      Submit your results: <input type="button" value="Submit" id="submit-button"><br>
       <div id="result-overview"><!-- Your total score is: 1870 points, rank 3/10--></div><br>
       
     </section>

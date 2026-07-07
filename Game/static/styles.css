@@ -6,9 +6,14 @@ body {
     background-color: #fff;
     margin: 0;
     padding: 0;
+    /*overflow: hidden;
     /*display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));*/
   }
+
+body.gamebase {
+  overflow: hidden;
+}
 
 header {
   width: 100%;
@@ -19,6 +24,7 @@ header {
   display: flex;
   align-items: center;
   justify-content: center;
+  height: 10vh;
 }
 
 header .logo img {
@@ -194,6 +200,17 @@ input[type="radio"]:checked + .option-box {
 #right-column, #left-column {
   width: 50%;
   float: left;
+  overflow-y: scroll;
+  height: 87vh;
+}
+
+html.gamebase {
+    overflow: hidden; /* Hides the scrollbar */
+    -ms-overflow-style: none; /* Internet Explorer 10+ */
+    scrollbar-width: none; /* Firefox */
+}
+::-webkit-scrollbar {
+    display: none; /* Safari and Chrome */
 }
 
 .col-left {/*
@@ -389,6 +406,13 @@ tr:nth-child(odd) {
   display: none;
 }
 
+#ball-selector img {
+  display: block;
+  margin: auto;
+  width: 90%;
+  clip-path: inset(1px 1px 1px 1px round 50%);
+}
+
 body:has(#highlight-balls:hover) .ball {
   border: 10px solid red;
 }
@@ -404,7 +428,8 @@ body:has(#highlight-balls:hover) .ball {
 
 #ball-selector {
   display: grid;    
-  grid-template-columns: repeat(5, 1fr);
+  /*grid-template-columns: repeat(5, 1fr);*/
+  grid-template-columns: repeat(8, minmax(0, 1fr));
   gap: 1rem;
 }
 /* 
@@ -543,6 +568,22 @@ fieldset input[type="button"]:hover {
   opacity: 1;
 }
 
-label:has(> input.ball-exists) {
+/*label:has(> input.ball-exists) {
   font-weight: bold;
+}*/
+label:has(> input.ball-exists) img {
+  opacity: 0.4;
+}
+
+#submit-button {
+  background: #e1e1e1;
+  padding: 0.5rem;
+  text-align: center;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+  overflow-wrap: break-word;
+  white-space: normal;
+  margin: 5px;
 }

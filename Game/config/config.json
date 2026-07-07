@@ -25,13 +25,13 @@
     "modules": [
         {
             "name": "beamer",
-            "ip": "134.28.20.52",
+            "ip": "192.168.178.129",
             "ip-test": "127.0.0.1",
             "port": "5000"
         },
         {
             "name": "camera",
-            "ip": "134.28.20.58",
+            "ip": "isem-jetson.fritz.box",
             "ip-test": "127.0.0.1",
             "port": "5000"
         }

@@ -102,7 +102,7 @@ class Game(Module):
 			"online_game": online_game.OnlineGame(api_secrets),
 			"local_game": local_game.LocalGame(api_secrets),
 			"curling": Curling(),
-			"curling2": Curling2()
+			#"curling2": Curling2()
 		}
 
 
