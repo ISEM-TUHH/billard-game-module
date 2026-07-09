@@ -97,7 +97,7 @@ class KP2(GameMode):
         """ Generate a dictionary of keyword arguments that get supplied to a jinja html template of a gamemode with the same name (e.g. precision -> precision.html) in the template directory """
         out = {
             "title": "Beat the ISEM!",
-            "teams": ["ISEM", "Professoren", "Dekanat M"],
+            "teams": [],
             "js_vars": { # stuff that gets set as JS global variables (var declaration)
                 "countdown_original_time": self.time
             }
@@ -207,6 +207,7 @@ class KP2(GameMode):
             case "user-info":
                 self.history_base |= settings
             case "session-info":
+                if self.gamemode_name == "Final Competition": return out
                 self.history_base |= settings
                 self.active_mystery = settings["mystery-challenge"] # This is just the key for self.mystery_challenges dict
                 out["history"] = self.history(get_semester=settings["semester"])

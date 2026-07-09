@@ -230,6 +230,8 @@ class GameMode:
         Returns:
             GameMode or (bool, dict, dict): the reinitialized gamemode OR (False, {}, {}) as "neutral" output for calls in GameMode.entrance (if inplace=True)
         """
+        print("POSSIBLE ERROR: in GameMode.reset, the self.HISTORY is deleted. This shouldnt cause an issue, as this should always be removed when resetting.")
+        del self.HISTORY
         print("Resetting", self.gamemode_name, "...")
         if hasattr(self, "SETTINGS") and keep_settings:
             if inplace:

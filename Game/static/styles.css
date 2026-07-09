@@ -191,7 +191,7 @@ input[type="radio"]:checked + .option-box {
   width: 94%;
   padding: 1rem;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
   margin: 1rem;
   box-sizing: border-box;
   vertical-align: top; 
@@ -504,7 +504,7 @@ fieldset input[type="button"]:hover {
 .collapsible-content {
   padding: 0 18px;
   /*display: none;*/
-  background-color: #f1f1f1;
+  background-color: #e5e5e5;
 
   /* Animation */
   -moz-transition: height .3s;
@@ -586,4 +586,8 @@ label:has(> input.ball-exists) img {
   overflow-wrap: break-word;
   white-space: normal;
   margin: 5px;
+}
+
+#result-overview td, #result-overview th {
+  background-color: #e5e5e5;
 }
