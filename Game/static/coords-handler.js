@@ -204,13 +204,21 @@ function sendCorrectedCoords() {
     sender("/general/correctedcoords", sendCoords);
 }
 
-document.getElementById("manipulation-flag").addEventListener("change", () => {
+/*document.getElementById("manipulation-flag").addEventListener("change", () => {
   var flag = document.getElementById("manipulation-flag");
   manipulatedFlag = flag.checked
 })
 function setManipulatedFlag(state) {
   var flag = document.getElementById("manipulation-flag");
   flag.checked = state;
+  manipulatedFlag = state;
+}*/
+const manualEntryPanel = document.getElementById("manual-entry-panel");
+/*manualEntryPanel.addEventListener("toggle", () => {
+  manipulatedFlag = manualEntryPanel.open;
+});*/
+function setManipulatedFlag(state) {
+  manualEntryPanel.open = state;
   manipulatedFlag = state;
 }
 

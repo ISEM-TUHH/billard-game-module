@@ -83,3 +83,8 @@ def beamer_update_manual_text(self):
     self.gameimage.update_text(res["text"])
     self.beamer.push_image(self.gameimage.getImageCV2())
     return f"Written text to beamer: '{res['text']}'"
+
+def beamer_raw_white(self):
+    """Display a full white image without any corrections"""
+    request.get(self.beamer.endpoint("/v1/white"))
+    return "Beamer displays a raw white image"

@@ -50,6 +50,10 @@
       </div>
       &ensp; <!-- fixed empty space -->
       <h1>{{title}}</h1>
+      <button id="theme_toggle">
+        <i id="theme_toggle_icon" class="fa-solid fa-moon"></i>
+      </button>
+      <script src="{{ url_for('static', filename='theme_handler.js') }}"></script>
     </header>
 
     <div id="left-column">
@@ -80,12 +84,9 @@
 
         </div>
         <div class="button-list">
-          <input type="checkbox" id="manipulation-flag" value="off">
-          <label for="manipulation-flag">Manual entries</label>
-
-          <input type="button" id="highlight-balls" value="Highlight balls"><!-- This only uses a css :hover rule to add a red border to all ball images -->
+          <input type="button" id="highlight-balls" value="Highlight balls" onclick="this.classList.toggle('active')">
         </div>
-        <details>
+        <details id="manual-entry-panel">
           <summary>Place balls</summary>
           
           <div id="ball-selector">
@@ -229,5 +230,6 @@
       // Local script, gets set on rendering the page
       tempAlert("{{ notification }}", 4000)
     </script>
+    <script src="{{ url_for('static', filename='clicker_controller.js') }}"></script>
   </body>
 </html>

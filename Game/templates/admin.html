@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <title>Admin</title>
+</head>
+<body>
+    <header>
+        <a href="/"><i class="fa-solid fa-house" id="home-button"></i></a>
+        <h1>Admin page</h1>
+        <button id="theme_toggle"><i id="theme_toggle_icon" class="fa-solid fa-moon"></i></button>
+    </header>
+
+    <section class="col">
+        <h3>Beamer</h3>
+        <div class="button-list">
+            <input type="button" value="Restart Beamer" onclick="fetch(beamer_address + '/debug/restartgui')">
+            <input type="button" value="Turn off Beamer" onclick="fetch(beamer_address + '/general/beameroff')">
+            <a href="{{ beamer }}" target="_blank">Configure Beamer</a>
+        </div>
+
+        <h3>Camera</h3>
+        <div class="button-list">
+            <input type="button" value="Restart Camera" onclick="fetch(camera_address + '/meta/relaunch')">
+            <a href="{{ camera }}" target="_blank">Configure Camera</a>
+        </div>
+
+        <h3>Table placement</h3>
+        <div class="button-list">
+            <a href="/placement">Open table placement mode</a>
+        </div>
+
+        <hr>
+        <h3>Advanced (full endpoint list):</h3>
+        <div class="button-list">
+            <a href="{{ beamer }}" target="_blank">Beamer API</a>
+            <a href="{{ camera }}" target="_blank">Camera API</a>
+        </div>
+    </section>
+
+    <script>
+        let beamer_address = "{{ beamer }}";
+        let camera_address = "{{ camera }}";
+    </script>
+</body>
+<script src="{{ url_for('static', filename='theme_handler.js') }}"></script>
+</html>
