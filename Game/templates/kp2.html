@@ -5,9 +5,9 @@
     <form name="round" id="roundForm" action="" method="POST" class="contains-columns">
       <!-- Begin collecting information on the rounds to post in the end -->
 
-      {% include "modules/countdown.html" %}
+      {# include "modules/countdown.html" #}
 
-      <section id="session-info" class="col global-config">
+      <section id="session-info" class="col global-config" style="display: none;">
         <fieldset>
           <legend>Game configurations</legend>
           <label for="event-run">Semester:</label><input type="text" placeholder="WS25/26" id="semester" name="semester">
@@ -81,7 +81,7 @@
         <div class="collapsible-content">
           <fieldset>
             <legend>Precision</legend>
-            Get as close as possible to the marking on the field. You have five tries, only the best one influences your score. Decreasing the difficulty increases the penalty for missing!
+            Get as close as possible to the marking on the field. You have {{ precision_results|length }} tries, only the best one influences your score. Decreasing the difficulty increases the penalty for missing!
             <div class="results">
               {% for n in precision_results %}
               <div class="open-game">Try {{ n+1 }}</div>
@@ -108,7 +108,7 @@
         <div class="collapsible-content">
           <fieldset>
             <legend>Distance</legend>
-            Cover as much distance as possible from one hit. Manually count and enter the number of collisions with the border. You have five tries, the best of all goes into your score.
+            Cover as much distance as possible from one hit. Manually count and enter the number of collisions with the border. You have {{ distance_results|length }} tries, the best of all goes into your score.
             <div class="results">
               {% for n in distance_results %}
               <div class="open-game">Try {{ n+1 }}</div>
@@ -122,6 +122,7 @@
         <!--<script src="{{ url_for('static', filename='gamemodes/distance.js') }}"></script>-->
       </section>
 
+      {% if longest_break_results|length > 0 %}
       <section id="longest_break" class="col mode">
         <button type="button" class="collapsible">Longest Break</button>
         <div class="collapsible-content">
@@ -144,12 +145,16 @@
         </div>
         <!--<script src="{{ url_for('static', filename='gamemodes/longest_break.js') }}"></script>-->
       </section>
+      {% endif %}
 
     </form>
     
   
     <section id="submit-round" class="col">
-      Submit your results: <input type="button" value="Submit" id="submit-button"><br>
+      Submit your results: <input type="button" value="Submit" id="submit-button">
+      <br>
+      The total score is computed as the longest distance minus 3x the best precision distance.
+      <br>
       <div id="result-overview"><!-- Your total score is: 1870 points, rank 3/10--></div><br>
       
     </section>

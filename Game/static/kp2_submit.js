@@ -11,11 +11,11 @@ document.getElementById("submit-button").addEventListener("click", (e) => {
         tempAlert("Set user information to continue", 5000);
         return;
     }
-    if (!checkAllSet(getAllInputValues(document.getElementById("session-info")))) {
+    /*if (!checkAllSet(getAllInputValues(document.getElementById("session-info")))) {
         // not all user info are set
         tempAlert("Set session information to continue", 5000);
         return;
-    }
+    }*/
     kp2Controller({"kp2_activity": "hand_in", "action": "game"}, set_activity=false)
         .then((res) => {
             var ev = new CustomEvent("update_scoreboard", {detail: res.history});
