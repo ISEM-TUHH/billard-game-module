@@ -1,0 +1,13 @@
+services:
+  billiard-game-module:
+    build:
+      context: .
+    image: billiard-game-module:latest  
+  
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    volumes:
+      - ./Game/gamemodes/resources:/app/Game/gamemodes/resources
+    container_name: billiard-game-module
