@@ -113,6 +113,12 @@ class Game(Module):
 
 		api_dict = { # sorted by functionality group
 			"": self.index,
+			"admin": self.get_admin_website,
+			"placement": {
+				"": self.get_placement_website,
+				"start": self.placement_start,
+				"stop": self.placement_stop
+			},
 			"general": {
 				"ballimagenumber": self.get_ball_image,
 				"correctedcoords": self.beamer_correct_coords,
@@ -150,6 +156,26 @@ class Game(Module):
 		#self.supermode = "base"
 		#self.beamer_make_gameimage()
 		return render_template('index.html', camera=self.camera.address, beamer=self.beamer.address)
+
+	def get_admin_website(self):
+		"""Renders the admin menu"""
+		return render_template('admin.html', camera=self.camera.address, beamer=self.beamer.address)
+
+	def get_placement_website(self):
+		"""Renders the table placement page (camera livestream, zoomed out and beamer displaying a full white image)"""
+		return self.render_template_camera('placement.html')
+
+	def placement_start(self):
+		"""Switch beamer and camera into placement mode: display white image without cropping, camera livestram zoomed out"""
+		self.camera_zoom_out()
+		self.beamer_raw_white()
+		return "Placement mode active"
+
+	def placement_stop(self):
+		"""Switch beamer and camera back to normal (using cropping and perspective corrections)"""
+		self.camera_zoom_reset()
+		self.beamer.push_image(self.gameimage.getImageCV2())
+		return "Placement mode ended"
 
 	def get_ball_image(self):
 		"""Get the image of a certain ball by number.
@@ -212,10 +238,10 @@ class Game(Module):
 		return res
 
 	# INTERACTIONS WITH CAMERA MODULE ###############################################
-	from ._camera_interface import forward_coords, camera_save_image
+	from ._camera_interface import forward_coords, camera_save_image, camera_zoom_out, camera_zoom_reset
 
 	# INTERACTIONS WITH BEAMER MODULE ###############################################
-	from ._beamer_interface import beamer_push_image, beamer_off, beamer_make_gameimage, beamer_correct_coords, beamer_update_manual_text
+	from ._beamer_interface import beamer_push_image, beamer_off, beamer_make_gameimage, beamer_correct_coords, beamer_update_manual_text, beamer_raw_white
 
 	# GAMEMODE CONTROLLER ###########################################################
 	from ._gamemode_controller import gamemode_controller, get_gamemode_website, list_available_gamemodes, gamemode_socket_handler, get_gamemode_report
