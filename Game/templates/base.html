@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" class="gamebase">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -39,7 +39,7 @@
       let global_gamemode = "{{ gamemode }}";
   </script>
 
-  <body>
+  <body id="gamebase">
     <!--<script src="{{ url_for('static', filename='sender.js')}}"></script>-->
     <script src="{{ url_for('static', filename='gamemode_controller.js') }}"></script>
 
@@ -89,7 +89,7 @@
           <summary>Place balls</summary>
           
           <div id="ball-selector">
-            <label class="active"><input type="radio" name="current_ball" value="ball-1" checked>1: Gelb</label>
+            <!-- <label class="active"><input type="radio" name="current_ball" value="ball-1" checked>1: Gelb</label>
             <label><input type="radio" name="current_ball" value="ball-2">2: Blau</label>
             <label><input type="radio" name="current_ball" value="ball-3">3: Rot</label>
             <label><input type="radio" name="current_ball" value="ball-4">4: Lila</label>
@@ -104,7 +104,55 @@
             <label><input type="radio" name="current_ball" value="ball-13">13: Halb Orange</label>
             <label><input type="radio" name="current_ball" value="ball-14">14: Halb Grün</label>
             <label><input type="radio" name="current_ball" value="ball-15">15: Halb Karmesin</label>
-            <label><input type="radio" name="current_ball" value="ball-white">Weiß</label>
+            <label><input type="radio" name="current_ball" value="ball-white">Weiß</label>-->
+            <label class="active"><input type="radio" name="current_ball" value="ball-1" checked>
+              <img src="{{ url_for('/general/ballimagenumber') }}?n=1">
+            </label>
+            <label><input type="radio" name="current_ball" value="ball-2">
+              <img src="{{ url_for('/general/ballimagenumber') }}?n=2">
+            </label>
+            <label><input type="radio" name="current_ball" value="ball-3">
+              <img src="{{ url_for('/general/ballimagenumber') }}?n=3">
+            </label>
+            <label><input type="radio" name="current_ball" value="ball-4">
+              <img src="{{ url_for('/general/ballimagenumber') }}?n=4">
+            </label>
+            <label><input type="radio" name="current_ball" value="ball-5">
+              <img src="{{ url_for('/general/ballimagenumber') }}?n=5">
+            </label>
+            <label><input type="radio" name="current_ball" value="ball-6">
+              <img src="{{ url_for('/general/ballimagenumber') }}?n=6">
+            </label>
+            <label><input type="radio" name="current_ball" value="ball-7">
+              <img src="{{ url_for('/general/ballimagenumber') }}?n=7">
+            </label>
+            <label><input type="radio" name="current_ball" value="ball-eight">
+              <img src="{{ url_for('/general/ballimagenumber') }}?n=8">
+            </label>
+            <label><input type="radio" name="current_ball" value="ball-9">
+              <img src="{{ url_for('/general/ballimagenumber') }}?n=9">
+            </label>
+            <label><input type="radio" name="current_ball" value="ball-10">
+              <img src="{{ url_for('/general/ballimagenumber') }}?n=10">
+            </label>
+            <label><input type="radio" name="current_ball" value="ball-11">
+              <img src="{{ url_for('/general/ballimagenumber') }}?n=11">
+            </label>
+            <label><input type="radio" name="current_ball" value="ball-12">
+              <img src="{{ url_for('/general/ballimagenumber') }}?n=12">
+            </label>
+            <label><input type="radio" name="current_ball" value="ball-13">
+              <img src="{{ url_for('/general/ballimagenumber') }}?n=13">
+            </label>
+            <label><input type="radio" name="current_ball" value="ball-14">
+              <img src="{{ url_for('/general/ballimagenumber') }}?n=14">
+            </label>
+            <label><input type="radio" name="current_ball" value="ball-15">
+              <img src="{{ url_for('/general/ballimagenumber') }}?n=15">
+            </label>
+            <label><input type="radio" name="current_ball" value="ball-white">
+              <img src="{{ url_for('/general/ballimagenumber') }}?n=16">
+            </label>
           </div>
 
           <!--<input type="button" value="Save image for AI training" id="ai-training-button">-->

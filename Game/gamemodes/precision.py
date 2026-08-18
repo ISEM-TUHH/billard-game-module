@@ -62,6 +62,8 @@ class Precision(GameMode):
     def settings(self, inp):
         """ Handle setting requests. In this gamemode, this is only the difficulty (0 = hard, 1, 2=easy) """
         print("Updating settings with", inp)
+        return {}, {"message": "This setting is currently disabled, how did you get it??"}
+
         settings = inp["settings"]
         self.SETTINGS = settings
         self.difficulty = int(settings["difficulty"])
@@ -108,17 +110,20 @@ class Precision(GameMode):
                 "center": self.bullseye_center
             }
         ]
-        lines = [w-250, w-500, w-750]
+        #lines = [w-250, w-500, w-750]
+        lines = [w-320, w-320, w-320] # disabled difficulties
+        
         self.start_points = [{"x": x, "y": h//2} for x in lines]
-        for i in range(3):
-            # 0,1,2
-            base.append({
-                "type": "line",
-                "c1": [lines[i], 100],
-                "c2": [lines[i], h-100],
-                "width": 7 if i == default_difficulty else 3,
-                "ref": "difficulty-" + str(i)
-            })
+        if False: # disabled drawing the lines
+            for i in range(3):
+                # 0,1,2
+                base.append({
+                    "type": "line",
+                    "c1": [lines[i], 100],
+                    "c2": [lines[i], h-100],
+                    "width": 7 if i == default_difficulty else 3,
+                    "ref": "difficulty-" + str(i)
+                })
         base.append({
             "type": "balls",
             "coords": {"white": {"name": "white"} | self.start_points[default_difficulty]},

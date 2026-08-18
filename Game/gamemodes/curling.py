@@ -179,7 +179,7 @@ class Curling(GameMode):
             self.message = "Hello World :)"
             self.update_history()
 
-            return "finish_round", {}, {"message": f"{self.current_round_score["round_summary"]}\n{self.current_round_score["ball_summary"]}"}
+            return "finish_round", {}, {"message": f"{self.current_round_score['round_summary']}\n{self.current_round_score['ball_summary']}"}
 
         self.current_play_in_round += 1
 
@@ -187,7 +187,7 @@ class Curling(GameMode):
         if self.current_play_in_round >= self.plays_per_round*2:
             self.current_round_score = self.get_round_results(coords)
             self.update_history()
-            return "finish_round", {}, {"message": f"{self.current_round_score["round_summary"]}\n{self.current_round_score["ball_summary"]}"}
+            return "finish_round", {}, {"message": f"{self.current_round_score['round_summary']}\n{self.current_round_score['ball_summary']}"}
         else:
             return "next_turn", {}, {"message": f"{self.current_player['name']}'s turn. \n({'full' if self.current_player == self.player1 else 'striped'})"}
 
@@ -404,7 +404,7 @@ class Curling(GameMode):
             
         if next_closest:
             ball, d = next_closest
-            ball_summary_parts.append(f"The next closest ball is {ball['name']} at {d:.0f}mm")
+            ball_summary_parts.append(f"\nThe next closest ball is {ball['name']} at {d:.0f}mm")
         
         p1_penalty, p2_penalty = 0, 0
         if self.negative_points:

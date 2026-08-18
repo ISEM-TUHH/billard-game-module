@@ -94,7 +94,7 @@ function getCoordsAndConfirm(event, jsonData, fun=controller, final=(l, r) => {l
         // this is the second step
         if ((target.step_coordinate_processing === "check_coordinates") || manipulatedFlag) {
             //console.log("really entered else")
-            target.checked = true; // REMOVE THIS FOR DOUBLE CLICK FIX
+            //target.checked = true; // REMOVE THIS FOR DOUBLE CLICK FIX
             delete target.step_coordinate_processing;
             return fun(jsonData).then((res) => {
                 //target.labels[0].innerText = res.message;
