@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import json
 import glob
+import subprocess
 
 """ This file supplies common operations used by the gamemodes. Mainly coordinate operations """
 
@@ -270,3 +271,6 @@ def load_challenge_files(glob_path, sort_difficulty=False):
     #print("challenges", len(challenges))
     return challenges
 
+def get_git_revision_hash():
+    head_hash = subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('ascii').strip()
+    return head_hash if "fatal" not in head_hash else "unknown software version"

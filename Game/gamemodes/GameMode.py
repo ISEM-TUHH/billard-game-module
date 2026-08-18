@@ -321,6 +321,7 @@ class GameMode:
 
         if add is not None:
             add["timestamp"] = pd.Timestamp.now()
+            add["software_git_hash"] = get_git_revision_hash()
             if len(hist) == 0:
                 new_hist = pd.DataFrame(add, index=[0])
             elif type(add) is not dict:
