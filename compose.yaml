@@ -1,0 +1,35 @@
+services:
+  billiard-game-module:
+    profiles:
+      - build
+    build:
+      context: .
+    image: billiard-game-module:latest  
+  
+  billiar-game-module-prod:
+    profiles:
+      - prod
+    image: billiard-game-module:latest
+    ports:
+      - "5000:5000"
+    #env_file:
+    #  - .env
+    environment:
+      PROD_OR_TEST: "PROD"
+    volumes:
+      - ./Game/gamemodes/resources:/app/Game/gamemodes/resources
+    container_name: billiard-game-module-prod
+
+  billiar-game-module-dev:
+    profiles:
+      - dev
+    image: billiard-game-module:latest
+    ports:
+      - "5000:5000"
+    #env_file:
+    #  - .env
+    environment:
+      PROD_OR_TEST: "TEST"
+    volumes:
+      - .:/app
+    container_name: billiard-game-module-dev

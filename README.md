@@ -3,11 +3,14 @@
 The repository provides the game module for the Billard@ISEM system.
 
 ## Installation
+These steps must be done for both local and docker installations. We recommend the docker installation.
 + Clone the repository: `git clone https://github.com/ISEM-TUHH/billard-game-module.git`
-+ Modify `config.json` and/or `test_config.json` as well as add a `.env` file as specified later on
-+ From inside the repository folder create and install all relevant python dependencies: `python -m venv venv && source venv/bin/activate && pip install -r requirements.txt`
++ Modify `config.json` and/or `test_config.json` to find your other modules as well as add a `.env` file as specified later on
 + Download the font used for generating images for the beamer and paste it into the `fonts` folder. 
     - We use `Minecraft-Regular.otf` from publicly available Minecraft font collections.
+
+### Local installation
++ From inside the repository folder create and install all relevant python dependencies: `python -m venv venv && source venv/bin/activate && pip install -r requirements.txt`
 + For testing the system, run `python main.py`.
     + This starts the server using the configuration from `test_config.json`
     + Open the specified webpage and check that everything works
@@ -19,7 +22,19 @@ The repository provides the game module for the Billard@ISEM system.
     + Reload the daemon, enable and start the service: `sudo systemctl reload-daemon && systemctl enable job.service && systemctl start job.service`
     + Check if the server is running as intended: `sudo journalctl -u job.service`
     + If succesfully started, the server should now be accessible under the address/port provided in `config.json`.
-+ A lot of functionalities require the other modules to also be up and running (mostly Game, Camera and Beamer modules). See https://github.com/ISEM-TUHH for the respective modules.
+
+### Docker container
+This is the 
+```bash
+docker compose --profile build build
+```
+- Run production server: `docker compose --profile prod up`
+- Run development server: `docker compose --profile dev up`
+- Stop with `docker compose --profile [profile] down`
+- If you choose another network port than `5000`, this must also be modified in the `compose.yaml`
+
+> [!IMPORTANT]
+> A lot of functionalities require the other modules to also be up and running (mostly Game, Camera and Beamer modules). See https://github.com/ISEM-TUHH for the respective modules.
 
 ![The website of the KP2 gamemode with the Longest Break challenge selected](https://github.com/ISEM-TUHH/billard-game-module/blob/main/docs/source/images/website.png?raw=true)
 *The website of the KP2 gamemode with the Longest Break challenge selected*
