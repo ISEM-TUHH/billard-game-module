@@ -94,6 +94,8 @@ function placeAllBalls(coords) {
   // remove all old positions
   for (let b of balls) {
     b.style.display = "none";
+    var label = document.getElementById(b.id + "-coords");
+    if (label) label.remove();
   }
 
   // add new balls
@@ -105,7 +107,11 @@ function placeAllBalls(coords) {
     var y = b.y;
     var id = "ball-" + b.name;
     if (!manipulatedFlag) {
-      placePointFromRealDim(x,y,id);
+      try {
+        placePointFromRealDim(x,y,id);
+      } catch (err) {
+        console.error("Failed to place ball", id, err);
+      }
     }
   }
 }
@@ -118,15 +124,32 @@ function placePoint(x, y, id, realBall = true) {
   //console.log(x, y)
   point.style.left = `${x}px`; // Set the left position
   point.style.top = `${y}px`; // Set the top position
+  var xr = pxToReal(x);
+  var yr = pxToReal(y)
   if (realBall) {
-    coordinates[id] = {name: id, x: x, y: y, xr: pxToReal(x), yr: pxToReal(y)};
+    coordinates[id] = {name: id, x: x, y: y, xr: xr, yr: yr};
+    updateCoordLabel(id, x, y, xr, yr);
   } else {
-    altCoordinates[id] = {name: id, x: x, y: y, xr: pxToReal(x), yr: pxToReal(y)};
+    altCoordinates[id] = {name: id, x: x, y: y, xr: xr, yr: yr};
   }
   //console.log(x,y)
 
   // highlight the corresponding label/input
   document.querySelector("#ball-selector input[value=" + id + "]").classList.add("ball-exists")
+}
+
+function updateCoordLabel(id, x, y, xr, yr) {
+  var labelId = id + "-coords";
+  var label = document.getElementById(labelId);
+  if (!label) {
+    label = document.createElement("div");
+    label.id = labelId;
+    label.className = "coord-label";
+    document.getElementById("livestream-container").appendChild(label);
+  }
+  label.style.left = `${x}px`;
+  label.style.top = `${y + 15}px`;
+  label.textContent = `${Math.round(xr)}, ${Math.round(yr)} mm`;
 }
 
 function placePointFromRealDim(xr, yr, id) {
@@ -154,6 +177,8 @@ for (let element of balls) {
   element.addEventListener("click", function(e) {
     element.style.display = "none";
     delete coordinates[element.id];
+    var label = document.getElementById(element.id + "-coords");
+    if (label) label.remove();
     if (element.id != "marker-start") {
       setManipulatedFlag(true); // deleting the marker-start (for distance) does not count as manipulating the real coordinates 
     }

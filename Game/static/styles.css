@@ -446,6 +446,22 @@ body:has(#highlight-balls.active) .ball {
   border: 10px solid red;
 }
 
+.coord-label {
+  position: absolute;
+  transform: translate(-50%, 0);
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  font-size: 0.7rem;
+  padding: 2px 4px;
+  border-radius: 4px;
+  display: none;
+}
+
+body:has(#show-coords:hover) .coord-label,
+body:has(#show-coords.active) .coord-label {
+  display: block;
+}
+
 .image-container {
   position: relative;
   width: 100%;
@@ -498,7 +514,8 @@ input[type="radio"] {
 }*/
 
 fieldset input[type="button"],
-#highlight-balls {
+#highlight-balls,
+#show-coords {
   background: #e1e1e1;
   padding: 0.5rem;
   text-align: center;
@@ -514,7 +531,9 @@ fieldset input[type="button"]:hover,
 .button-list input[type="button"]:hover,
 .button-list a:hover,
 #highlight-balls:hover,
-#highlight-balls.active {
+#highlight-balls.active,
+#show-coords:hover,
+#show-coords.active {
   background-color: #e0f7fa;
   /*border-color: #00C1D4;*/
   border: 2px solid #00C1D4;
@@ -655,6 +674,7 @@ body.dark .option-boxes a,
 body.dark .button-list label,
 body.dark .button-list input[type="button"],
 body.dark #highlight-balls,
+body.dark #show-coords,
 body.dark .cool-label,
 body.dark fieldset input[type="button"],
 body.dark .button-list a,
@@ -671,7 +691,9 @@ body.dark fieldset input[type="button"]:hover,
 body.dark .button-list input[type="button"]:hover,
 body.dark .button-list a:hover,
 body.dark #highlight-balls:hover,
-body.dark #highlight-balls.active {
+body.dark #highlight-balls.active,
+body.dark #show-coords:hover,
+body.dark #show-coords.active {
   background: #3f4b50;
   border-color: #00C1D4;
 }

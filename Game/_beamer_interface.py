@@ -86,5 +86,5 @@ def beamer_update_manual_text(self):
 
 def beamer_raw_white(self):
     """Display a full white image without any corrections"""
-    request.get(self.beamer.endpoint("/v1/white"))
+    requests.get(self.beamer.endpoint("/v1/white"))
     return "Beamer displays a raw white image"
