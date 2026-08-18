@@ -6,6 +6,7 @@
     "port": "5000",
 
     "size": 8,
+    "apriltag-id-beamer": ["4", "5", "6", "7"],
 
     "table-dimensions": {
         "height": 1171,
