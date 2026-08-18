@@ -96,6 +96,7 @@ function getCoordsAndConfirm(event, jsonData, fun=controller, final=(l, r) => {l
             //console.log("really entered else")
             //target.checked = true; // REMOVE THIS FOR DOUBLE CLICK FIX
             delete target.step_coordinate_processing;
+            setManipulatedFlag(false);
             return fun(jsonData).then((res) => {
                 //target.labels[0].innerText = res.message;
                 final(label, res);

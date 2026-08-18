@@ -434,13 +434,18 @@ class GameMode:
         for k, v in self.TREE.items():
             inputs = v[3]
             button_name = inputs[0]
+            index = 0
 
             html = ""
             if button_name is not None:
                 ID = "-".join([self.gamemode_name, k, "submit"])
-                html = f"<input type='checkbox' id='{ID}' class='submit-step'><label for='{ID}' data-og='{button_name}'>{button_name}</label>"
+                html = f"<input type='checkbox' id='{ID}' class='submit-step' clicker-index='{index}'><label for='{ID}' data-og='{button_name}'>{button_name}</label>"
+                index += 1
 
             for specials in inputs[1:]:
+                if specials["type"] in ("button", "checkbox", "radio"):
+                    specials["clicker-index"] = index
+                    index += 1
                 specials["id"] = "-".join([self.gamemode_name, k, specials["name"]])
                 #typ = specials["type"]
                 #placeholder = specials["placeholder"]

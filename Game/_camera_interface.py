@@ -52,3 +52,11 @@ def camera_save_image(self):
     res = response.json()
     return res
     #return "aaa"
+    
+def camera_zoom_out(self):
+    requests.get(self.camera.endpoint("/v1/zoomout"))
+    return "Camera zoomed out."
+
+def camera_zoom_reset(self):
+    requests.get(self.camera.endpoint("/v1/loadtransformation"))
+    return "Camera view reset."
