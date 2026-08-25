@@ -72,13 +72,23 @@ class GameMode:
     def __init__(self):
         self.score = 0
         self.state = "init"
+
         self.name = Path(self.__file__).stem
-        self.history_file = Path(self.__file__).parent.absolute().joinpath(Path("resources"), self.name + "_history.csv")
+        self.resource_dir = str(Path(self.__file__).parent.absolute().joinpath(Path("resources"), self.name))
+
+        self.history_file = Path(self.resource_dir + "_history.csv")
         if hasattr(self, "HISTORY_FORMAT") and self.HISTORY_FORMAT == ".json":
             # for very sparse data it can be reasonable to write a more comprehensive history into a .json file -> see GameMode.save_json_history
             # A boiled down history can still be saved into the .csv file
-            self.json_history_file = Path(self.__file__).parent.absolute().joinpath(Path("resources"), self.name + "_history.json")
-        #print("History file: ", self.history_file)
+            self.json_history_file = Path(self.resource_dir + "_history.json")
+
+        self.configuration_file = Path(self.resource_dir + "_config.json")
+        self.ENABLE_CONFIG = False
+        if self.configuration_file.exists():
+            self.ENABLE_CONFIG = True
+            with open(self.configuration_file, "r") as f:
+                self.config = json.load(f)
+
         #self.gameimage = GameImage()
         if not hasattr(self, "HISTORY"):
             self.HISTORY = {} # history objects of this current round/instance
@@ -321,7 +331,7 @@ class GameMode:
 
         if add is not None:
             add["timestamp"] = pd.Timestamp.now()
-            add["software_git_hash"] = get_git_revision_hash()
+            #add["software_git_hash"] = get_git_revision_hash()
             if len(hist) == 0:
                 new_hist = pd.DataFrame(add, index=[0])
             elif type(add) is not dict:
@@ -347,7 +357,7 @@ class GameMode:
         teams = hist.groupby("team")["score"].mean().sort_values(ascending=False, ignore_index=True)
         teamsTop3 = teams.iloc[:3]
 
-        #print(teams)
+        print(teams)
 
         if add is not None: # if there is something new added to the history, actually save the file
             self.save_history(new_hist)
@@ -506,4 +516,3 @@ class GameMode:
             update_gameimage.update_definition(local_returns["gameimage-updates"][1])
 
         return within_tolerance, local_returns, {"message": message} 
-

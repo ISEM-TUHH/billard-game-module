@@ -8,6 +8,7 @@ docs/_build/latex/*
 OLD_*
 exampleeeeeee.png
 .python-report.txt
+*mongodb_data_volume
 
 # font folder from https://www.1001freefonts.com/minecraft.font
 fonts/* 

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Configuration of {{ name }}</title>
+    </head>
+
+    <body>
+        <h1>Configuration of {{ name }}</h1>
+
+        <form autocomplete="off">
+        {% for key, val in config.items() %}
+            <label for="{{ key }}">{{ key }}:</label>
+            <textarea id="{{ key }}" class="config">{{val}}</textarea>
+            <br/>
+        {% endfor %}
+        </form>
+
+        <label for="config-password">Password:</label>
+        <input type="password" id="config-password">
+        <br/>
+        <label for="config-submit">Update configuration:</label>
+        <input type="button" id="config-submit" value="Submit">
+
+        <br/>
+        <div id="config-feedback">
+
+        </div>
+
+        <script>
+
+            function sender(apiEndpoint, jsonData) {
+                return fetch(apiEndpoint, {
+                    method: "POST",
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(jsonData)
+                })
+            }
+
+            document.getElementById("config-submit").addEventListener("click", () => {
+                var config = {};
+                Array.from(document.getElementsByClassName("config")).forEach(element => {
+                    config[element.id] = element.value;
+                });
+                console.log("Config:", config);
+
+                var password = document.getElementById("config-password").value;
+
+                sender("/configuration_submit/{{ name }}", {"config": config, "password": password})
+                    .then((r) => r.json())
+                    .then((res) => {
+                        console.log("Returned:", res);
+
+                        document.getElementById("config-feedback").innerHTML = res.text;
+                    })
+            })
+        </script>
+    </body>
+</html>

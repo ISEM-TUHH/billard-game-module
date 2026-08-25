@@ -2,6 +2,8 @@ import requests
 from flask import request, Response
 import os
 
+from ..utils.mail_sender import send_message
+from ..utils.mongo_interface import MongoDB
 from ..GameImage import GameImage
 
 from .common_utils import *
@@ -22,60 +24,36 @@ class KP2(GameMode):
     __file__ = __file__
 
     def __init__(self,
-            occurences={ # THIS IS MAINLY CONTROLLED FROM config.json
-                "precision": 5,
-                "distance": 5,
-                "break": 1,
-                "longest_break": 5 # 5 starts and 2 fully to the end -> only two scores
-            }, 
+            #occurences={ # THIS IS MAINLY CONTROLLED FROM kp2_config.json
+            #    "precision": 5,
+            #    "distance": 5,
+            #    "break": 1,
+            #    "longest_break": 5 # 5 starts and 2 fully to the end -> only two scores
+            #},
             gm_name="KP2",
-            time=1800, # how much time students have for an attestation
-            settings=None
+            #time=1800, # how much time students have for an attestation
+            #settings=None,
+            send_mails=False
         ):
-        
+        self.send_mails = send_mails
 
         self.gamemode_name = gm_name # "KP2"
         self.message = "Hello there :)" # this just needs to exist
         
-        self.occurences = occurences
+        #self.occurences = occurences
         
-        if settings is None:
-            self.SETTINGS = {"occurences": occurences, "time": time} # settings get unzipped in GameMode init -> time gets set to self.time
-        else:
-            self.SETTINGS = settings
-
-        self.GAMEMODES = {
-            "distance": Distance(),
-            "precision": Precision(),
-            "break": Break(),
-            "longest_break": LongestBreak(tries=self.occurences["longest_break"], scored=2)
-        }
-
-        # index all mystery challenges here. The dictionary key gets shown on the KP2 website for selection
-        self.mystery_challenges = {
-            "Fantastic Four": self.mystery_distance_4b,
-            "And I would walk 500 miles...": self.mystery_distance_500,
-            "Not catchin' a break": self.mystery_longestbreak_break,
-            "One's company, two's a crowd and three's a party": self.mystery_longestbreak_3solid,
-            "Hell Yeah!": self.mystery_precision_2bull,
-            "It all adds up...": self.mystery_precision_600
-        }
+        #if settings is None:
+        #    self.SETTINGS = {"occurences": occurences, "time": time} # settings get unzipped in GameMode init -> time gets set to self.time
+        #else:
+        #    self.SETTINGS = settings
 
         self.SUBSELECTOR = "kp2_activity"
 
         self.state = "init"
         #self.active_mode = self.gamemodes[starting_mode]
 
-        self.longest_break_play = 5
-
-        self.scores = {}
-        self.history_collection = {}
-        for k,v in self.occurences.items():
-            self.scores[k] = [None]*v
-            self.history_collection[k] = {str(i): None for i in range(v)} # this direct indexing makes the pd.json_normalize easier/possible.
-            
-
-
+        #self.longest_break_play = 5
+        
         self.history_base = {} # basic history items: player, team, score, semester, attestation, mystery_challenge
 
         self.gameimage = GameImage()
@@ -93,16 +71,40 @@ class KP2(GameMode):
         
         GameMode.__init__(self)
 
+
+        # Connection to MongoDB for score calculation
+        self.score_db = MongoDB(gm_name, self.config["score_aggregation"])
+
+        self.occurences = {
+            "precision": self.config["precision"],
+            "distance": self.config["distance"],
+            "break": self.config["break"],
+            "longest_break": self.config["longest_break"]
+        }
+
+        self.GAMEMODES = {
+            "distance": Distance(),
+            "precision": Precision(),
+            "break": Break(),
+            "longest_break": LongestBreak(tries=self.occurences["longest_break"], scored=2)
+        }
+
+        self.scores = {}
+        self.history_collection = {}
+        for k,v in self.occurences.items():
+            self.scores[k] = [None]*v
+            self.history_collection[k] = {str(i): None for i in range(v)} # this direct indexing makes the pd.json_normalize easier/possible.
+         
+
     def index_args(self):
         """ Generate a dictionary of keyword arguments that get supplied to a jinja html template of a gamemode with the same name (e.g. precision -> precision.html) in the template directory """
         out = {
             "title": "Beat the ISEM!",
             "teams": [],
             "js_vars": { # stuff that gets set as JS global variables (var declaration)
-                "countdown_original_time": self.time
+                "countdown_original_time": self.config["time"]
             }
         }
-        out["mystery_challenges"] = list(self.mystery_challenges.keys())
         for gm, gamemode in self.GAMEMODES.items():
             if hasattr(gamemode, "TREE"):
                 html, name = gamemode.build_HTML()
@@ -209,20 +211,22 @@ class KP2(GameMode):
             case "session-info":
                 if self.gamemode_name == "Final Competition": return out
                 self.history_base |= settings
-                self.active_mystery = settings["mystery-challenge"] # This is just the key for self.mystery_challenges dict
                 out["history"] = self.history(get_semester=settings["semester"])
 
                 match int(settings["attestation"]):
                     case 1:
                         # on the first attestation, the longest break challenge is not played: create a fake (resulting in a 0 score) history. Do not do this if a longest break run has already been played 
                         if np.all([x is None for x in self.scores["longest_break"]]):
-                            self.scores["longest_break"] = [0] * self.longest_break_play + [-1] * (self.occurences["longest_break"] - self.longest_break_play) 
+                            self.scores["longest_break"] = [0] * self.config["longest_break"] + [-1] * (self.occurences["longest_break"] - self.config["longest_break"]) 
                             out["disable"] = ["#longest_break"] # html id of the longest break section
                     case _:
                         out["enable"] = ["#longest_break"]
 
 
         return out
+
+    def validate_config(self, config):
+        return self.score_db.assert_aggregation(config["score_aggregation"])
 
     def hand_in(self):
         """ Calculates the total score, score breakdown and saves the history. Returns with signal="finished". """
@@ -248,142 +252,52 @@ class KP2(GameMode):
         out["hist-package"] = {k: v[0] for k,v in self.HISTORY.to_dict().items()}
         #print("KP2 OUT HIST-PACKAGE:", out["hist-package"])
 
+        # send this runs total history by mail (addresses specified in .env)
+        try:
+            if self.send_mails:
+                content = f"New {self.gamemode_name} results!"
+                subject = f"{self.gamemode_name} results {self.HISTORY["player"][0]}, {self.HISTORY["team"][0]}"
+                print("SUBJECT:", subject)
+                send_message(
+                    content,
+                    subject, 
+                    df=pd.DataFrame(self.HISTORY, index=[0]))
+        except:
+            print("Exception raised when trying to send mail with KP2 results.")
+
         return out
         
 
 
     def get_score(self):
         """ Determine the score based on the scores of the indiviual played gamemodes. Edit here to manipulate the scoring function (weights). """
-
-        # load history for some scoring and mystery challenge decisions/functions
-        hist = self.get_history() 
-        #session_hist = hist[hist["semester"].astype(str) == self.history_base["semester"] & hist["attestation"].astype(str) == self.history_base["attestation"]]
-        #session_hist = hist.query(f'semester == {self.history_base["semester"]} & attestation == {self.history_base["attestation"]}')
-        if len(hist) != 0:
-            session_hist = hist.loc[(hist["semester"].astype(str) == self.history_base["semester"]) & (hist["attestation"].astype(str) == self.history_base["attestation"])]
-        else:
-            session_hist = hist
-
-        scores = self.history_collection
-        #print(self.history_collection)
-
-        precision = scores["precision"]
-        distance = scores["distance"]
-        single_break = scores["break"]
-        longest_break = scores["longest_break"]
-
-        # already register the maximum distance over the 5 tries in the distance challenge
-        distance_distance = np.array([x["distance"] for x in distance.values()])
-        self.history_addons["distance.longest"] = np.max(distance_distance)
-        # closest500 is used in the mystery challenge "And I would walk 500 miles..."
-        # save the minimal distance from 500cm in mm.
-        self.history_addons["distance.closest500"] = np.min(np.abs(distance_distance - 5000))
-        #np.abs(distance_distance[np.argmin(np.abs(distance_distance - 5000))] - 5000)
         
-        # Precision: +150p if all 5 hits are <180mm (on target)
-        # Distance: +150p if at least two wall collisions on every attempt
-        # Distance fancy: +250p if team has longest distance among all teams in the current competition
-        # Break: +200p if sinking at least one ball
-        # Longest Break: +150p pro solid, -300p pro stripe, sinking 8 ends the round with 0 points (discard if possible)
-        # Other: +500p if passing attestation -> 2x precision < 180mm, 2x distance 2 walls, 2x longest break sink >=1 ball
-        # Mystery challenges follow individual specifications
+        hist = self.history_collection | self.history_base
 
-        overview = { # this is the actual collection of points
-            "Zone 1": 0, # Precision: +50p if Zone I: <22mm (for every ball possible)
-            "Two Walls": 0, # Distance: +150p if at least two wall collisions on every attempt
-            "Longest Distance": 0, # Distance fancy: +250p if team has longest distance among all teams in the current competition
-            "Break": 0, # Break: +200p if sinking at least one ball
-            "Longest Break": 0, #Longest Break: +150p pro solid, -300p pro stripe, sinking 8 ends the round with 0 points (discard if possible)
-            "Passed": 0, # Other: +500p if passing attestation -> 2x precision < 180mm, 2x distance 2 walls, 2x longest break sink >=1 ball
-            "Mystery Challenge": 0,
+        precision = hist["precision"]
+        distance = hist["distance"]
+        single_break = hist["break"]
+        longest_break = hist["longest_break"]
+        
+        overview = {
+            "Best precision": min([x["distance"] for x in precision.values()]),
+            "Best distance": max([x["distance"] for x in distance.values()]),
+            "Sunken break": max([x["sunk_legal"] for x in single_break.values()]),
+            "Best longest break": max([x["sunk_legal"] for x in longest_break.values()])
         }
-        overview["Zone 1"] = int(np.sum([50 for x in precision.values() if x["distance"] < 22]))
-        overview["Two Walls"] = 150 if np.all([x["collisions"] >= 2 for x in distance.values()]) else 0
-        overview["Break"] = int(np.sum([200 for x in single_break.values() if x["sunk_legal"] >= 1]))
-        overview["Longest Break"] = int(np.sum([x["sunk_legal"] for x in longest_break.values()]))# if x["decision"] == "kept"])) # calculation done in gamemode
 
-        # Longest Distance: check if the current entry will be the final entry of the session. If true, check if it is the longest distance of all entries of the session and change the value. Otherwise, assign the 250p to the entry with the longest distance among the saved entries
-        if len(session_hist) + 1 == int(self.history_base["number_teams"]):
-            # if this is the final team
-            updated_table = False
-            
-            if len(session_hist) == 0:
-                # if there is only one team in the attestation (mainly when testing aahhh)
-                max_saved = -1000000
+        # turn hist from dict-dict-dict intro dict-list-dict
+        h2 = {}
+        for k,v in hist.items():
+            if type(v) is dict:
+                h2[k] = [i for i in v.values()]
             else:
-                max_saved_index = session_hist["distance.longest"].idxmax()
-                max_saved = session_hist["distance.longest"][max_saved_index]
-            if max_saved < self.history_addons["distance.longest"]:
-                overview["Longest Distance"] = 250
-            else:
-                hist.at[max_saved_index, "overview.Longest Distance"] = 250
-                hist.at[max_saved_index, "score"] += 250
-                updated_table = True
+                h2[k] = v
 
-            # if the mystery challenge is the 500 thing
-            if self.active_mystery == "And I would walk 500 miles...":
-                if len(session_hist) == 0:
-                    # if there is only one team in the attestation (mainly when testing aahhh)
-                    max_saved = 100000000
-                else:
-                    max_saved_index = session_hist["distance.closest500"].idxmax()
-                    max_saved = session_hist["distance.closest500"][max_saved_index]
+        self.score_db.enter_round(h2)
+        total_score = self.score_db.get_score()
 
-                if max_saved > self.history_addons["distance.closest500"]:
-                    overview["Mystery Challenge"] = 350
-                else:
-                    hist.at[max_saved_index, "overview.Mystery Challenge"] = 250
-                    hist.at[max_saved_index, "score"] += 250
-                    updated_table = True
-            
-            # if the table (session history) was updated, save it manually
-            self.save_history(hist)
+        #total_score = "tbd"
 
-        
-        # Check if passed
-        passed_precision = 2 <= [x["distance"] <= 180 for x in precision.values()].count(True)
-        passed_distance = 2 <= [x["collisions"] >= 2 for x in distance.values()].count(True)
-        passed_longestbreak = 2 <= [x["sunk_legal"] >= 1 for x in longest_break.values()].count(True)
-        overview["Passed"] = 500 if (passed_precision and passed_distance and passed_longestbreak) else 0
-
-        # Mystery challenge
-        if self.active_mystery != "And I would walk 500 miles...":
-            overview["Mystery Challenge"] = self.mystery_challenges[self.active_mystery](session=scores)
-
-
-        total_score = int(np.sum(list(overview.values())))
         self.score = total_score
         return total_score, overview
-
-    #%% Mystery challenges.
-    # all take the current sessions history as input and return a certain score bonus based on their requirements
-    # TODO: correct exact score numbers
-
-    def mystery_distance_4b(self, session=0, **kwargs):
-        """ Fantastic Four: Hit 4 borders in (at least) one distance shot, get 350p """
-        return 350 if max([x["collisions"] for x in session["distance"].values()]) >= 4 else 0
-        
-
-    def mystery_distance_500(self, session_hist=0, history_addons=0, **kwargs):
-        """ And I would walk 500 miles...: Try to be the closest to 500cm in the distance shot (session wide). The closest team in the session gets 350p
-        
-        THIS is implemented in the KP2.score, as it manipulates the history.
-        """
-        return
-
-    def mystery_precision_600(self, session=0, **kwargs):
-        """ It all adds up: The accumulated distance from the bullseye over all precision shots must not be larger than 600mm, earn 350p """
-        return 350 if np.sum([x["distance"] for x in session["precision"].values()]) else 0
-
-    def mystery_precision_2bull(self, session=0, **kwargs):
-        """ (2): Hit the bullseye at least twice during the precision challenge (<15mm) """
-        return 350 if 2 <= [x["distance"] <= 22 for x in session["precision"].values()].count(True) else 0
-
-    def mystery_longestbreak_3solid(self, session=0, **kwargs):
-        """ One's company, two's a crowd and three's a party: Sink three solids in at least one round of the longest break """
-        return 350 if np.any([x["sunk_legal"] >= 3 for x in session["longest_break"].values()]) else 0
-
-
-    def mystery_longestbreak_break(self, session=0, **kwargs):
-        """ Not catchin' a break: Sink at least one solid in every round of the longest break """
-        return 350 if np.all([x["sunk_legal"] >= 1 for x in session["longest_break"].values()]) else 0

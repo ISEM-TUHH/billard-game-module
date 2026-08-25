@@ -8,14 +8,14 @@ class FinalCompetition(KP2):
     def __init__(self, settings=None):
         self.__file__ = __file__
 
-        occurences = {
-            "precision": 2,
-            "distance": 2,
-            "break": 0,
-            "longest_break": 0
-        }
+        #occurences = {
+        #    "precision": 2,
+        #    "distance": 2,
+        #    "break": 0,
+        #    "longest_break": 0
+        #}
 
-        KP2.__init__(self, occurences=occurences, gm_name="Final Competition") # super init
+        KP2.__init__(self, gm_name="Final Competition") # super init
 
         self.WEBSITE_TEMPLATE = "kp2.html"
 
@@ -121,10 +121,9 @@ class FinalCompetition(KP2):
             "title": "Schlag das ISEM!",
             "teams": [],
             "js_vars": { # stuff that gets set as JS global variables (var declaration)
-                "countdown_original_time": self.time
+                #"countdown_original_time": self.time
             }
         }
-        out["mystery_challenges"] = list(self.mystery_challenges.keys())
         for gm, gamemode in self.GAMEMODES.items():
             if hasattr(gamemode, "TREE"):
                 html, name = gamemode.build_HTML()

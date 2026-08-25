@@ -11,7 +11,7 @@ services:
       - prod
     image: billiard-game-module:latest
     ports:
-      - "5000:5000"
+      - 5000:5000
     #env_file:
     #  - .env
     environment:
@@ -20,7 +20,11 @@ services:
       - ./Game/gamemodes/resources:/app/Game/gamemodes/resources
     container_name: billiard-game-module-prod
 
-  billiar-game-module-dev:
+    networks:
+      backend:
+        ipv4_address: 10.30.0.3
+
+  billiard-game-module-dev:
     profiles:
       - dev
     image: billiard-game-module:latest
@@ -33,3 +37,42 @@ services:
     volumes:
       - .:/app
     container_name: billiard-game-module-dev
+
+    networks:
+      backend:
+        ipv4_address: 10.30.0.3
+
+  mongodb-prod:
+    image: mongo:latest
+    profiles:
+      - prod
+    ports:
+      - 27017:27017
+    volumes:
+      - ${PWD}/mongodb_data_volume:/data/db
+
+    networks:
+      backend:
+        ipv4_address: 10.30.0.2
+  
+
+  mongodb-dev:
+    image: mongo:latest
+    profiles:
+      - dev
+    ports:
+      - 27017:27017
+    volumes:
+      - ${PWD}/dev_mongodb_data_volume:/data/db
+
+    networks:
+      backend:
+        ipv4_address: 10.30.0.2
+
+networks:
+  backend:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.30.0.0/24
+          gateway: 10.30.0.1

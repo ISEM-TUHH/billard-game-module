@@ -97,7 +97,7 @@ class Game(Module):
 		kp2_settings = self.config["kp2-details"]
 
 		self.GAMEMODES = {
-			"kp2": KP2(settings=kp2_settings),
+			"kp2": KP2(),#settings=kp2_settings),
 			"final_competition": FinalCompetition(),
 			"online_game": online_game.OnlineGame(api_secrets),
 			"local_game": local_game.LocalGame(api_secrets),
@@ -131,6 +131,8 @@ class Game(Module):
 			},
 			"gamemodecontroller": self.gamemode_controller,
 			"gamemode/<mode>": self.get_gamemode_website,
+			"configuration/<mode>": self.get_gamemode_config_website,
+			"configuration_submit/<mode>": self.write_gamemode_config,
 			"gamemode_report/<mode>/<timestamp>": self.get_gamemode_report,
 			"view_csv/<file>": self.view_csv
 		}
@@ -244,7 +246,7 @@ class Game(Module):
 	from ._beamer_interface import beamer_push_image, beamer_off, beamer_make_gameimage, beamer_correct_coords, beamer_update_manual_text, beamer_raw_white
 
 	# GAMEMODE CONTROLLER ###########################################################
-	from ._gamemode_controller import gamemode_controller, get_gamemode_website, list_available_gamemodes, gamemode_socket_handler, get_gamemode_report
+	from ._gamemode_controller import gamemode_controller, get_gamemode_website, get_gamemode_config_website, write_gamemode_config, list_available_gamemodes, gamemode_socket_handler, get_gamemode_report
 
 	# INTERNAL FUNCTIONS ############################################################
 
