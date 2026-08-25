@@ -2,6 +2,7 @@
 <html>
     <head>
         <title>Configuration of {{ name }}</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='style-config.css') }}" />
     </head>
 
     <body>
@@ -15,15 +16,15 @@
         {% endfor %}
         </form>
 
-        <label for="config-password">Password:</label>
-        <input type="password" id="config-password">
-        <br/>
-        <label for="config-submit">Update configuration:</label>
-        <input type="button" id="config-submit" value="Submit">
+        <div class="config-sidebar">
+            <label for="config-password">Password:</label>
+            <input type="password" id="config-password">
+            <br/>
+            <label for="config-submit">Update configuration:</label>
+            <input type="button" id="config-submit" value="Submit">
 
-        <br/>
-        <div id="config-feedback">
-
+            <br/>
+            <div id="config-feedback"></div>
         </div>
 
         <script>
