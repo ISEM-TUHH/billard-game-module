@@ -31,7 +31,7 @@ class FinalCompetition(KP2):
         ]
         self.gameimage.draw_from_dict(self.img_definition)
 
-    def get_score(self):
+    def get_score_old(self):
         """ Determine the score based on the scores of the indiviual played gamemodes. Edit here to manipulate the scoring function (weights).
         
         This is a clone of KP2.get_score, except that it does not account for Mystery Challenges or Passing
@@ -118,11 +118,13 @@ class FinalCompetition(KP2):
     def index_args(self):
         """ Generate a dictionary of keyword arguments that get supplied to a jinja html template of a gamemode with the same name (e.g. precision -> precision.html) in the template directory """
         out = {
-            "title": "Schlag das ISEM!",
+            "title": self.config["title"],
             "teams": [],
             "js_vars": { # stuff that gets set as JS global variables (var declaration)
                 #"countdown_original_time": self.time
-            }
+            },
+            "show_attestation": False,
+            "scoring_information": self.config["scoring_information"]
         }
         for gm, gamemode in self.GAMEMODES.items():
             if hasattr(gamemode, "TREE"):

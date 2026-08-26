@@ -1,0 +1,64 @@
+<!-- Report template when finishing a KP2 gamemode -->
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+
+    <title>Report for {{ team }}</title>
+  </head>
+
+  <body>
+    <h1>Report for {{ team }}</h1>
+
+    A KP2 attestation was submitted on {{ timestamp }}, started with the first submit at {{ break["0"].start_time }}
+
+    <h3>Settings</h3>
+    Player: {{player}}<br>
+    Team: {{team}}<br>
+    Semester: {{semester}}<br>
+    Attestation: {{attestation}}<br>
+    
+    <h3>Scores</h3>
+    Points collected:
+    <ul>
+      {% for key,val in overview.items() %}
+      <li>{{key}}: {{val}} points</li>
+      {% endfor %}
+    </ul>
+    Total score: {{score}} points<br>
+
+    Now follows the complete listing of each challenge:
+
+    <h4>Break challenge</h4>
+    <ol>
+    {% for num, val in break.items() %}
+      <li>Sunken balls: {{ val.sunk_legal }}</li>
+    {% endfor %}
+    </ol>
+
+    <h4>Precision challenge</h4>
+    <ol>
+    {% for num, val in precision.items() %}
+      <li>Distance from bullseye: {{val.distance}}mm</li>
+    {% endfor %}
+    </ol>
+
+    <h4>Distance challenge</h4>
+    <ol>
+    {% for num, val in distance.items() %}
+      {% if not num in ["closest500", "longest"] %}
+      <li>Total distance {{val.distance}}mm with {{val.collisions}} collisions</li>
+      {% endif %}
+    {% endfor %}
+    </ol>
+    
+    <h4>Longest Break challenge</h4>
+    <ol>
+    {% for num, val in longest_break.items() %}
+      <li>{{val.sunk_legal}} sunken legal balls, ended because "{{val.end_reason}}"</li>
+    {% endfor %}
+    </ol>
+
+
+  </body>
+</html>

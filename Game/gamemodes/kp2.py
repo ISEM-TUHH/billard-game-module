@@ -1,6 +1,7 @@
 import requests
 from flask import request, Response
 import os
+import traceback
 
 from ..utils.mail_sender import send_message
 from ..utils.mongo_interface import MongoDB
@@ -93,8 +94,10 @@ class KP2(GameMode):
         self.history_collection = {}
         for k,v in self.occurences.items():
             self.scores[k] = [None]*v
-            self.history_collection[k] = {str(i): None for i in range(v)} # this direct indexing makes the pd.json_normalize easier/possible.
+            self.history_collection[k] = [None]*v#{str(i): None for i in range(v)} # this direct indexing makes the pd.json_normalize easier/possible.
          
+        # overwrite the history method with the modern mongo_history method to use the MongoDB backend as the single source of truth instead of the .csv file locally
+        self.history = self.mongo_history
 
     def index_args(self):
         """ Generate a dictionary of keyword arguments that get supplied to a jinja html template of a gamemode with the same name (e.g. precision -> precision.html) in the template directory """
@@ -103,7 +106,9 @@ class KP2(GameMode):
             "teams": [],
             "js_vars": { # stuff that gets set as JS global variables (var declaration)
                 "countdown_original_time": self.config["time"]
-            }
+            },
+            "show_attestation": True,
+            "scoring_information": self.config["scoring_information"]
         }
         for gm, gamemode in self.GAMEMODES.items():
             if hasattr(gamemode, "TREE"):
@@ -146,7 +151,7 @@ class KP2(GameMode):
                     #self.GAMEMODES[activity].reset() # setting friendly reset -> reset on manual request on the website
                     # immediately init the next
                     #_, gameimage = self.GAMEMODES[activity].entrance(inp)
-                    self.history_collection[activity][str(index)] = self.GAMEMODES[activity].HISTORY ############################################################################
+                    self.history_collection[activity][index] = self.GAMEMODES[activity].HISTORY ############################################################################
 
                     self.scores[activity][index] = new_score
                     out["was_round"] = index
@@ -186,14 +191,6 @@ class KP2(GameMode):
                 case "settings":
                     out = self.settings(inp)
 
-                case "debug":
-                    # just immediately set the self.scores object accordingly
-                    self.scores = {'precision': [np.float64(-17531.86035041569), np.float64(-17531.86035041569), np.float64(-17531.86035041569), np.float64(-17531.86035041569), np.float64(-17531.86035041569)], 'distance': [3589.642041318819, 3589.642041318819, 4438.357958681181, 4438.357958681181, 4438.357958681181], 'break': [8], 'longest_break': [0, 0, -1, -1, -1]}
-
-                    self.history_collection = {'precision': {'0': {'distance': 1198, 'difficulty': 1}, '1': {'distance': 1198, 'difficulty': 1}, '2': {'distance': 1198, 'difficulty': 1}, '3': {'distance': 1198, 'difficulty': 1}, '4': {'distance': 1198, 'difficulty': 1}}, 'distance': {'0': {'distance': 3539, 'collisions': 1}, '1': {'distance': 4488, 'collisions': 2}, '2': {'distance': 4488, 'collisions': 2}, '3': {'distance': 7999, 'collisions': 3}, '4': {'distance': 3539, 'collisions': 1}}, 'break': {'0': {'sunk_legal': 8}}, 'longest_break': {'0': {'challenge': '1st longest break', 'decision': 'unset', 'progress': "[{'eight_sunk': False, 'white_sunk': False, 'n_sunk': 0, 'n_sunk_legal': 0, 'n_sunk_half': 0, 'n_sunk_full': 0}]", 'end_reason': 'No Ball sunk', 'sunk_legal': 0}, '1': {'challenge': '1st longest break', 'decision': 'unset', 'progress': "[{'eight_sunk': False, 'white_sunk': False, 'n_sunk': 0, 'n_sunk_legal': 0, 'n_sunk_half': 0, 'n_sunk_full': 0}]", 'end_reason': 'No Ball sunk', 'sunk_legal': 0}, '2': {'challenge': '1st longest break', 'decision': 'unset', 'progress': "[]", 'end_reason': 'logic_skip', 'sunk_legal': 0}, '3': {'challenge': '1st longest break', 'decision': 'unset', 'progress': "[]", 'end_reason': 'logic_skip', 'sunk_legal': 0}, '4': {'challenge': '1st longest break', 'decision': 'unset', 'progress': "[]", 'end_reason': 'logic_skip', 'sunk_legal': 0}}}
-
-                    out = {"signal": "forward"}
-
 
             gameimage = self.gameimage
         
@@ -205,12 +202,19 @@ class KP2(GameMode):
         settings = inp["settings"]
         out = {"signal": "forward"}
 
+        parsed_settings = {}
+        for k,v in settings.items():
+            try:
+                parsed_settings[k] = int(v)
+            except:
+                parsed_settings[k] = v
+        print(parsed_settings)
         match inp["container"]:
             case "user-info":
-                self.history_base |= settings
+                self.history_base |= parsed_settings
             case "session-info":
                 if self.gamemode_name == "Final Competition": return out
-                self.history_base |= settings
+                self.history_base |= parsed_settings
                 out["history"] = self.history(get_semester=settings["semester"])
 
                 match int(settings["attestation"]):
@@ -226,30 +230,48 @@ class KP2(GameMode):
         return out
 
     def validate_config(self, config):
-        return self.score_db.assert_aggregation(config["score_aggregation"])
+        try:
+            if int(config["precision"]) < 0 and int(config["distance"]) < 0 and int(config["break"]) < 0 and int(config["longest_break"]) < 0 and int(config["time"]) < 0:
+                return False, "One of the precision, distance, break, longest_break, or time is <0, which is not feasible. All must be >=0."
+        except:
+            return False, "One of the precision, distance, break, longest_break, or time can not be parsed as an integer (natural number >=0). Please correct and try again."
+        try:
+            new_agg = json.loads(config["score_aggregation"])
+        except Exception as e:
+            return False, "There was an error parsing the json, see the stacktrace:\n\n" + traceback.format_exc()
+        b, msg = self.score_db.assert_aggregation(new_agg)
+
+        msg += "\nThe check was successful."
+
+        if b:
+            # update all the scores for all entries
+            self.score_db.get_score(_id="all", new_agg=new_agg)
+            msg += "\n!!! The scores for all history entries where updated !!!\n-> This can easily be reversed when entering the old score_aggregation value."
+
+        return b, msg
 
     def hand_in(self):
         """ Calculates the total score, score breakdown and saves the history. Returns with signal="finished". """
         
         # build up the history entry
-        #self.HISTORY = pd.json_normalize(self.history_base | self.history_collection).to_dict() # flatten the nested history objects
         out = {"signal": "finished"}
         self.history_addons = {}
 
         # check if every history is available, otherwise reset with empty specific history
         for name, gm in self.history_collection.items():
-            for i, hist in gm.items():
+            for i, hist in enumerate(gm):
                 if hist is None:
                     self.GAMEMODES[name].reset()
                     gm[i] = self.GAMEMODES[name].HISTORY # reset the object and get the default history
 
         score, overview = self.get_score()
         self.history_addons["score"] = score
-        self.history_addons["overview"] = overview
+        #self.history_addons["overview"] = overview
         out["overview"] = overview
 
-        self.HISTORY = pd.json_normalize(self.history_base | self.history_addons | self.history_collection)
-        out["hist-package"] = {k: v[0] for k,v in self.HISTORY.to_dict().items()}
+        self.HISTORY = self.history_base | self.history_addons | self.history_collection#pd.json_normalize(self.history_base | self.history_addons | self.history_collection)
+        print(self.HISTORY)
+        out["hist-package"] = self.HISTORY#{k: v[0] for k,v in self.HISTORY.to_dict().items()}
         #print("KP2 OUT HIST-PACKAGE:", out["hist-package"])
 
         # send this runs total history by mail (addresses specified in .env)
@@ -280,21 +302,23 @@ class KP2(GameMode):
         longest_break = hist["longest_break"]
         
         overview = {
-            "Best precision": min([x["distance"] for x in precision.values()]),
-            "Best distance": max([x["distance"] for x in distance.values()]),
-            "Sunken break": max([x["sunk_legal"] for x in single_break.values()]),
-            "Best longest break": max([x["sunk_legal"] for x in longest_break.values()])
+            "Best precision": min([x["distance"] for x in precision]),
+            "Best distance": max([x["distance"] for x in distance])
         }
+        if len(single_break) > 0:
+            overview["Sunken break"] = max([x["sunk_legal"] for x in single_break])
+        if len(longest_break) > 0:
+            overview["Best longest break"] = max([x["sunk_legal"] for x in longest_break])
 
         # turn hist from dict-dict-dict intro dict-list-dict
-        h2 = {}
-        for k,v in hist.items():
-            if type(v) is dict:
-                h2[k] = [i for i in v.values()]
-            else:
-                h2[k] = v
+        #h2 = {}
+        #for k,v in hist.items():
+        #    if type(v) is dict:
+        #        h2[k] = [i for i in v.values()]
+        #    else:
+        #        h2[k] = v
 
-        self.score_db.enter_round(h2)
+        self.score_db.enter_round(hist)
         total_score = self.score_db.get_score()
 
         #total_score = "tbd"

@@ -92,7 +92,8 @@ class GameMode:
         #self.gameimage = GameImage()
         if not hasattr(self, "HISTORY"):
             self.HISTORY = {} # history objects of this current round/instance
-        self.HISTORY |= {"finished_time": None}
+        # add the timestamp already (will get overwritten when actually finished), to solve hashing problems with empty runs in dev from mongo db integration
+        self.HISTORY |= {"finished_time": pd.Timestamp.now()}
 
         if hasattr(self, "SETTINGS") and "settings" in self.__init__.__code__.co_varnames:
             # if it has a SETTINGS attribute and the init expects settings as an argument:
@@ -299,8 +300,74 @@ class GameMode:
         with open(self.json_history_file, "w") as file:
             json.dump(entire_history, file, ensure_ascii=False, indent=4)
 
+    def mongo_history(self, history=None, add=None, get_semester=None):
+        """ An exact copy of the .history method, but using the MongoDB database (expected as self.score_db) instead of the csv file.
+
+        After GameMode.init, use `self.history = self.mongo_history` to overwrite the history command.
+
+        Args:
+            history (list, optional): _description_. Defaults to None.
+            add (dict, optional): _description_. Defaults to None.
+            get_semester (str, optional): _description_. Defaults to None.
+        """
+        if history is None:
+            history = self.score_db.select_items({}) # all items
+        if add is not None:
+            ts = pd.Timestamp.now()
+            add["timestamp"] = ts
+            _id = self.score_db.enter_round(add)
+
+            already_entered = [x for x in history if x["_id"] == _id]
+            if len(already_entered) == 0:
+                history.append(add)
+            else:
+                add = already_entered[0]
+
+
+        select = {}
+        if get_semester is not None:
+            history = [x for x in history if str(x["semester"]) == str(get_semester)]
+            select = {"semester": get_semester}
+        
+        singles = sorted(history, key=lambda x: (x["score"] is not None, x["score"]), reverse=True)
+        singlesTop3 = singles[:3]
+
+        teams = self.score_db.aggregate([
+            {"$match": select},
+            {"$group": {
+                "_id": "$team",
+                "avg_double": {"$avg": "$score"}
+            }},
+            {"$project": {
+                "_id": 1,
+                "avg": {"$round": ["$avg_double", 0]}
+            }},
+            {"$sort": {"avg": -1}}
+        ])
+
+
+        to_list = lambda x: [[int(v), k] for k, v in x.items()] # score, team
+        if len(singles) > 0 and "semester" in singles[0].keys():
+            from_dict = lambda x: [[v["player"], v["team"], v["score"], v["semester"], v["attestation"]] for v in x] # score, player, team
+            columns = ["Player", "Team", "Score", "Semester", "Attestation"]
+        else:
+            from_dict = lambda x: [[v["player"], v["team"], v["score"]] for v in x] # score, player, team
+            columns = ["Player", "Team", "Score"]
+        out = {
+            "single_table": from_dict(singles),
+            "single_columns": columns,
+            "team_table": [[x["avg"], x["_id"]] for x in teams]
+        }
+        if add is not None:
+            out["timestamp"] = str(ts)
+            out["single_new_index"] = singles.index(add)
+
+        return out
+
     def history(self, history=None, add=None, get_semester=None):
         """ Get the player/team rankings.
+
+        IF YOUR GAMEMODE USES the MongoDB backend, see GameMode.mongo_history, as this GameMode.history method only interacts with the local .csv file.
         
         Returns a dictionary that can be used to generate html code for showing the list and podium. History files are organized inside the `resources` directory, always starting with the stem of the gamemode filename (kp2.py -> `kp2_. . .`). History file must be name [gamemode]_history.csv.
         If adding to the history, set add to a dictionary containing all fields you want to save (must contain `player`, `team` and `score`). A timestamp automatically gets added.

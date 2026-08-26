@@ -146,6 +146,9 @@ def write_gamemode_config(self, mode):
     gm = self.GAMEMODES[mode]
     if hasattr(gm, "validate_config") and callable(gm.validate_config):
         accepted, message = gm.validate_config(req["config"])
+
+        message += "\nConfig was updated. Reload the gamemodes website if currently open to apply."
+
     else:
         accepted = True
         message = "Config was updated. Reload the gamemodes website if currently open to apply."
