@@ -183,6 +183,14 @@ def get_gamemode_report(self, mode, timestamp):
     #return jsonify(hist)
     return send_file(BytesIO(pdf), download_name=f"history-{timestamp.replace(' ', '_')}.pdf", as_attachment=True)
 
+def get_gamemode_history(self, mode):
+    assert mode in self.GAMEMODES
+
+    buffer = self.GAMEMODES[mode].download_history()
+
+    print(mode, buffer)
+    return send_file(buffer, download_name=f"{mode}-history.xlsx", as_attachment=True)
+
 # util for reverse pd.json_normalize
 # Source - https://stackoverflow.com/a/63366556
 # Posted by Yaakov Bressler, modified by community. See post 'Timeline' for change history

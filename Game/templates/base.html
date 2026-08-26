@@ -50,12 +50,16 @@
       </div>
       &ensp; <!-- fixed empty space -->
       <h1>{{title}}</h1>
-      <div>
+      <div class="menu">
         {% if has_config %}
         <a href="/configuration/{{ gamemode }}" target="_blank">
           <i class="fa-solid fa-gear"></i>
         </a>
         {% endif %}
+        <a href="/gamemode_history/{{ gamemode }}" target="_blank">
+          <i class="fa-solid fa-floppy-disk"></i>
+        </a>
+
         <button id="theme_toggle">
           <i id="theme_toggle_icon" class="fa-solid fa-moon"></i>
         </button>

@@ -1,5 +1,5 @@
 *.env
-utils/
+/utils/
 docs/source/_autosummary/
 docs/_build/doctrees/
 docs/_build/html/
@@ -9,6 +9,8 @@ OLD_*
 exampleeeeeee.png
 .python-report.txt
 *mongodb_data_volume
+.~*
+*.xlsx
 
 # font folder from https://www.1001freefonts.com/minecraft.font
 fonts/* 

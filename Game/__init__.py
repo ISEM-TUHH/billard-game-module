@@ -133,7 +133,8 @@ class Game(Module):
 			"gamemode/<mode>": self.get_gamemode_website,
 			"configuration/<mode>": self.get_gamemode_config_website,
 			"configuration_submit/<mode>": self.write_gamemode_config,
-			"gamemode_report/<mode>/<timestamp>": self.get_gamemode_report,
+			#"gamemode_report/<mode>/<timestamp>": self.get_gamemode_report,
+			"gamemode_history/<mode>": self.get_gamemode_history,
 			"view_csv/<file>": self.view_csv
 		}
 
@@ -246,7 +247,7 @@ class Game(Module):
 	from ._beamer_interface import beamer_push_image, beamer_off, beamer_make_gameimage, beamer_correct_coords, beamer_update_manual_text, beamer_raw_white
 
 	# GAMEMODE CONTROLLER ###########################################################
-	from ._gamemode_controller import gamemode_controller, get_gamemode_website, get_gamemode_config_website, write_gamemode_config, list_available_gamemodes, gamemode_socket_handler, get_gamemode_report
+	from ._gamemode_controller import gamemode_controller, get_gamemode_website, get_gamemode_config_website, write_gamemode_config, list_available_gamemodes, gamemode_socket_handler, get_gamemode_report, get_gamemode_history
 
 	# INTERNAL FUNCTIONS ############################################################
 

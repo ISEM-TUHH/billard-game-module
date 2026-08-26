@@ -3,6 +3,7 @@ import pandas as pd
 import json
 from jinja2 import Environment, FileSystemLoader
 from weasyprint import HTML
+from io import BytesIO
 
 from ..GameImage import GameImage
 from .common_utils import *
@@ -481,6 +482,26 @@ class GameMode:
         rendered_html = template.render(history, debug=str(history))
 
         return HTML(string=rendered_html).write_pdf()
+
+    def download_history(self):
+        if self.ENABLE_CONFIG:
+            # this gamemode uses mongo db as its backend
+            df = self.score_db.get_df()
+            print(df)
+        else:
+            df = self.get_history()
+
+        print("DATAFRAME:", df)
+        buffer = BytesIO()
+
+        writer = pd.ExcelWriter(buffer, engine="openpyxl")
+        df.to_excel(writer, index=False, sheet_name="history")
+
+        writer.close()
+        buffer.seek(0)
+        return buffer
+
+        
 
 
     def build_HTML(self):
