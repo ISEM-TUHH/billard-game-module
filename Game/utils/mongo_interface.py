@@ -3,12 +3,15 @@ from bson.json_util import loads, dumps
 import json
 import traceback
 import pandas as pd
+import os
+from urllib.parse import quote
 
 from .excel_export import documents_to_dataframe
 
 class MongoDB:
-    def __init__(self, collection: str, scoring_aggregation: list, address = "mongodb://10.30.0.2:27017"):
-        self.client = pymongo.MongoClient(address)
+    def __init__(self, collection: str, scoring_aggregation: list, address = "10.30.0.2:27017"):
+        uri = "mongodb://" + quote(os.getenv("MONGO_INITDB_ROOT_USERNAME")) + ":" + quote(os.getenv("MONGO_INITDB_ROOT_PASSWORD")) + "@" + address + "/"
+        self.client = pymongo.MongoClient(uri)
         self.db = self.client["billard"]
 
         self.col_name = collection

@@ -10,7 +10,7 @@ These steps must be done for both local and docker installations. We recommend t
     - We use `Minecraft-Regular.otf` from publicly available Minecraft font collections.
 
 ### Docker container
-This is the recommended way to run this module, as it uses a MongoDB server too. It is possible to install locally, but you'd need to get the MongoDB server running too (and maybe change the preconfigured address of it).
+This is the recommended way to run this module, as it uses a MongoDB server too. It is possible to install locally, but you'd need to get the MongoDB server running too (and maybe change the preconfigured address of it + user authentication).
 ```bash
 docker compose --profile build build
 ```
@@ -42,6 +42,10 @@ PORT=XXX
 
 # Password to change the configuration of gamemodes in the browser
 CONFIG_PASSWORD=XXX
+
+# AUTH MONGODB: to be used from MongoDB Compass to login into the database
+MONGO_INITDB_ROOT_USERNAME=admin (this is just a suggestion)
+MONGO_INITDB_ROOT_PASSWORD=XXX
 ```
 To be able to communicate with the global API to play online games you need to be registered with us. Write us an e-mail if you want to get registered. We will provide you with a `TID` and `TAUTH`
 

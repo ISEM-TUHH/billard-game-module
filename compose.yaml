@@ -12,8 +12,8 @@ services:
     image: billiard-game-module:latest
     ports:
       - 5000:5000
-    #env_file:
-    #  - .env
+    env_file:
+      - .env
     environment:
       PROD_OR_TEST: "PROD"
     volumes:
@@ -30,8 +30,8 @@ services:
     image: billiard-game-module:latest
     ports:
       - "5000:5000"
-    #env_file:
-    #  - .env
+    env_file:
+      - dev2.env
     environment:
       PROD_OR_TEST: "TEST"
     volumes:
@@ -50,6 +50,8 @@ services:
       - 27017:27017
     volumes:
       - ${PWD}/mongodb_data_volume:/data/db
+    env_file:
+      - .env
 
     networks:
       backend:
@@ -64,6 +66,8 @@ services:
       - 27017:27017
     volumes:
       - ${PWD}/dev_mongodb_data_volume:/data/db
+    env_file:
+      - dev2.env
 
     networks:
       backend:
