@@ -6,16 +6,24 @@
 
 document.getElementById("submit-button").addEventListener("click", (e) => {
     // First of all, check if the configuration boxes session-info and user-info have all set inputs
-    if (!checkAllSet(getAllInputValues(document.getElementById("user-info")))) {
+    var userinfo = getAllInputValues(document.getElementById("user-info"));
+    var sessioninfo = getAllInputValues(document.getElementById("session-info"));
+
+    if (!checkAllSet(userinfo)) {
         // not all user info are set
         tempAlert("Set user information to continue", 5000);
         return;
     }
-    /*if (!checkAllSet(getAllInputValues(document.getElementById("session-info")))) {
+    if (!checkAllSet(sessioninfo)) {
         // not all user info are set
         tempAlert("Set session information to continue", 5000);
         return;
-    }*/
+    }
+
+    send_setting(document.getElementById("user-info"), print=false, meta=true);
+
+    send_setting(document.getElementById("session-info"), print=false, meta=true);
+
     kp2Controller({"kp2_activity": "hand_in", "action": "game"}, set_activity=false)
         .then((res) => {
             var ev = new CustomEvent("update_scoreboard", {detail: res.history});
