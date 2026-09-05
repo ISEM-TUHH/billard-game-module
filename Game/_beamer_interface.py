@@ -65,7 +65,7 @@ def beamer_correct_coords(self):
     #print(coords)
 
     # order the camera module to cache the current image. When the coords are commited, they are saved with the last cached image for training purposes.
-    self.camera.cache_image()
+    #self.camera.cache_image()
 
     #if self.supermode in ["game-local", "kp2"]:
     self.game_coords = coords

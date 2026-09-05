@@ -96,14 +96,24 @@ class Game(Module):
 		
 		kp2_settings = self.config["kp2-details"]
 
-		self.GAMEMODES = {
-			"kp2": KP2(),#settings=kp2_settings),
-			"final_competition": FinalCompetition(),
-			"online_game": online_game.OnlineGame(api_secrets),
-			"local_game": local_game.LocalGame(api_secrets),
-			"curling": Curling(),
+		self.GAMEMODE_CLASSES = { # different instances can be added to the list
+			"kp2": KP2,
+			"final_competition": FinalCompetition,
+			"online_game": lambda: online_game.OnlineGame(api_secrets),
+			"local_game": lambda: local_game.LocalGame(api_secrets),
+			"curling": Curling,
 			#"curling2": Curling2()
 		}
+
+		self.GAMEMODES = {k: [v()] for k,v in self.GAMEMODE_CLASSES.items()}
+		#self.GAMEMODES = { # different instances can be added to the list
+		#	"kp2": [KP2()],
+		#	"final_competition": [FinalCompetition()],
+		#	"online_game": [online_game.OnlineGame(api_secrets)],
+		#	"local_game": [local_game.LocalGame(api_secrets)],
+		#	"curling": [Curling()],
+		#	#"curling2": Curling2()
+		#}
 
 
 		socket_dict = {
@@ -247,7 +257,7 @@ class Game(Module):
 	from ._beamer_interface import beamer_push_image, beamer_off, beamer_make_gameimage, beamer_correct_coords, beamer_update_manual_text, beamer_raw_white
 
 	# GAMEMODE CONTROLLER ###########################################################
-	from ._gamemode_controller import gamemode_controller, get_gamemode_website, get_gamemode_config_website, write_gamemode_config, list_available_gamemodes, gamemode_socket_handler, get_gamemode_report, get_gamemode_history
+	from ._gamemode_controller import gamemode_controller, get_gamemode_website, get_gamemode_config_website, write_gamemode_config, list_available_gamemodes, gamemode_socket_handler, get_gamemode_history
 
 	# INTERNAL FUNCTIONS ############################################################
 

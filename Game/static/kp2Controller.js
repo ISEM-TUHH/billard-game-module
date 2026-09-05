@@ -6,6 +6,7 @@
 
 function kp2Controller(jsonData, set_activity=true) {
     jsonData["gmode"] = global_gamemode; //this gets set in the base.html when it gets rendered from _gamemode_controller.py.
+    jsonData["index"] = current_index;
     if (set_activity) {
         jsonData["kp2_activity"] = current_gamemode;
     }
@@ -23,19 +24,21 @@ function kp2Controller(jsonData, set_activity=true) {
         .then((res) => {
             console.log("SEND:", jsonData, "RECEIVED:", res);
 
+            var gm_active = document.querySelector(".instance-" + current_index)
+
             if (res.hasOwnProperty("notification")) {
                 tempAlert(res.notification, 6000);
             }
             if (res.hasOwnProperty("disable")) {
                 for (var selector in res.disable) {
-                    document.querySelectorAll(res.disable[selector]).forEach((e) => {
+                    gm_active.querySelectorAll(res.disable[selector]).forEach((e) => {
                         e.classList.add("deactivated")
                     })
                 }
             }
             if (res.hasOwnProperty("enable")) {
                 for (var selector in res.enable) {
-                    document.querySelectorAll(res.enable[selector]).forEach((e) => {
+                    gm_active.querySelectorAll(res.enable[selector]).forEach((e) => {
                         e.classList.remove("deactivated")
                     })
                 }

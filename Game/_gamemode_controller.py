@@ -23,6 +23,9 @@ def gamemode_controller(self):
     #print("Input to the game module:", inp)
 
     # If the inp contains coordinates, they are assumed to be correct. Order the camera module to save its previously cached image with the coordinates for training in the future.
+
+    
+
     if "coordinates" in inp.keys():
         self.camera.save_cached_image_training(inp["coordinates"])
 
@@ -31,13 +34,31 @@ def gamemode_controller(self):
     selected_gamemode = inp["gmode"]
     assert selected_gamemode in self.GAMEMODES.keys(), f"selected gamemode {selected_gamemode} not found in registered gamemodes: {self.GAMEMODES.keys()}"
 
-    # PASS TO GAMEMODE
-    if inp["action"] == "show":
+    assert "index" in inp.keys(), "The index of the gamemode object is needed."
+    i = int(inp["index"])
+    if not 0 <= i < len(self.GAMEMODES[selected_gamemode]) and inp["action"] != "add_instance":
+        print("index to big or to small.")
+        return "Index not existing.", 404
+
+    if inp["action"] == "add_instance":
+        print(f"Creating a new instance of {selected_gamemode}!")
+        self.GAMEMODES[selected_gamemode].append(
+            self.GAMEMODE_CLASSES[selected_gamemode]()
+        )
         out = {"signal": "forward"}
-        gameimage = self.GAMEMODES[selected_gamemode].show(inp)
+        gameimage = self.GAMEMODES[selected_gamemode][-1].show()
         sound = None
+
+        gm = self.GAMEMODES[selected_gamemode][-1]
     else:
-        out, gameimage, sound = self.GAMEMODES[selected_gamemode].entrance(inp)
+        gm = self.GAMEMODES[selected_gamemode][i]
+        # PASS TO GAMEMODE
+        if inp["action"] == "show":
+            out = {"signal": "forward"}
+            gameimage = gm.show(inp)
+            sound = None
+        else:
+            out, gameimage, sound = gm.entrance(inp)
 
 
     # POSTPROCESS
@@ -47,9 +68,9 @@ def gamemode_controller(self):
         case "finished":
             # The gamemode finished as intended, ran through all steps: Collect score/history
             if "hist-package" not in out.keys() and hasattr(self.GAMEMODES[selected_gamemode], "HISTORY"):
-                hist = self.GAMEMODES[selected_gamemode].history()
+                hist = gm.history()
             else:
-                hist = self.GAMEMODES[selected_gamemode].history(add=out["hist-package"])
+                hist = gm.history(add=out["hist-package"])
                 del out["hist-package"] # not necessary, maybe passing it could be useful
             out["history"] = hist
 
@@ -57,7 +78,7 @@ def gamemode_controller(self):
             pass
         case "interrupted":
             # The gamemode finished in an alternate state (e.g. aborted)
-            self.GAMEMODES[selected_gamemode].reset()
+            gm.reset()
             pass
         case "forward":
             # The gamemode is still running: forward to client, do nothing else
@@ -83,6 +104,7 @@ def gamemode_socket_handler(self, json_data):
 
     A gamemode must have a GameMode.SOCKETS dictionary matching the current state to a message handler like {"init": self.handler}
     """
+    raise NotImplementedError("How did you even get here??")
     gm = json_data["gmode"]
     self.GAMEMODES[gm].socket_event(json_data)
 
@@ -93,11 +115,13 @@ def list_available_gamemodes(self):
 
 def get_gamemode_website(self, mode):
     """ A main level gamemode should have a website. If a gamemode exists but has no GameMode.index_args() implemented, return a 404 error. """
-    if mode not in self.GAMEMODES.keys() or not hasattr(self.GAMEMODES[mode], "index_args"):
+    if mode not in self.GAMEMODES.keys() or not hasattr(self.GAMEMODES[mode][0], "index_args"):
         return jsonify({"error": f"gamemode {mode} does not exist or does not supply a website."}), 404
 
-    self.GAMEMODES[mode].reset(inplace=True) # reload the gamemode to sync states with website
-    gm = self.GAMEMODES[mode]
+    # always launch only one instance
+    self.GAMEMODES[mode] = [self.GAMEMODES[mode][0]]
+    self.GAMEMODES[mode][0].reset(inplace=True) # reload the gamemode to sync states with website
+    gm = self.GAMEMODES[mode][0]
     index_args = gm.index_args()
 
     if "error" in index_args.keys():
@@ -119,10 +143,10 @@ def get_gamemode_website(self, mode):
     return self.render_template_camera(file, **(index_args | gm.history()), gamemode=mode, has_config=gm.ENABLE_CONFIG)
 
 def get_gamemode_config_website(self, mode):
-    if mode not in self.GAMEMODES.keys() or (not self.GAMEMODES[mode].ENABLE_CONFIG):
+    if mode not in self.GAMEMODES.keys() or (not self.GAMEMODES[mode][0].ENABLE_CONFIG):
         return jsonify({"error": f"gamemode {mode} does not exist or has no configuration options ([name]_config.json missing)"}), 404
     
-    gm = self.GAMEMODES[mode]
+    gm = self.GAMEMODES[mode][0]
     with open(gm.configuration_file, "r") as f:
         config = json.load(f)
     
@@ -133,17 +157,14 @@ def get_gamemode_config_website(self, mode):
     return render_template("config.html", config=pretty_config, name=mode)
 
 def write_gamemode_config(self, mode):
-    if mode not in self.GAMEMODES.keys() or (not self.GAMEMODES[mode].ENABLE_CONFIG):
+    if mode not in self.GAMEMODES.keys() or (not self.GAMEMODES[mode][0].ENABLE_CONFIG):
         return jsonify({"error": f"gamemode {mode} does not exist or has no configuration options ([name]_config.json missing)"}), 404
 
     req = request.json
-
-    print(req["password"])
-    print(os.getenv("CONFIG_PASSWORD"))
     if req["password"] != os.getenv("CONFIG_PASSWORD"):
         return jsonify({"text": "Wrong password. Password is set in the .env file of the module."})
 
-    gm = self.GAMEMODES[mode]
+    gm = self.GAMEMODES[mode][0]
     if hasattr(gm, "validate_config") and callable(gm.validate_config):
         accepted, message = gm.validate_config(req["config"])
 
@@ -166,70 +187,10 @@ def write_gamemode_config(self, mode):
 
     return jsonify({"text": message.replace("\n", "<br/>")})
 
-def get_gamemode_report(self, mode, timestamp):
-    assert mode in self.GAMEMODES
-    #print(mode, timestamp)
-    history = self.GAMEMODES[mode].get_history()
-
-    # timestamp serves as ID
-    #print("Available timestamps:", history["timestamp"], history["timestamp"].dtype)
-    t = history.loc[history["timestamp"] == timestamp].reset_index()
-    if t.shape[0] == 0:
-        return "History not found.", 404
-    t = df_to_formatted_json(t)
-    hist = t[0]#.loc[0,:].to_dict()
-    #print(t)
-    pdf = self.GAMEMODES[mode].build_PDF_report(hist)
-    #return jsonify(hist)
-    return send_file(BytesIO(pdf), download_name=f"history-{timestamp.replace(' ', '_')}.pdf", as_attachment=True)
-
 def get_gamemode_history(self, mode):
     assert mode in self.GAMEMODES
 
-    buffer = self.GAMEMODES[mode].download_history()
+    buffer = self.GAMEMODES[mode][0].download_history()
 
     print(mode, buffer)
     return send_file(buffer, download_name=f"{mode}-history.xlsx", as_attachment=True)
-
-# util for reverse pd.json_normalize
-# Source - https://stackoverflow.com/a/63366556
-# Posted by Yaakov Bressler, modified by community. See post 'Timeline' for change history
-# Retrieved 2026-03-02, License - CC BY-SA 4.0
-
-# with slight altercations
-
-def df_to_formatted_json(df, sep="."):
-    """Re-nest a previously normalized dictionary from a pd.DataFrame.
-
-    Args:
-        df (pd.DataFrame): Dateframe which will get parsed
-        sep (str, optional): Separator in column names to indicate nesting. Defaults to ".".
-
-    Returns:
-        list: list of dicts with each row of the df as an entry.
-    """
-    result = []
-    for idx, row in df.iterrows():
-        parsed_row = {}
-        for col_label,v in row.items():
-
-            # assuming your dict has keys that aren't strings
-            # otherwise, simplify with just: keys = col_label.split(sep)
-            if not isinstance(col_label, str):
-                keys = [col_label]
-            else:
-                keys = col_label.split(sep)
-
-            current = parsed_row
-            for i, k in enumerate(keys):
-                k = k.replace("-", "_")
-                if i==len(keys)-1:
-                    current[k] = v
-                else:
-                    if k not in current.keys():
-                        current[k] = {}
-                    current = current[k]
-        # save
-        result.append(parsed_row)
-    print("DNNN", result)
-    return result

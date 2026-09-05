@@ -9,41 +9,39 @@ try {
 } catch(error) {
     // if the current gamemode is defined as const (like in local_game.js), this will throw an error. 
 }
-ev = document.createEvent("HTMLEvents");
-ev.initEvent("gamemode_updated", true, true);
+gamemode_update_event = document.createEvent("HTMLEvents");
+gamemode_update_event.initEvent("gamemode_updated", true, true);
 
-modeSections = document.getElementsByClassName("collapsible")
+function attach_collapse_events(collapsibles) {
+    collapsibles.forEach((element) => {
+        element.addEventListener("click", (e) => {
 
-function update_gamemode(button) {
+            var new_gamemode = e.target.parentElement.id;
+            if (current_gamemode === new_gamemode) {
+                // this handles closing the current gamemode
+                new_gamemode = "base";
+            }    
+            
+            try {
+                current_gamemode = new_gamemode;
+            } catch(error) {
+                // if the current gamemode is defined as const, this will throw an error. 
+            }
 
-    var new_gamemode = button.parentElement.id;
-    if (current_gamemode === new_gamemode) {
-        // this handles closing the current gamemode
-        new_gamemode = "base";
-    }    
-    
-    try {
-        current_gamemode = new_gamemode;
-    } catch(error) {
-        // if the current gamemode is defined as const (like in local_game.js), this will throw an error. 
-    }
-    
-    for (var i = 0; i < modeSections.length; i++) {
-        var content = modeSections[i].nextElementSibling;
-        var this_gamemode = modeSections[i].parentElement.id;
-        if (this_gamemode === new_gamemode) {
-            content.style.display = "block";
-            content.style.height = "fit-content"//(content.children[0].clientHeight + 20) + "px"
-        } else {
-            content.style.display = "none"
-            //content.style.height = "0px";
-        }
-    }
-    //console.log("Updated gamemode from " + current_gamemode + " to " + new_gamemode + ".");
-
-    document.dispatchEvent(ev);
+            var coll = document.querySelectorAll(".collapsible");
+            coll.forEach((elem) => {
+                var content = elem.nextElementSibling;
+                var this_gamemode = elem.parentElement.id;
+                if (this_gamemode === new_gamemode) {
+                    content.style.display = "block";
+                    content.style.height = "fit-content"
+                } else {
+                    content.style.display = "none"
+                }
+            });
+            document.dispatchEvent(gamemode_update_event);
+        })
+    });
 }
 
-for (var i = 0; i < modeSections.length; i++) {
-    modeSections[i].addEventListener("click", (event) => {update_gamemode(event.target);});
-}
+attach_collapse_events(document.querySelectorAll(".collapsible"));
