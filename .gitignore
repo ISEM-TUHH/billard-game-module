@@ -1,5 +1,5 @@
 *.env
-utils/
+/utils/
 docs/source/_autosummary/
 docs/_build/doctrees/
 docs/_build/html/
@@ -8,6 +8,9 @@ docs/_build/latex/*
 OLD_*
 exampleeeeeee.png
 .python-report.txt
+*mongodb_data_volume
+.~*
+*.xlsx
 
 # font folder from https://www.1001freefonts.com/minecraft.font
 fonts/* 
@@ -16,7 +19,7 @@ fonts/*
 
 # empty storage files are kept: git update-index --assume-unchanged Game/storage/*
 Game/storage/
-Game/gamemodes/resources/
+Game/gamemodes/resources/*_history*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

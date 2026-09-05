@@ -14,6 +14,7 @@
     },
 
     "kp2-details": {
+        "__doc__": "This is not being used anymore, see gamemodes/resources/kp2_config.json",
         "time": 1800,
         "occurences": {
             "precision": 5,

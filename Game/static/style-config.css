@@ -1,0 +1,312 @@
+body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+form {
+    grid-column: 1;
+}
+
+.config-sidebar {
+    grid-column: 2;
+    padding: 8px;
+    background: var(--panel);
+    border: 1px solid #292a2c;
+    border-radius: 3px;
+}
+
+.config-sidebar label {
+    display: block;
+    margin: 4px 0;
+    color: #bfc1c2;
+    font-weight: bold;
+}
+
+.config-sidebar #config-password,
+.config-sidebar #config-submit {
+    width: 100%;
+    margin: 0 0 12px;
+}
+
+.config-sidebar #config-feedback {
+    width: 100%;
+    margin: 4px 0 0;
+}
+
+:root {
+    --background: #111213;
+    --panel: #1b1c1e;
+    --panel-dark: #171819;
+    --border: #343638;
+    --border-light: #55575a;
+    --text: #d6d6d6;
+    --muted: #8d8f91;
+    --accent: #56bdd7;
+    --accent-dark: #357e91;
+    --input: #3a3b3d;
+    --input-light: #77787a;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    min-height: 100%;
+    background: var(--background);
+    color: var(--text);
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 11px;
+}
+
+body {
+    width: min(100% - 24px, 1024px);
+    margin: 0 auto;
+    padding: 12px 0 30px;
+
+    /* Two-column layout similar to the screenshot */
+    display: grid;
+    grid-template-columns: minmax(260px, 1fr) minmax(280px, 1fr);
+    grid-template-rows: auto 1fr;
+    gap: 10px 14px;
+}
+
+/*
+ * Header/title area
+ */
+h1 {
+    grid-column: 1 / -1;
+
+    height: 30px;
+    margin: 0;
+    padding: 7px 10px;
+
+    border-bottom: 1px solid var(--border);
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: bold;
+    text-align: center;
+    letter-spacing: 0.2px;
+    text-shadow: 0 0 4px rgba(86, 189, 215, 0.25);
+}
+
+/*
+ * Configuration form
+ */
+form {
+    grid-column: 1;
+    grid-row: 2;
+
+    margin: 0;
+    padding: 8px;
+
+    background: var(--panel);
+    border: 1px solid #292a2c;
+    border-radius: 3px;
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.015),
+        0 2px 5px rgba(0, 0, 0, 0.35);
+
+    overflow: auto;
+}
+
+/*
+ * Each generated field is kept compact.
+ * The <br> elements provide separation between rows.
+ */
+form label {
+    display: block;
+    margin: 0 0 3px;
+    color: #bfc1c2;
+    font-size: 10px;
+    font-weight: bold;
+}
+
+form textarea {
+    display: block;
+    width: 100%;
+    min-height: 28px;
+    height: 28px;
+    margin: 0 0 8px;
+    padding: 6px 7px;
+
+    resize: vertical;
+    overflow: auto;
+
+    background: var(--input);
+    color: #e1e1e1;
+    border: 1px solid #505154;
+    border-radius: 1px;
+
+    font: 10px Consolas, "Courier New", monospace;
+    line-height: 1.25;
+    outline: none;
+
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.45);
+}
+
+form textarea:focus {
+    border-color: var(--accent-dark);
+    box-shadow:
+        0 0 0 1px rgba(86, 189, 215, 0.2),
+        inset 0 1px 3px rgba(0, 0, 0, 0.45);
+}
+
+/*
+ * Controls on the right side
+ */
+form ~ label {
+    grid-column: 2;
+    grid-row: 2;
+
+    align-self: start;
+    margin: 0;
+    padding: 10px 10px 0;
+
+    color: #babbbc;
+    font-size: 10px;
+    font-weight: bold;
+}
+
+/*
+ * Password input
+ */
+#config-password {
+    grid-column: 2;
+    grid-row: 2;
+
+    align-self: start;
+
+    width: calc(100% - 20px);
+    height: 28px;
+    margin: 28px 10px 0;
+    padding: 5px 7px;
+
+    background: var(--input);
+    color: var(--text);
+    border: 1px solid #505154;
+    border-radius: 1px;
+    outline: none;
+
+    font: 10px Consolas, "Courier New", monospace;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.45);
+}
+
+#config-password:focus {
+    border-color: var(--accent-dark);
+}
+
+/*
+ * Submit button
+ */
+#config-submit {
+    grid-column: 2;
+    grid-row: 2;
+
+    align-self: start;
+
+    width: calc(100% - 20px);
+    height: 28px;
+    margin: 67px 10px 0;
+    padding: 0 10px;
+
+    background: var(--input-light);
+    color: #eeeeee;
+    border: 1px solid #252628;
+    border-radius: 1px;
+
+    font-size: 10px;
+    font-weight: bold;
+    text-align: left;
+    cursor: pointer;
+
+    box-shadow:
+        inset 0 1px rgba(255, 255, 255, 0.12),
+        0 2px 3px rgba(0, 0, 0, 0.35);
+}
+
+#config-submit:hover {
+    background: #898a8c;
+}
+
+#config-submit:active {
+    background: #5f6062;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+/*
+ * Feedback panel
+ */
+#config-feedback {
+    grid-column: 2;
+    grid-row: 2;
+
+    align-self: start;
+
+    min-height: 55px;
+    margin: 107px 0 0;
+    padding: 10px;
+
+    background: var(--panel);
+    border: 1px solid #292a2c;
+    border-radius: 2px;
+
+    color: var(--muted);
+    font-size: 10px;
+    line-height: 1.4;
+}
+
+#config-feedback:empty {
+    display: none;
+}
+
+#config-feedback::before {
+    content: "Status";
+    display: block;
+    margin-bottom: 5px;
+    color: var(--accent);
+    font-weight: bold;
+}
+
+/*
+ * Responsive layout
+ */
+@media (max-width: 650px) {
+    body {
+        width: calc(100% - 16px);
+        display: block;
+        padding-top: 8px;
+    }
+
+    h1 {
+        margin-bottom: 10px;
+    }
+
+    form {
+        margin-bottom: 10px;
+    }
+
+    form ~ label,
+    #config-password,
+    #config-submit,
+    #config-feedback {
+        display: block;
+        width: 100%;
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    form ~ label {
+        padding: 0;
+        margin-bottom: 4px;
+    }
+
+    #config-password,
+    #config-submit,
+    #config-feedback {
+        margin-top: 0;
+        margin-bottom: 10px;
+    }
+}

@@ -8,6 +8,7 @@ import requests
 import json
 import datetime
 from io import BytesIO
+import traceback
 
 """ This file provides methods necessary for the implementation of the MVC model for running gamemodes """
 
@@ -96,25 +97,74 @@ def get_gamemode_website(self, mode):
         return jsonify({"error": f"gamemode {mode} does not exist or does not supply a website."}), 404
 
     self.GAMEMODES[mode].reset(inplace=True) # reload the gamemode to sync states with website
-    index_args = self.GAMEMODES[mode].index_args()
+    gm = self.GAMEMODES[mode]
+    index_args = gm.index_args()
 
     if "error" in index_args.keys():
         return index_args["error"], index_args["error_status"]
     
     # show the current gamemodes gameimage 
-    self.gameimage = self.GAMEMODES[mode].show()
+    self.gameimage = gm.show()
     self.gameimage.redraw()
     self.beamer.push_image(self.gameimage.getImageCV2())
 
-    if hasattr(self.GAMEMODES[mode], "WEBSITE_TEMPLATE"):
-        file = self.GAMEMODES[mode].WEBSITE_TEMPLATE
+    if hasattr(gm, "WEBSITE_TEMPLATE"):
+        file = gm.WEBSITE_TEMPLATE
     else:
         file = mode + ".html"
 
     # handle non existing js_vars field
     if "js_vars" not in index_args.keys():
         index_args["js_vars"] = {}
-    return self.render_template_camera(file, **(index_args | self.GAMEMODES[mode].history()), gamemode=mode)
+    return self.render_template_camera(file, **(index_args | gm.history()), gamemode=mode, has_config=gm.ENABLE_CONFIG)
+
+def get_gamemode_config_website(self, mode):
+    if mode not in self.GAMEMODES.keys() or (not self.GAMEMODES[mode].ENABLE_CONFIG):
+        return jsonify({"error": f"gamemode {mode} does not exist or has no configuration options ([name]_config.json missing)"}), 404
+    
+    gm = self.GAMEMODES[mode]
+    with open(gm.configuration_file, "r") as f:
+        config = json.load(f)
+    
+    pretty_config = {}
+    for k,v in config.items():
+        pretty_config[k] = json.dumps(v, indent=4)
+
+    return render_template("config.html", config=pretty_config, name=mode)
+
+def write_gamemode_config(self, mode):
+    if mode not in self.GAMEMODES.keys() or (not self.GAMEMODES[mode].ENABLE_CONFIG):
+        return jsonify({"error": f"gamemode {mode} does not exist or has no configuration options ([name]_config.json missing)"}), 404
+
+    req = request.json
+
+    print(req["password"])
+    print(os.getenv("CONFIG_PASSWORD"))
+    if req["password"] != os.getenv("CONFIG_PASSWORD"):
+        return jsonify({"text": "Wrong password. Password is set in the .env file of the module."})
+
+    gm = self.GAMEMODES[mode]
+    if hasattr(gm, "validate_config") and callable(gm.validate_config):
+        accepted, message = gm.validate_config(req["config"])
+
+        message += "\nConfig was updated. Reload the gamemodes website if currently open to apply."
+
+    else:
+        accepted = True
+        message = "Config was updated. Reload the gamemodes website if currently open to apply."
+
+    if accepted:
+        try:
+            config = {}
+            for k,v in req["config"].items():
+                config[k] = json.loads(v)
+            parsed = json.dumps(config, indent=4)
+            with open(gm.configuration_file, "w") as f:
+                f.write(parsed)
+        except Exception as e:
+            message = "The configuration was accepted but could not be written, as some characters are not json parsable. See the following stacktrace:\n\n" + traceback.format_exc()
+
+    return jsonify({"text": message.replace("\n", "<br/>")})
 
 def get_gamemode_report(self, mode, timestamp):
     assert mode in self.GAMEMODES
@@ -132,6 +182,14 @@ def get_gamemode_report(self, mode, timestamp):
     pdf = self.GAMEMODES[mode].build_PDF_report(hist)
     #return jsonify(hist)
     return send_file(BytesIO(pdf), download_name=f"history-{timestamp.replace(' ', '_')}.pdf", as_attachment=True)
+
+def get_gamemode_history(self, mode):
+    assert mode in self.GAMEMODES
+
+    buffer = self.GAMEMODES[mode].download_history()
+
+    print(mode, buffer)
+    return send_file(buffer, download_name=f"{mode}-history.xlsx", as_attachment=True)
 
 # util for reverse pd.json_normalize
 # Source - https://stackoverflow.com/a/63366556

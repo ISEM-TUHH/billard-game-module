@@ -1,0 +1,34 @@
+{
+    "precision": 5,
+    "distance": 5,
+    "break": 1,
+    "longest_break": 5,
+    "time": 1800,
+    "scoring_information": "The score consists of the longest distance minus 3x the best precision shot. Optional bonus points can be given from earlier attestations.",
+    "score_aggregation": [
+        {
+            "$project": {
+                "score": {
+                    "$subtract": [
+                        {
+                            "$add": [
+                                {
+                                    "$max": "$distance.distance"
+                                },
+                                "$manual_bonus_points"
+                            ]
+                        },
+                        {
+                            "$multiply": [
+                                {
+                                    "$min": "$precision.distance"
+                                },
+                                3
+                            ]
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}

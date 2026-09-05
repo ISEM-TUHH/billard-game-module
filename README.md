@@ -9,22 +9,8 @@ These steps must be done for both local and docker installations. We recommend t
 + Download the font used for generating images for the beamer and paste it into the `fonts` folder. 
     - We use `Minecraft-Regular.otf` from publicly available Minecraft font collections.
 
-### Local installation
-+ From inside the repository folder create and install all relevant python dependencies: `python -m venv venv && source venv/bin/activate && pip install -r requirements.txt`
-+ For testing the system, run `python main.py`.
-    + This starts the server using the configuration from `test_config.json`
-    + Open the specified webpage and check that everything works
-+ To run in the goal environment, set the environment variable `PROD_OR_TEST` (`export PROD_OR_TEST=PROD`) and restart the server
-    + Now the configuration from `config.json` is used
-+ Add a systemd service so the server automatically runs when the device boots up
-    + See the exemplary `job.service` file (you can change the name, exemplary name)
-    + Move the `job.service` into `/etc/systemd/system/` (most likely a `sudo` operation)
-    + Reload the daemon, enable and start the service: `sudo systemctl reload-daemon && systemctl enable job.service && systemctl start job.service`
-    + Check if the server is running as intended: `sudo journalctl -u job.service`
-    + If succesfully started, the server should now be accessible under the address/port provided in `config.json`.
-
 ### Docker container
-This is the 
+This is the recommended way to run this module, as it uses a MongoDB server too. It is possible to install locally, but you'd need to get the MongoDB server running too (and maybe change the preconfigured address of it + user authentication).
 ```bash
 docker compose --profile build build
 ```
@@ -53,6 +39,13 @@ TAUTH=XXX
 # API: connection details for the global API
 ADDRESS=https://XXX.XXX.XXX.XXX
 PORT=XXX
+
+# Password to change the configuration of gamemodes in the browser
+CONFIG_PASSWORD=XXX
+
+# AUTH MONGODB: to be used from MongoDB Compass to login into the database
+MONGO_INITDB_ROOT_USERNAME=admin (this is just a suggestion)
+MONGO_INITDB_ROOT_PASSWORD=XXX
 ```
 To be able to communicate with the global API to play online games you need to be registered with us. Write us an e-mail if you want to get registered. We will provide you with a `TID` and `TAUTH`
 

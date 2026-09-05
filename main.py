@@ -1,10 +1,14 @@
 from Game import Game
+from dotenv import load_dotenv
 
 if __name__ == "__main__":
 
 	print("Starting game module...")
 	g = Game()
-	#g.add_website("index.html")
-	#g.app.run(host="0.0.0.0", port="5000")
-	# use Module.app_run() to use the host and port given by config files (test or prod) as well as debug mode.
+	
+	if g.TEST_MODE:
+		load_dotenv("dev2.env")
+	else:
+		load_dotenv()
+
 	g.app_run()

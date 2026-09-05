@@ -733,7 +733,7 @@ body.dark .select {
   color: #1a3a40;
 }
 
-#theme_toggle {
+/*#theme_toggle {
   font-size: 2rem;
   color: #00C1D4;
   text-decoration: none;
@@ -743,6 +743,23 @@ body.dark .select {
   background: transparent;
   border: none;
   margin: 0;
+  padding: 0;
+  cursor: pointer;
+}*/
+
+.menu {
+  position: absolute;
+  right: 4em;
+  top: 1.5em;
+}
+
+.menu a, .menu button {
+  font-size: 2rem;
+  color: #00C1D4;
+  text-decoration: none;
+  background: transparent;
+  border: none;
+  margin: 0.5em;
   padding: 0;
   cursor: pointer;
 }
