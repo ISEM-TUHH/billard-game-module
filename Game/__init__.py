@@ -211,11 +211,11 @@ class Game(Module):
 		df = pd.read_csv(path, sep="\t", index_col=False)
 
 		# if this is a history file (*_history.csv), we want to be able to download a history report .pdf file on click.
-		if file.endswith("_history.csv") and "timestamp" in df.columns:
-			base = file.replace("_history.csv", "")
-			substitutes = [f"<a href='/gamemode_report/{base}/{x}'>Download Report</a>" for x in df["timestamp"].to_list()]
-			print(substitutes)
-			df["Download Report"] = substitutes
+		#if file.endswith("_history.csv") and "timestamp" in df.columns:
+			#base = file.replace("_history.csv", "")
+			#substitutes = [f"<a href='/gamemode_report/{base}/{x}'>Download Report</a>" for x in df["timestamp"].to_list()]
+			#print(substitutes)
+			#df["Download Report"] = substitutes
 			#html = re.sub(
 			#	r"<tr>",
 			#	lambda _, i=iter(substitutes): f"<tr onclick='window.location=\"/gamemode_report/{base}/{next(i,"")}\";'>",
@@ -223,7 +223,7 @@ class Game(Module):
 			#)
 			#print(html)
 			#print("Cols:", ["Download Report"] + df.columns.to_list()[:-1], df.columns)
-			df = df[["Download Report"] + df.columns.to_list()[:-1]]
+			#df = df[["Download Report"] + df.columns.to_list()[:-1]]
 			#print(df)
 
 		html = df.to_html(escape=False)
