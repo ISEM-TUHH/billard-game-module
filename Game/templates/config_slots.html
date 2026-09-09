@@ -1,0 +1,224 @@
+<!-- Most of the JS was generated using GPT-5.6 Luna -->
+
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Configuration of {{ name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style-config.css') }}" />
+</head>
+<body>
+    <h1>Configuration of {{ name }}</h1>
+
+    <div class="config-sidebar">
+        Edit the configuration of a gamemode. Configurations are stored in slots, which you can select/create/delete as below.
+
+        <label for="activeSlot">Active slot</label>
+        <select id="activeSlot"></select>
+
+        <div class="toolbar">
+            <button type="button" id="addSlot">Add slot</button>
+            <button type="button" id="removeSlot">Remove selected slot</button>
+        </div>
+
+        <label for="config-password">Password:</label>
+        <input type="password" id="config-password">
+        <button type="button" id="save">Save changes</button>
+
+        <p id="message" class="error"></p>
+    </div>
+
+
+    <form id="slotEditor" autocomplete="off"></form>
+
+
+    <script>
+        let slots = JSON.parse("{{ slots }}".replaceAll("&#34;", '"'));
+
+        const activeSlotSelect = document.querySelector("#activeSlot");
+        const slotEditor = document.querySelector("#slotEditor");
+        const message = document.querySelector("#message");
+
+        function slotKeys() {
+            return Object.keys(slots)
+            .filter(key => !key.startsWith("__"))
+            .sort((a, b) => Number(a) - Number(b));
+        }
+
+        function nextSlotKey() {
+            const keys = slotKeys().map(Number).filter(Number.isFinite);
+            return keys.length ? String(Math.max(...keys) + 1) : "0";
+        }
+
+        function formatValue(value) {
+            if (typeof value === "string") {
+            return value;
+            }
+
+            return JSON.stringify(value, null, 2);
+        }
+
+        function renderActiveSlotSelect() {
+            const keys = slotKeys();
+
+            activeSlotSelect.innerHTML = "";
+
+            for (const key of keys) {
+            const option = document.createElement("option");
+            option.value = key;
+            option.textContent = `Slot ${key}`;
+            option.selected = key === slots.__active__;
+            activeSlotSelect.appendChild(option);
+            }
+
+            if (!keys.includes(slots.__active__) && keys.length > 0) {
+            slots.__active__ = keys[0];
+            activeSlotSelect.value = keys[0];
+            }
+        }
+
+        function renderSlotEditor() {
+            const key = activeSlotSelect.value;
+            const slot = slots[key];
+
+            slotEditor.innerHTML = "";
+
+            if (!slot) {
+            slotEditor.textContent = "No slot selected.";
+            return;
+            }
+
+            const heading = document.createElement("h2");
+            heading.textContent = `Slot ${key}`;
+            slotEditor.appendChild(heading);
+
+            for (const [attribute, value] of Object.entries(slot)) {
+            const wrapper = document.createElement("div");
+            wrapper.className = "attribute";
+
+            const label = document.createElement("label");
+            label.textContent = attribute;
+            label.htmlFor = `attribute-${attribute}`;
+
+            const textarea = document.createElement("textarea");
+            textarea.id = `attribute-${attribute}`;
+            textarea.dataset.attribute = attribute;
+            textarea.value = formatValue(value);
+
+            /*
+                * Each textarea represents one first-level slot attribute.
+                * Strings are edited as plain text.
+                * Numbers, booleans, arrays, and objects are edited as JSON.
+            */
+            textarea.addEventListener("change", (e) => {
+                try {
+                slots[key][attribute] = parseAttributeValue(textarea.value, value);
+                message.textContent = "";
+                //updateOutput();
+                } catch (error) {
+                message.textContent =
+                    `Invalid value for "${attribute}": ${error.message}`;
+                }
+
+                e.target.style.height = this.scrollHeight + "px"
+            });
+
+            wrapper.appendChild(label);
+            wrapper.appendChild(textarea);
+            slotEditor.appendChild(wrapper);
+            }
+        }
+
+        function parseAttributeValue(text, oldValue) {
+            /*
+            * Existing strings remain strings, even if they contain valid JSON.
+            */
+            if (typeof oldValue === "string") {
+            return text;
+            }
+
+            return JSON.parse(text);
+        }
+
+        function render() {
+            renderActiveSlotSelect();
+            renderSlotEditor();
+            //updateOutput();
+        }
+
+        activeSlotSelect.addEventListener("change", () => {
+            slots.__active__ = activeSlotSelect.value;
+            renderSlotEditor();
+            //updateOutput();
+        });
+
+        document.querySelector("#addSlot").addEventListener("click", () => {
+            const key = nextSlotKey();
+
+            slots[key] = JSON.parse(JSON.stringify(slots["0"]));
+
+            slots.__active__ = key;
+            render();
+        });
+
+        document.querySelector("#removeSlot").addEventListener("click", () => {
+            const key = activeSlotSelect.value;
+            const keys = slotKeys();
+
+            if (!key) {
+            return;
+            }
+
+            if (keys.length === 1) {
+            message.textContent = "At least one slot must remain.";
+            return;
+            }
+
+            delete slots[key];
+
+            const remainingKeys = slotKeys();
+            slots.__active__ = remainingKeys[0];
+
+            render();
+        });
+
+        document.querySelector("#save").addEventListener("click", () => {
+            /*
+            * At this point, the edited configuration is available in "slots".
+            * Replace this with an API call, localStorage, file export, etc.
+            
+            console.log("Saved slots:", slots);
+
+            message.className = "";
+            message.textContent = "Changes saved to the slots variable.";
+            */
+            console.log("Config:", slots);
+
+            var password = document.getElementById("config-password").value;
+
+            sender("/configuration_submit/{{ name }}", {"config": slots, "password": password})
+                .then((r) => r.json())
+                .then((res) => {
+                    console.log("Returned:", res);
+
+                    document.getElementById("message").innerHTML = res.text;
+                });
+        });
+
+        render();
+
+        // Server communication
+        function sender(apiEndpoint, jsonData) {
+            return fetch(apiEndpoint, {
+                method: "POST",
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(jsonData)
+            })
+        }
+    </script>
+</body>
+</html>

@@ -140,7 +140,7 @@ def get_gamemode_website(self, mode):
     # handle non existing js_vars field
     if "js_vars" not in index_args.keys():
         index_args["js_vars"] = {}
-    return self.render_template_camera(file, **(index_args | gm.history()), gamemode=mode, has_config=gm.ENABLE_CONFIG)
+    return self.render_template_camera(file, **(index_args | gm.history()), gamemode=mode, has_config=gm.ENABLE_CONFIG, config_slot=getattr(gm, "CONFIG_SLOT", ""))
 
 def get_gamemode_config_website(self, mode):
     if mode not in self.GAMEMODES.keys() or (not self.GAMEMODES[mode][0].ENABLE_CONFIG):
@@ -150,11 +150,17 @@ def get_gamemode_config_website(self, mode):
     with open(gm.configuration_file, "r") as f:
         config = json.load(f)
     
-    pretty_config = {}
-    for k,v in config.items():
-        pretty_config[k] = json.dumps(v, indent=4)
+    if "__active__" in config.keys():
+        # this is a config with slots
+        slots = json.dumps(config)
 
-    return render_template("config.html", config=pretty_config, name=mode)
+        return render_template("config_slots.html", slots=slots, name=mode)
+    else:
+        pretty_config = {}
+        for k,v in config.items():
+            pretty_config[k] = json.dumps(v, indent=4)
+
+        return render_template("config.html", config=pretty_config, name=mode)
 
 def write_gamemode_config(self, mode):
     if mode not in self.GAMEMODES.keys() or (not self.GAMEMODES[mode][0].ENABLE_CONFIG):
@@ -166,9 +172,17 @@ def write_gamemode_config(self, mode):
 
     gm = self.GAMEMODES[mode][0]
     if hasattr(gm, "validate_config") and callable(gm.validate_config):
-        accepted, message = gm.validate_config(req["config"])
+        if "__active__" in req["config"].keys():
+            slot = req["config"]["__active__"]
+            accepted, message = gm.validate_config(req["config"][slot], slot=slot)
+            message = "Slot " + slot + ": " + message
 
-        message += "\nConfig was updated. Reload the gamemodes website if currently open to apply."
+                #accepted = part_accepted and accepted
+        else:    
+            accepted, message = gm.validate_config(req["config"])
+
+        if accepted:
+            message += "\nConfig was updated. Reload the gamemodes website if currently open to apply."
 
     else:
         accepted = True
@@ -176,10 +190,10 @@ def write_gamemode_config(self, mode):
 
     if accepted:
         try:
-            config = {}
-            for k,v in req["config"].items():
-                config[k] = json.loads(v)
-            parsed = json.dumps(config, indent=4)
+            #config = {}
+            #for k,v in req["config"].items():
+            #    config[k] = json.loads(v)
+            parsed = json.dumps(req["config"], indent=4)
             with open(gm.configuration_file, "w") as f:
                 f.write(parsed)
         except Exception as e:

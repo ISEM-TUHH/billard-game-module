@@ -88,7 +88,17 @@ class GameMode:
         if self.configuration_file.exists():
             self.ENABLE_CONFIG = True
             with open(self.configuration_file, "r") as f:
-                self.config = json.load(f)
+                config = json.load(f)
+                if "__active__" in config.keys():
+                    selector = config["__active__"]
+                    print(f"Loading {self.name} with configuration slot '{selector}'.")
+                    self.config = config[selector]
+
+                    self.CONFIG_TYPE = "slots"
+                    self.CONFIG_SLOT = selector
+                else:
+                    self.config = config
+                    self.CONFIG_TYPE = "single"
 
         #self.gameimage = GameImage()
         if not hasattr(self, "HISTORY"):
@@ -311,11 +321,14 @@ class GameMode:
             add (dict, optional): _description_. Defaults to None.
             get_semester (str, optional): _description_. Defaults to None.
         """
+        config_slot = getattr(self, "CONFIG_SLOT", None)
+
         if history is None:
-            history = self.score_db.select_items({}) # all items
+            history = self.score_db.select_items({"_config_slot": config_slot}) # all items
         if add is not None:
             ts = pd.Timestamp.now()
             add["timestamp"] = ts
+            add["_config_slot"] = config_slot
             _id = self.score_db.enter_round(add)
 
             already_entered = [x for x in history if x["_id"] == _id]
@@ -328,7 +341,7 @@ class GameMode:
         select = {}
         if get_semester is not None:
             history = [x for x in history if str(x["semester"]) == str(get_semester)]
-            select = {"semester": get_semester}
+            select = {"semester": get_semester, "_config_slot": getattr(self, "CONFIG_SLOT", None)}
         
         singles = sorted(history, key=lambda x: (x["score"] is not None, x["score"]), reverse=True)
         singlesTop3 = singles[:3]
@@ -349,10 +362,10 @@ class GameMode:
 
         to_list = lambda x: [[int(v), k] for k, v in x.items()] # score, team
         if len(singles) > 0 and "semester" in singles[0].keys():
-            from_dict = lambda x: [[v["player"], v["team"], v["score"], v["semester"], v["attestation"]] for v in x] # score, player, team
+            from_dict = lambda x: [[v["player"], v["team"], int(v["score"]), v["semester"], v["attestation"]] for v in x] # score, player, team
             columns = ["Player", "Team", "Score", "Semester", "Attestation"]
         else:
-            from_dict = lambda x: [[v["player"], v["team"], v["score"]] for v in x] # score, player, team
+            from_dict = lambda x: [[v["player"], v["team"], int(v["score"])] for v in x] # score, player, team
             columns = ["Player", "Team", "Score"]
         out = {
             "single_table": from_dict(singles),

@@ -229,23 +229,24 @@ class KP2(GameMode):
 
         return out
 
-    def validate_config(self, config):
+    def validate_config(self, config, slot):
         try:
             if int(config["precision"]) < 0 and int(config["distance"]) < 0 and int(config["break"]) < 0 and int(config["longest_break"]) < 0 and int(config["time"]) < 0:
                 return False, "One of the precision, distance, break, longest_break, or time is <0, which is not feasible. All must be >=0."
         except:
             return False, "One of the precision, distance, break, longest_break, or time can not be parsed as an integer (natural number >=0). Please correct and try again."
         try:
-            new_agg = json.loads(config["score_aggregation"])
+            new_agg = json.loads(json.dumps(config["score_aggregation"]))
         except Exception as e:
             return False, "There was an error parsing the json, see the stacktrace:\n\n" + traceback.format_exc()
-        b, msg = self.score_db.assert_aggregation(new_agg)
+        b, exists, msg = self.score_db.assert_aggregation(new_agg, {"_config_slot": slot})
 
         msg += "\nThe check was successful."
 
-        if b:
+        if b and exists:
             # update all the scores for all entries
-            self.score_db.get_score(_id="all", new_agg=new_agg)
+            self.score_db.get_score(_id="all", new_agg=new_agg, match={"_config_slot": slot})
+
             msg += "\n!!! The scores for all history entries where updated !!!\n-> This can easily be reversed when entering the old score_aggregation value."
 
         return b, msg
@@ -294,34 +295,25 @@ class KP2(GameMode):
     def get_score(self):
         """ Determine the score based on the scores of the indiviual played gamemodes. Edit here to manipulate the scoring function (weights). """
         
-        hist = self.history_collection | self.history_base
+        hist = self.history_collection | self.history_base | {"_config_slot": getattr(self, "CONFIG_SLOT", None)}
 
-        precision = hist["precision"]
-        distance = hist["distance"]
-        single_break = hist["break"]
-        longest_break = hist["longest_break"]
+        precision = hist.get("precision", [])
+        distance = hist.get("distance", [])
+        single_break = hist.get("break", [])
+        longest_break = hist.get("longest_break", [])
         
-        overview = {
-            "Best precision": min([x["distance"] for x in precision]),
-            "Best distance": max([x["distance"] for x in distance])
-        }
+        overview = {}
+        if len(precision) > 0:
+            overview["Best precision"] = min([x["distance"] for x in precision])
+        if len(distance) > 0:
+            overview["Best distance"] = max([x["distance"] for x in distance])
         if len(single_break) > 0:
             overview["Sunken break"] = max([x["sunk_legal"] for x in single_break])
         if len(longest_break) > 0:
             overview["Best longest break"] = max([x["sunk_legal"] for x in longest_break])
 
-        # turn hist from dict-dict-dict intro dict-list-dict
-        #h2 = {}
-        #for k,v in hist.items():
-        #    if type(v) is dict:
-        #        h2[k] = [i for i in v.values()]
-        #    else:
-        #        h2[k] = v
-
         self.score_db.enter_round(hist)
         total_score = self.score_db.get_score()
-
-        #total_score = "tbd"
 
         self.score = total_score
         return total_score, overview

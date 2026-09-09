@@ -38,7 +38,7 @@ document.getElementById("submit-button").addEventListener("click", (e) => {
                 text_head += "<th>" + k + "</th>";
                 text_body += "<td>" + table[k] + "</td>";
             }
-            document.querySelector(".instance-" + current_index).getElementById("result-overview").innerHTML = text_head + text_body + "</tr></tbody></table>";/*
+            document.querySelector(".instance-" + current_index).querySelector("#result-overview").innerHTML = text_head + text_body + "</tr></tbody></table>";/*
             + "<a href='/gamemode_report/kp2/" + res.history.timestamp + "'>Download report</a>";*/
         })
 })

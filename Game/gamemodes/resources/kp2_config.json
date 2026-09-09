@@ -1,34 +1,360 @@
 {
-    "precision": 5,
-    "distance": 5,
-    "break": 1,
-    "longest_break": 5,
-    "time": 1800,
-    "scoring_information": "The score consists of the longest distance minus 3x the best precision shot. Optional bonus points can be given from earlier attestations.",
-    "score_aggregation": [
-        {
-            "$project": {
-                "score": {
-                    "$subtract": [
-                        {
-                            "$add": [
-                                {
-                                    "$max": "$distance.distance"
-                                },
-                                "$manual_bonus_points"
-                            ]
-                        },
-                        {
-                            "$multiply": [
-                                {
-                                    "$min": "$precision.distance"
-                                },
-                                3
-                            ]
-                        }
-                    ]
+    "0": {
+        "__doc__": "A normal KP2 attestation.",
+        "precision": 5,
+        "distance": 5,
+        "break": 1,
+        "longest_break": 5,
+        "time": 1800,
+        "scoring_information": "This is currently just always constant 1000.",
+        "score_aggregation": [
+            {
+                "$project": {
+                    "score": {
+                        "$add": [
+                            1000
+                        ]
+                    }
                 }
             }
-        }
-    ]
+        ]
+    },
+    "1": {
+        "__doc__": "Only precision challenge",
+        "precision": 3,
+        "distance": 0,
+        "break": 0,
+        "longest_break": 0,
+        "time": 600,
+        "scoring_information": "1,000 \u00d7 (ln W \u2212 ln own) \u00f7 (ln W \u2212 ln B)",
+        "score_aggregation": [
+            {
+                "$set": {
+                    "_own": {
+                        "$min": "$precision.distance"
+                    }
+                }
+            },
+            {
+                "$lookup": {
+                    "from": "KP2",
+                    "let": {
+                        "a": "$attestation",
+                        "s": "$semester",
+                        "c": "$_config_slot"
+                    },
+                    "pipeline": [
+                        {
+                            "$match": {
+                                "$expr": {
+                                    "$and": [
+                                        {
+                                            "$eq": [
+                                                "$attestation",
+                                                "$$a"
+                                            ]
+                                        },
+                                        {
+                                            "$eq": [
+                                                "$semester",
+                                                "$$s"
+                                            ]
+                                        },
+                                        {
+                                            "$eq": [
+                                                "$_config_slot",
+                                                "$$c"
+                                            ]
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "$project": {
+                                "_own": {
+                                    "$min": "$precision.distance"
+                                }
+                            }
+                        },
+                        {
+                            "$group": {
+                                "_id": null,
+                                "W": {
+                                    "$max": "$_own"
+                                },
+                                "B": {
+                                    "$min": "$_own"
+                                }
+                            }
+                        }
+                    ],
+                    "as": "_run"
+                }
+            },
+            {
+                "$set": {
+                    "_W": {
+                        "$arrayElemAt": [
+                            "$_run.W",
+                            0
+                        ]
+                    },
+                    "_B": {
+                        "$arrayElemAt": [
+                            "$_run.B",
+                            0
+                        ]
+                    }
+                }
+            },
+            {
+                "$project": {
+                    "score": {
+                        "$cond": [
+                            {
+                                "$or": [
+                                    {
+                                        "$eq": [
+                                            "$_W",
+                                            "$_B"
+                                        ]
+                                    },
+                                    {
+                                        "$eq": [
+                                            "$_own",
+                                            "$_B"
+                                        ]
+                                    }
+                                ]
+                            },
+                            1000,
+                            {
+                                "$cond": [
+                                    {
+                                        "$or": [
+                                            {
+                                                "$eq": [
+                                                    "$_B",
+                                                    0
+                                                ]
+                                            },
+                                            {
+                                                "$eq": [
+                                                    "$_own",
+                                                    0
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    0,
+                                    {
+                                        "$multiply": [
+                                            1000,
+                                            {
+                                                "$divide": [
+                                                    {
+                                                        "$subtract": [
+                                                            {
+                                                                "$log": [
+                                                                    "$_W",
+                                                                    10
+                                                                ]
+                                                            },
+                                                            {
+                                                                "$log": [
+                                                                    "$_own",
+                                                                    10
+                                                                ]
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        "$subtract": [
+                                                            {
+                                                                "$log": [
+                                                                    "$_W",
+                                                                    10
+                                                                ]
+                                                            },
+                                                            {
+                                                                "$log": [
+                                                                    "$_B",
+                                                                    10
+                                                                ]
+                                                            }
+                                                        ]
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                }
+            }
+        ]
+    },
+    "2": {
+        "__doc__": "Only distance challenge",
+        "precision": 0,
+        "distance": 3,
+        "break": 0,
+        "longest_break": 0,
+        "time": 600,
+        "scoring_information": "5,000 \u00d7 (own \u2212 W) \u00f7 (B \u2212 W)",
+        "score_aggregation": [
+            {
+                "$set": {
+                    "_own": {
+                        "$max": "$distance.distance"
+                    }
+                }
+            },
+            {
+                "$lookup": {
+                    "from": "KP2",
+                    "let": {
+                        "a": "$attestation",
+                        "s": "$semester",
+                        "c": "$_config_slot"
+                    },
+                    "pipeline": [
+                        {
+                            "$match": {
+                                "$expr": {
+                                    "$and": [
+                                        {
+                                            "$eq": [
+                                                "$attestation",
+                                                "$$a"
+                                            ]
+                                        },
+                                        {
+                                            "$eq": [
+                                                "$semester",
+                                                "$$s"
+                                            ]
+                                        },
+                                        {
+                                            "$eq": [
+                                                "$_config_slot",
+                                                "$$c"
+                                            ]
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "$project": {
+                                "_own": {
+                                    "$max": "$distance.distance"
+                                }
+                            }
+                        },
+                        {
+                            "$group": {
+                                "_id": null,
+                                "W": {
+                                    "$max": "$_own"
+                                },
+                                "B": {
+                                    "$min": "$_own"
+                                }
+                            }
+                        }
+                    ],
+                    "as": "_run"
+                }
+            },
+            {
+                "$set": {
+                    "_W": {
+                        "$arrayElemAt": [
+                            "$_run.W",
+                            0
+                        ]
+                    },
+                    "_B": {
+                        "$arrayElemAt": [
+                            "$_run.B",
+                            0
+                        ]
+                    }
+                }
+            },
+            {
+                "$project": {
+                    "score": {
+                        "$cond": [
+                            {
+                                "$or": [
+                                    {
+                                        "$eq": [
+                                            "$_W",
+                                            "$_B"
+                                        ]
+                                    },
+                                    {
+                                        "$eq": [
+                                            "$_own",
+                                            "$_B"
+                                        ]
+                                    }
+                                ]
+                            },
+                            5000,
+                            {
+                                "$cond": [
+                                    {
+                                        "$or": [
+                                            {
+                                                "$eq": [
+                                                    "$_B",
+                                                    0
+                                                ]
+                                            },
+                                            {
+                                                "$eq": [
+                                                    "$_own",
+                                                    0
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    0,
+                                    {
+                                        "$multiply": [
+                                            5000,
+                                            {
+                                                "$divide": [
+                                                    {
+                                                        "$subtract": [
+                                                            "$_own",
+                                                            "$_W"
+                                                        ]
+                                                    },
+                                                    {
+                                                        "$subtract": [
+                                                            "$_B",
+                                                            "$_W"
+                                                        ]
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                }
+            }
+        ]
+    },
+    "__active__": "2",
+    "__doc__": "This config file consists of multiple config slots. The active config is identified via the __active__ property, which specifies its key."
 }
