@@ -40,15 +40,6 @@ function activate_instance(button) {
     // notify the gamemodule (-> beamer) of the changed gamemode (relevant for nested gamemodes)
     // see kp2Controller.js and update_gamemode.js
     document.dispatchEvent(gamemode_update_event);
-
-    // find the corresponding instance
-    /*document.querySelectorAll(".instance").forEach((elem) => {
-        if (elem.classList.contains("instance-" + current_index)) {
-            elem.classList.add("active_instance");
-        } else {
-            elem.classList.remove("active_instance")
-        }
-    });*/
 }
 
 document.getElementById("add_instance").addEventListener("click", (e) => {
@@ -78,6 +69,8 @@ document.getElementById("add_instance").addEventListener("click", (e) => {
     }).then(() => {
         activate_instance(button);
     })
+
+    additional_instance_callback(new_instance);
 });
 
 update_instance_switch_event_listeners();

@@ -56,12 +56,14 @@ class KP2(GameMode):
         #self.longest_break_play = 5
         
         self.history_base = {} # basic history items: player, team, score, semester, attestation, mystery_challenge
-
+        
+        GameMode.__init__(self)
+        
         self.gameimage = GameImage()
         self.img_definiton = [ # TODO: outsource to config file?
             {
                 "type": "text",
-                "text": "Welcome to the MDP2 challenge! Select a gamemode"
+                "text": self.config["title"]
             },
             {
                 "type": "central_image",
@@ -69,9 +71,6 @@ class KP2(GameMode):
             }
         ]
         self.gameimage.draw_from_dict(self.img_definiton)
-        
-        GameMode.__init__(self)
-
 
         # Connection to MongoDB for score calculation
         self.score_db = MongoDB(gm_name, self.config["score_aggregation"])
@@ -102,7 +101,7 @@ class KP2(GameMode):
     def index_args(self):
         """ Generate a dictionary of keyword arguments that get supplied to a jinja html template of a gamemode with the same name (e.g. precision -> precision.html) in the template directory """
         out = {
-            "title": "Beat the ISEM!",
+            "title": self.config["title"],
             "teams": [],
             "js_vars": { # stuff that gets set as JS global variables (var declaration)
                 "countdown_original_time": self.config["time"]

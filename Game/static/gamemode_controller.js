@@ -59,18 +59,5 @@ function getCoordsAndConfirm(event, jsonData, fun=controller, final=(l, r) => {l
     }
 }
 
-/*function runGamemodeSteps(event, jsonData, subcontrol=(res)=>{}, fun=kp2Controller) {
-    // wraps getCoordsAndConfirm, based on the steps of a gamemode. Loops over getCoordAndConfirm until the response has signal=finished => Display message to label.
-    target = event.target;
-    if (target.checked) {
-        getCoordsAndConfirm(event, jsonData, fun=controller) // no output until finished
-            .then((res) => {
-                console.log(res);
-                subcontrol(res);
-                if (res.signal === "finished") {
-                    target.labels[0].innerText = res.message;
-                }
-            })
-    }
-}
-*/
+// just an empty function to get called when adding a new instance.
+var additional_instance_callback = (instance) => {}; 

@@ -341,7 +341,9 @@ class GameMode:
         select = {}
         if get_semester is not None:
             history = [x for x in history if str(x["semester"]) == str(get_semester)]
-            select = {"semester": get_semester, "_config_slot": getattr(self, "CONFIG_SLOT", None)}
+            select["semester"] = get_semester
+        if hasattr(self, "CONFIG_SLOT"):
+            select["_config_slot"] = self.CONFIG_SLOT
         
         singles = sorted(history, key=lambda x: (x["score"] is not None, x["score"]), reverse=True)
         singlesTop3 = singles[:3]

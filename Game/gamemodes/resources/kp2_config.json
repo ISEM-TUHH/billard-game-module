@@ -1,6 +1,7 @@
 {
     "0": {
         "__doc__": "A normal KP2 attestation.",
+        "title": "Welcome to the KP2!",
         "precision": 5,
         "distance": 5,
         "break": 1,
@@ -21,6 +22,7 @@
     },
     "1": {
         "__doc__": "Only precision challenge",
+        "title": "Welcome to the KP2 Precision Challenge!",
         "precision": 3,
         "distance": 0,
         "break": 0,
@@ -199,6 +201,7 @@
     },
     "2": {
         "__doc__": "Only distance challenge",
+        "title": "Welcome to the KP2 Distance Challenge!",
         "precision": 0,
         "distance": 3,
         "break": 0,
@@ -259,10 +262,10 @@
                             "$group": {
                                 "_id": null,
                                 "W": {
-                                    "$max": "$_own"
+                                    "$min": "$_own"
                                 },
                                 "B": {
-                                    "$min": "$_own"
+                                    "$max": "$_own"
                                 }
                             }
                         }
@@ -355,6 +358,6 @@
             }
         ]
     },
-    "__active__": "2",
+    "__active__": "1",
     "__doc__": "This config file consists of multiple config slots. The active config is identified via the __active__ property, which specifies its key."
 }
