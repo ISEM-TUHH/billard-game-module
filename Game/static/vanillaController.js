@@ -8,6 +8,7 @@
 function vanillaController(jsonData, set_activity=false) {
     // set_activity argument is only for compatability reasons, not used
     jsonData["gmode"] = global_gamemode; // CHANGED FROM local_gamemode, test downstream effects!
+    jsonData["index"] = current_index;
 
     console.log("SEND:", jsonData); 
 
@@ -21,6 +22,9 @@ function vanillaController(jsonData, set_activity=false) {
     })
         .then((res) => res.json())
         .then((res) => {
+
+            var gm_active = document.querySelector(".instance-" + current_index)
+
             console.log("RECEIVED:", res);
 
             if (res.hasOwnProperty("notification")) {
@@ -28,14 +32,14 @@ function vanillaController(jsonData, set_activity=false) {
             }            
             if (res.hasOwnProperty("disable")) {
                 for (var selector in res.disable) {
-                    document.querySelectorAll(res.disable[selector]).forEach((e) => {
+                    gm_active.querySelectorAll(res.disable[selector]).forEach((e) => {
                         e.classList.add("deactivated")
                     })
                 }
             }
             if (res.hasOwnProperty("enable")) {
                 for (var selector in res.enable) {
-                    document.querySelectorAll(res.enable[selector]).forEach((e) => {
+                    gm_active.querySelectorAll(res.enable[selector]).forEach((e) => {
                         e.classList.remove("deactivated")
                     })
                 }
@@ -53,14 +57,14 @@ function vanillaController(jsonData, set_activity=false) {
             if (res.hasOwnProperty("click")) {
                 // emit a click event onto everything that matches
                 for (var selector in res.click) {
-                    document.querySelectorAll(res.click[selector]).forEach((e) => {
+                    gm_active.querySelectorAll(res.click[selector]).forEach((e) => {
                         e.click();
                     })
                 }
             }
 
             if (res.hasOwnProperty("log_to")) {
-                document.querySelectorAll(res.log_to).forEach((e) => { // should be only one, but this prevents a not found error.
+                gm_active.querySelectorAll(res.log_to).forEach((e) => { // should be only one, but this prevents a not found error.
                     e.innerText = res.message;
                 });
                 delete res["message"]; // remove so it doesnt get in the way of gamemode_retro.js

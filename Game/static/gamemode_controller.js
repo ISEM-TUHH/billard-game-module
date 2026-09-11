@@ -4,6 +4,8 @@
 
 Gamemodes can issue post requests to the game module's /gamemodecontroller endpoint. 
 
+See vanillaController.js and kp2Controller.js for each implementation.
+
 */
 
 function sender(apiEndpoint, jsonData) {
@@ -16,56 +18,6 @@ function sender(apiEndpoint, jsonData) {
         body: JSON.stringify(jsonData)
     })
 }
-
-/* -> outsourced to vanillaController.js
-function vanillaController(jsonData) {
-    jsonData["gmode"] = current_gamemode
-
-    fetch("/gamemodecontroller", {
-        method: "POST",
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(jsonData)
-    })
-        .then((res) => res.json())
-        .then((res) => {
-            if (res.hasOwnProperty("notification")) {
-                tempAlert(res.notification, 6000);
-            }
-            console.log("SEND:", jsonData, "RECEIVED:", res);
-            return res
-            //saveImageButton.value = "Click to save image. " + res["answer"];
-        })
-}*/
-
-/* -> outsourced to kp2Controller.js
-function kp2Controller(jsonData, set_activity=true) {
-    jsonData["gmode"] = "kp2";
-    if (set_activity) {
-        jsonData["kp2_activity"] = current_gamemode;
-    }
-    //console.log(jsonData)
-
-    return fetch("/gamemodecontroller", {
-            method: "POST",
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(jsonData)
-        })
-        .then((res) => res.json())
-        .then((res) => {
-            if (res.hasOwnProperty("notification")) {
-                tempAlert(res.notification, 6000);
-            }
-            console.log("SEND:", jsonData, "RECEIVED:", res);
-            
-            return res
-        })
-}*/
 
 /* 
 modus operandi: set this to a change event listener on checkboxes that signify actions

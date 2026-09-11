@@ -767,3 +767,30 @@ body.dark .select {
 body.dark details {
   background: #282828;
 }
+
+/*
+  Instance switcher classes
+*/
+/*.instance {
+  display: none;
+}
+
+.active_instance {
+  display: block !important;
+}*/
+
+#instance_management {
+  width: auto;
+  height: 1em;
+  position: absolute;
+  bottom: 1em;
+  left: 6em;
+}
+
+#instance_management button.active_instance_selector {
+  background-color: #006A81;
+}
+
+#instance_management button {
+  background-color: #00c1d4;
+}

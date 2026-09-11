@@ -35,6 +35,9 @@
       var {{ k }} = {{ v }}
       {% endfor %}
 
+
+      let current_index = 0; // the index of the current game object in the list of objects
+
       let camera_address = "{{ camera_address }}";
       let global_gamemode = "{{ gamemode }}";
   </script>
@@ -45,6 +48,13 @@
 
     <header>
       <a href="/"><i class="fa-solid fa-house" id="home-button"></i></a>
+
+      <div id="instance_management">
+        Instances: 
+        <button class="instance_selector active_instance_selector">1</button>
+        <button id="add_instance">+</button>
+      </div>
+
       <div class="logo">
         <img src=" {{ url_for('static', filename='inst_logo.svg') }}" alt="ISEM Logo" />
       </div>
@@ -54,6 +64,7 @@
         {% if has_config %}
         <a href="/configuration/{{ gamemode }}" target="_blank">
           <i class="fa-solid fa-gear"></i>
+          {{ config_slot }}
         </a>
         {% endif %}
         <a href="/gamemode_history/{{ gamemode }}" target="_blank">
@@ -102,22 +113,6 @@
           <summary>Place balls</summary>
           
           <div id="ball-selector">
-            <!-- <label class="active"><input type="radio" name="current_ball" value="ball-1" checked>1: Gelb</label>
-            <label><input type="radio" name="current_ball" value="ball-2">2: Blau</label>
-            <label><input type="radio" name="current_ball" value="ball-3">3: Rot</label>
-            <label><input type="radio" name="current_ball" value="ball-4">4: Lila</label>
-            <label><input type="radio" name="current_ball" value="ball-5">5: Orange</label>
-            <label><input type="radio" name="current_ball" value="ball-6">6: Grün</label>
-            <label><input type="radio" name="current_ball" value="ball-7">7: Karmesin</label>
-            <label><input type="radio" name="current_ball" value="ball-eight">8: Schwarz</label>
-            <label><input type="radio" name="current_ball" value="ball-9">9: Halb Gelb</label>
-            <label><input type="radio" name="current_ball" value="ball-10">10: Halb Blau</label>
-            <label><input type="radio" name="current_ball" value="ball-11">11: Halb Rot</label>
-            <label><input type="radio" name="current_ball" value="ball-12">12: Halb Lila</label>
-            <label><input type="radio" name="current_ball" value="ball-13">13: Halb Orange</label>
-            <label><input type="radio" name="current_ball" value="ball-14">14: Halb Grün</label>
-            <label><input type="radio" name="current_ball" value="ball-15">15: Halb Karmesin</label>
-            <label><input type="radio" name="current_ball" value="ball-white">Weiß</label>-->
             <label class="active"><input type="radio" name="current_ball" value="ball-1" checked>
               <img src="{{ url_for('/general/ballimagenumber') }}?n=1">
             </label>
@@ -228,11 +223,16 @@
     </div>
 
     <div id="right-column">
-    {% block content %}
+    {% for i in [0] %}
+      <div class="instance instance-{{ i }} active_instance">
+      {% block content %}
 
-    {% endblock %}
+      {% endblock %}
+      </div>
+    {% endfor %}
     </div>
 
+    <script src="{{ url_for('static', filename='instance_switcher.js') }}"></script>
     <script src="{{ url_for('static', filename='coords-handler.js') }}"></script>
     <script src="{{ url_for('static', filename='history_handler.js') }}"></script>
     <script src="{{ url_for('static', filename='update_gamemode.js') }}"></script>
